@@ -8,6 +8,7 @@ Plug 'https://github.com/tomasr/molokai.git'
 Plug 'lifepillar/vim-mucomplete'
 Plug 'vim-scripts/lookupfile'
 Plug 'vim-scripts/genutils'
+Plug 'ctrlpvim/ctrlp.vim'
 call plug#end()  "结束
 
 set helplang=cn
