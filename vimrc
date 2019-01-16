@@ -4,7 +4,6 @@ Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }  "触发时才加载
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }        "打开对应文件才加载
 Plug 'honza/vim-snippets'
 Plug '/vim-scripts/taglist.vim.git'
-Plug 'https://github.com/tomasr/molokai.git'
 Plug 'lifepillar/vim-mucomplete'
 Plug 'vim-scripts/lookupfile'
 Plug 'vim-scripts/genutils'
@@ -13,17 +12,15 @@ call plug#end()  "结束
 
 set helplang=cn
 set encoding=utf-8
+colorscheme  evening
 " 设定配色方案
-colorscheme  molokai  
-
-set t_Co=256
-set background=dark
 " 自动语法高亮
 syntax on
 " 检测文件类型
 filetype on
 " 检测文件类型插件
 filetype plugin on
+hi Comment ctermfg=cyan
 " 不设定在插入状态无法用退格键和 Delete 键删除回车符
 set backspace=indent,eol,start
 set whichwrap+=<,>,h,l
@@ -97,7 +94,7 @@ set shortmess=atl
 "Update ctags
 " map <silent> <F8> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q<cr>
 """"""""""""""""""""""""""""""
-" Tag list (ctags) 
+" Tag list (ctags)
 " """"""""""""""""""""""""""""""
 let mapleader = ","       "Set mapleader
 " 关闭NERDTree快捷键
@@ -135,3 +132,4 @@ nmap <silent> <leader>lw :LUWalk<cr>
 
 set sessionoptions-=curdir
 set sessionoptions+=sesdir
+
