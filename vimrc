@@ -72,6 +72,7 @@ set cmdheight=1
 set laststatus=2
 "显示括号配对情况
 set showmatch
+set wrapscan
 " 解决自动换行格式下, 如高度在折行之后超过窗口高度结果这一行看不到的问题
 set cursorline
 hi CursorLine   cterm=NONE ctermbg=darkblue ctermfg=white guibg=darkred guifg=white
@@ -101,7 +102,10 @@ let mapleader = ","       "Set mapleader
  "map <leader>t :NERDTreeToggle<CR>
 map <leader>, :only<CR>
 map <leader>t :Tlist<CR>
-map <leader>b :ls<CR>:b 
+map <leader>b :ls<CR>:b
+map <leader>3 :b#<CR>
+map <leader>n :bn<CR>
+map <leader>p :bp<CR>
 
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
 "Ctags可执行文件的路径，千万要写对了，否则显示no such file
@@ -129,7 +133,7 @@ nmap <silent> <leader>lk :LUTags<cr>
 nmap <silent> <leader>ll :LUBufs<cr>
 "映射LUWalk为,lw
 nmap <silent> <leader>lw :LUWalk<cr>
-
-set sessionoptions-=curdir
-set sessionoptions+=sesdir
+let g:session_autoload = 'no'
+"set sessionoptions-=curdir
+"set sessionoptions+=sesdir
 
