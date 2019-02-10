@@ -28,8 +28,7 @@ set whichwrap+=<,>,h,l
 set number
 " 上下可视行数
 set scrolloff=6
-" replace tab with space
-set expandtab
+set noexpandtab
 " 设定 tab 长度为 4
 set tabstop=4
 " 设置按BackSpace的时候可以一次删除掉4个空格
@@ -100,13 +99,14 @@ set shortmess=atl
 let mapleader = ","       "Set mapleader
 " 关闭NERDTree快捷键
  "map <leader>t :NERDTreeToggle<CR>
-map <leader>, :only<CR>
 map <leader>t :Tlist<CR>
 map <leader>b :ls<CR>:b
 map <leader>3 :b#<CR>
 map <leader>n :bn<CR>
 map <leader>p :bp<CR>
 
+
+map <leader>,m /&clean-search&<CR>
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
 "Ctags可执行文件的路径，千万要写对了，否则显示no such file
 let Tlist_Show_One_File = 1
