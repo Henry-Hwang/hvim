@@ -105,6 +105,8 @@ map <leader>3 :b#<CR>
 map <leader>n :bn<CR>
 map <leader>p :bp<CR>
 
+"replace word
+map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 
 map <leader>,m /&clean-search&<CR>
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
