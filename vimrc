@@ -1,18 +1,34 @@
-call plug#begin('~/.vim/plugged') "开始，指定插件安装目录
-Plug 'junegunn/vim-easy-align'
-Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }  "触发时才加载
-Plug 'tpope/vim-fireplace', { 'for': 'clojure' }        "打开对应文件才加载
-Plug 'honza/vim-snippets'
-Plug '/vim-scripts/taglist.vim.git'
-Plug 'lifepillar/vim-mucomplete'
-Plug 'vim-scripts/lookupfile'
-Plug 'vim-scripts/genutils'
-Plug 'ctrlpvim/ctrlp.vim'
-call plug#end()  "结束
+set rtp+=$HOME\.vim\bundle\Vundle.vim
+call vundle#begin()
+"set rtp+=$HOME/.vim/bundle/Vundle.vim/
+"call vundle#begin('$HOME/.vim/bundle/')
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'eshion/vim-sync'
+Plugin 'junegunn/vim-easy-align'
+Plugin 'vim-scripts/molokai'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'vim-scripts/EasyGrep.git'
+Plugin 'vim-scripts/grep.vim'
+Plugin 'vim-scripts/taglist.vim'
+Plugin 'vim-scripts/a.vim'
+Plugin 'vim-scripts/xml.vim'
+Plugin 'vim-scripts/python.vim'
+Plugin 'vim-scripts/c.vim'
+Plugin 'vim-scripts/OmniCppComplete'
+Plugin 'vim-scripts/ctags.vim'
+Plugin 'lifepillar/vim-mucomplete'
+Plugin 'vim-scripts/VIM-Color-Picker'
+"Plugin 'vim-scripts/minibufexplorerpp'
+"Plugin 'scrooloose/nerdtree'
+"Plugin 'altercation/vim-colors-solarized'
+"Plugin 'jistr/vim-nerdtree-tabs'
+"Plugin  'Xuyuanp/nerdtree-git-plugin'
+"Plugin 'Valloric/YouCompleteMe'
+"Plugin 'vim-scripts/winmanager'
+call vundle#end()
 
 set helplang=cn
 set encoding=utf-8
-colorscheme  evening
 " 设定配色方案
 " 自动语法高亮
 syntax on
@@ -73,8 +89,6 @@ set laststatus=2
 set showmatch
 set wrapscan
 " 解决自动换行格式下, 如高度在折行之后超过窗口高度结果这一行看不到的问题
-set cursorline
-hi CursorLine   cterm=NONE ctermbg=darkblue ctermfg=white guibg=darkred guifg=white
 set display=lastline
 " 设置在状态行显示的信息
 set statusline=\ %<%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&fileformat}\ [%{(&fenc==\"\"?&enc:&fenc).(&bomb?\",BOM\":\"\")}]\ %c:%l/%L%)
@@ -85,12 +99,15 @@ set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
 
 "启动时不显示 捐赠提示
 set shortmess=atl
-"set tags=tags
-"set tags=~/.vim/ctags/tags
-"set tags+=~/.vim/my-tags/stl-tags
 
-"set tags+=~/.vim/my-tags/sys-tags
-"set autochdir
+"have to put color scheme at last
+set background=dark
+set t_Co=256
+colorscheme molokai
+set cursorline
+hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
+"command ": h" to show all color
+
 "Update ctags
 " map <silent> <F8> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q<cr>
 """"""""""""""""""""""""""""""
@@ -109,6 +126,13 @@ map <leader>p :bp<CR>
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 
 map <leader>,m /&clean-search&<CR>
+if exists('$TMUX')
+	let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+	let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
+else
+	let &t_SI = "\e[5 q"
+	let &t_EI = "\e[2 q"
+endif
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
 "Ctags可执行文件的路径，千万要写对了，否则显示no such file
 let Tlist_Show_One_File = 1
