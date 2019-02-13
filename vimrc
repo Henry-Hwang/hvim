@@ -106,24 +106,24 @@ set cursorline
 hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
 "command ": h" to show all color
 
-"Update ctags
-" map <silent> <F8> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q<cr>
-""""""""""""""""""""""""""""""
-" Tag list (ctags)
-" """"""""""""""""""""""""""""""
+"{ [[map keys]]
 let mapleader = ","       "Set mapleader
-" 关闭NERDTree快捷键
- "map <leader>t :NERDTreeToggle<CR>
 map <leader>t :Tlist<CR>
 map <leader>b :ls<CR>:b 
 map <leader>3 :b#<CR>
 map <leader>n :bn<CR>
 map <leader>p :bp<CR>
-
 "replace word
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-
+map <leader>,g :Bgrep expand('<cword>')<CR>
 map <leader>,m /&clean-search&<CR>
+"}
+
+"{ [[commands]]
+command! Bfind :execute ":cex [] | bufdo vimgrepadd /" . expand('<cword>') . "/g %" | cw
+command! Ffind :execute ":cex [] | vimgrepadd /" . expand('<cword>') . "/g %" | cw
+"command! Rfind :execute ":%s/" . expand('<cword>') . "/" . expand('<cword>') . "/gc"
+"}
 
 " SSH tmux
 if exists('$TMUX')
