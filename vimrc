@@ -1,7 +1,5 @@
-set rtp+=$HOME\.vim\bundle\Vundle.vim
-call vundle#begin()
-"set rtp+=$HOME/.vim/bundle/Vundle.vim/
-"call vundle#begin('$HOME/.vim/bundle/')
+set rtp+=$HOME/.vim/bundle/Vundle.vim/
+call vundle#begin('$HOME/.vim/bundle/')
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'eshion/vim-sync'
 Plugin 'junegunn/vim-easy-align'
@@ -117,7 +115,7 @@ let mapleader = ","       "Set mapleader
 " 关闭NERDTree快捷键
  "map <leader>t :NERDTreeToggle<CR>
 map <leader>t :Tlist<CR>
-map <leader>b :ls<CR>:b
+map <leader>b :ls<CR>:b 
 map <leader>3 :b#<CR>
 map <leader>n :bn<CR>
 map <leader>p :bp<CR>
@@ -126,6 +124,8 @@ map <leader>p :bp<CR>
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 
 map <leader>,m /&clean-search&<CR>
+
+" SSH tmux
 if exists('$TMUX')
 	let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
 	let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
@@ -133,6 +133,7 @@ else
 	let &t_SI = "\e[5 q"
 	let &t_EI = "\e[2 q"
 endif
+
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
 "Ctags可执行文件的路径，千万要写对了，否则显示no such file
 let Tlist_Show_One_File = 1
