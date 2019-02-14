@@ -115,7 +115,8 @@ map <leader>n :bn<CR>
 map <leader>p :bp<CR>
 "replace word
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-map <leader>,g :Bgrep expand('<cword>')<CR>
+map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
+map <leader>,g :Bgrep <C-r><C-w><CR>
 map <leader>,m /&clean-search&<CR>
 "}
 
