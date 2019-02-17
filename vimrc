@@ -90,6 +90,8 @@ set wrapscan
 set display=lastline
 " 设置在状态行显示的信息
 set statusline=\ %<%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&fileformat}\ [%{(&fenc==\"\"?&enc:&fenc).(&bomb?\",BOM\":\"\")}]\ %c:%l/%L%)
+" 粘贴保持格式
+set paste
 
 " 显示Tab符
 set list
@@ -103,21 +105,70 @@ set background=dark
 set t_Co=256
 colorscheme molokai
 set cursorline
-hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
+set guifont=Courier_New:h11
+if has('win32unix')
+	hi CursorLine cterm=NONE ctermfg=white ctermbg=55 guifg=#293739
+else
+	hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
+endif
 "command ": h" to show all color
-
+if has('win32unix')
+	function! Putclip(type, ...) range
+		let sel_save = &selection
+		let &selection = "inclusive"
+		let reg_save = @@
+		if a:type == 'n'
+			silent exe a:firstline . "," . a:lastline . "y"
+		elseif a:type == 'c'
+			silent exe a:1 . "," . a:2 . "y"
+		else
+			silent exe "normal! `<" . a:type . "`>y"
+		endif
+	
+		"call system('putclip', @@)  " if you're using an old Cygwin
+		"call system('clip.exe', @@) " if you're using Bash on Windows
+	
+		"As of Cygwin 1.7.13, the /dev/clipboard device was added to provide
+		"access to the native Windows clipboard. It provides the added benefit
+		"of supporting utf-8 characters which putclip currently does not. Based
+		"on a tip from John Beckett, use the following:
+		call writefile(split(@@,"\n"), '/dev/clipboard')
+	
+		let &selection = sel_save
+		let @@ = reg_save
+	endfunction
+	function! Getclip()
+		let reg_save = @@
+		"let @@ = system('getclip')
+		"Much like Putclip(), using the /dev/clipboard device to access to the
+		"native Windows clipboard for Cygwin 1.7.13 and above. It provides the
+		"added benefit of supporting utf-8 characters which getclip currently does
+		"not. Based again on a tip from John Beckett, use the following:
+		let @@ = join(readfile('/dev/clipboard'), "\n")
+		setlocal paste
+		exe 'normal p'
+		setlocal nopaste
+		let @@ = reg_save
+	endfunction
+endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
 map <leader>t :Tlist<CR>
 map <leader>b :ls<CR>:b 
 map <leader>3 :b#<CR>
-map <leader>n :bn<CR>
-map <leader>p :bp<CR>
 "replace word
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>,g :Bgrep <C-r><C-w><CR>
 map <leader>,m /&clean-search&<CR>
+if has('win32unix')
+	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
+	nnoremap <silent> <leader>y :call Putclip('n', 1)<CR>
+	nnoremap <silent> <leader>p :call Getclip()<CR>
+else
+	map <leader>p "+p
+	map <leader>y "+y
+endif
 "}
 
 "{ [[commands]]
@@ -162,6 +213,4 @@ nmap <silent> <leader>ll :LUBufs<cr>
 "映射LUWalk为,lw
 nmap <silent> <leader>lw :LUWalk<cr>
 let g:session_autoload = 'no'
-"set sessionoptions-=curdir
-"set sessionoptions+=sesdir
 
