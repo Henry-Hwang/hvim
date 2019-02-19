@@ -1,10 +1,19 @@
-set rtp+=$HOME/.vim/bundle/Vundle.vim/
-call vundle#begin('$HOME/.vim/bundle/')
+"插件管理
+
+if has('win32') && has ('gui_runing')
+	set rtp+=$HOME\.vim\bundle\Vundle.vim
+	call vundle#begin()
+else
+	set rtp+=$HOME/.vim/bundle/Vundle.vim/
+	call vundle#begin('$HOME/.vim/bundle/')
+endif
 Plugin 'VundleVim/Vundle.vim'
+"Plugin 'scrooloose/nerdtree'
+"Plugin 'jistr/vim-nerdtree-tabs'
+"Plugin  'Xuyuanp/nerdtree-git-plugin'
+Plugin 'kien/ctrlp.vim'
 Plugin 'eshion/vim-sync'
-Plugin 'junegunn/vim-easy-align'
-Plugin 'vim-scripts/molokai'
-Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'vim-scripts/molokai.git'
 Plugin 'vim-scripts/EasyGrep.git'
 Plugin 'vim-scripts/grep.vim'
 Plugin 'vim-scripts/taglist.vim'
@@ -15,18 +24,31 @@ Plugin 'vim-scripts/c.vim'
 Plugin 'vim-scripts/OmniCppComplete'
 Plugin 'vim-scripts/ctags.vim'
 Plugin 'lifepillar/vim-mucomplete'
-Plugin 'vim-scripts/VIM-Color-Picker'
+Plugin 'xolox/vim-session'
+Plugin 'xolox/vim-misc'
 "Plugin 'vim-scripts/minibufexplorerpp'
 "Plugin 'scrooloose/nerdtree'
 "Plugin 'altercation/vim-colors-solarized'
 "Plugin 'jistr/vim-nerdtree-tabs'
-"Plugin  'Xuyuanp/nerdtree-git-plugin'
+"Plugin	'Xuyuanp/nerdtree-git-plugin'
 "Plugin 'Valloric/YouCompleteMe'
 "Plugin 'vim-scripts/winmanager'
 call vundle#end()
 
 set helplang=cn
 set encoding=utf-8
+if has('win32') && has ('gui_running')
+	source $VIMRUNTIME/delmenu.vim
+	source $VIMRUNTIME/menu.vim
+	language messages zh_CN.utf-8
+
+	set guioptions-=T	" 不显示工具栏
+	set guioptions-=L	" 不显示左边滚动条
+	set guioptions-=r	" 不显示右边滚动条
+	set guioptions-=m
+endif
+
+set cst "ctags 多个选择
 " 设定配色方案
 " 自动语法高亮
 syntax on
@@ -51,17 +73,13 @@ set softtabstop=4
 set shiftwidth=4
 set smarttab
 set history=1024
-" 不突出显示当前行
-set nocursorline
 " 覆盖文件时不备份
 set nobackup
 " 自动切换当前目录为当前文件所在的目录
-set autochdir
+"set autochdir
 " 搜索时忽略大小写，但在有一个或以上大写字母时仍大小写敏感
 set ignorecase
 set smartcase
-" 搜索到文件两端时不重新搜索
-set nowrapscan
 " 实时搜索
 set incsearch
 " 搜索时高亮显示被找到的文本
@@ -80,7 +98,7 @@ set hidden
 " 智能自动缩进
 set smartindent
 " 设定命令行的行数为 1
-set cmdheight=1
+"set cmdheight=1
 " 显示状态栏 (默认值为 1, 无法显示状态栏)
 set laststatus=2
 "显示括号配对情况
@@ -185,7 +203,6 @@ else
 	let &t_SI = "\e[5 q"
 	let &t_EI = "\e[2 q"
 endif
-
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
 "Ctags可执行文件的路径，千万要写对了，否则显示no such file
 let Tlist_Show_One_File = 1
@@ -212,5 +229,7 @@ nmap <silent> <leader>lk :LUTags<cr>
 nmap <silent> <leader>ll :LUBufs<cr>
 "映射LUWalk为,lw
 nmap <silent> <leader>lw :LUWalk<cr>
-let g:session_autoload = 'no'
-
+"[[Session management]]
+let g:session_autosave = 'yes'
+let g:session_default_to_last = 1
+let g:session_autoload = 'yes'
