@@ -26,6 +26,7 @@ Plugin 'vim-scripts/ctags.vim'
 Plugin 'lifepillar/vim-mucomplete'
 Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
+Plugin 'will133/vim-dirdiff'
 "Plugin 'vim-scripts/minibufexplorerpp'
 "Plugin 'scrooloose/nerdtree'
 "Plugin 'altercation/vim-colors-solarized'
@@ -128,6 +129,9 @@ if has('win32unix')
 else
 	hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
 endif
+"[[syntax]]
+hi Comment term=bold ctermfg=60 guifg=#465457
+
 "command ": h" to show all color
 if has('win32unix')
 	function! Putclip(type, ...) range
@@ -193,6 +197,8 @@ endif
 command! Bfind :execute ":cex [] | bufdo vimgrepadd /" . expand('<cword>') . "/g %" | cw
 command! Ffind :execute ":cex [] | vimgrepadd /" . expand('<cword>') . "/g %" | cw
 "command! Rfind :execute ":%s/" . expand('<cword>') . "/" . expand('<cword>') . "/gc"
+command! DiffT windo diffthis
+command! DiffO windo diffoff
 "}
 
 " SSH tmux
@@ -230,7 +236,15 @@ nmap <silent> <leader>ll :LUBufs<cr>
 "映射LUWalk为,lw
 nmap <silent> <leader>lw :LUWalk<cr>
 "[[Session management]]
-let g:session_autosave = 'yes'
-let g:session_default_to_last = 1
-let g:session_autoload = 'yes'
-let g:session_directory = '~/vim-sessions'
+if &diff
+    map ] ]c
+    map [ [c
+    hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+    hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+    hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+else
+	let g:session_autosave = 'yes'
+	let g:session_default_to_last = 1
+	let g:session_autoload = 'yes'
+	let g:session_directory = '~/vim-sessions'
+endif
