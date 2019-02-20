@@ -63,7 +63,7 @@ set whichwrap+=<,>,h,l
 " 显示行号
 set number
 " 上下可视行数
-set scrolloff=6
+set scrolloff=4
 set noexpandtab
 " 设定 tab 长度为 4
 set tabstop=4
@@ -76,7 +76,6 @@ set history=1024
 " 覆盖文件时不备份
 set nobackup
 " 自动切换当前目录为当前文件所在的目录
-"set autochdir
 " 搜索时忽略大小写，但在有一个或以上大写字母时仍大小写敏感
 set ignorecase
 set smartcase
@@ -87,10 +86,9 @@ set hlsearch
 " 关闭错误声音
 set noerrorbells
 set novisualbell
-"set t_vb=
 
 " 不自动换行
-"set nowrap
+set nowrap
 "How many tenths of a second to blink
 set mat=2
 " 允许在有未保存的修改时切换缓冲区，此时的修改由 vim 负责保存
@@ -107,7 +105,8 @@ set wrapscan
 " 解决自动换行格式下, 如高度在折行之后超过窗口高度结果这一行看不到的问题
 set display=lastline
 " 设置在状态行显示的信息
-set statusline=\ %<%F[%1*%M%*%n%R%H]%=\ %y\ %0(%{&fileformat}\ [%{(&fenc==\"\"?&enc:&fenc).(&bomb?\",BOM\":\"\")}]\ %c:%l/%L%)
+set statusline=\ %f%m%r%h%w\ %=%({%{&ff}\|%{(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\")}%k\|%Y}%)\ %([%l,%L][%p%%]\ %)
+
 " 粘贴保持格式
 set paste
 
@@ -178,6 +177,7 @@ map <leader>3 :b#<CR>
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>,g :Bgrep <C-r><C-w><CR>
+map <leader>,f :Bfind<CR>
 map <leader>,m /&clean-search&<CR>
 if has('win32unix')
 	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
@@ -216,7 +216,7 @@ let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
 " lookupfile setting
 """""""""""""""""""""""""""""""
 let g:LookupFile_MinPatLength = 2               "最少输入2个字符才开始查找
-let g:LookupFile_PreserveLastPattern = 0        "不保存上次查找的字符串
+let g:LookupFile_PreserveLastPattern = 0        "不保存上次查找的字符串g:session_directory
 let g:LookupFile_PreservePatternHistory = 1     "保存查找历史
 let g:LookupFile_AlwaysAcceptFirst = 1          "回车打开第一个匹配项目
 let g:LookupFile_AllowNewFiles = 0              "不允许创建不存在的文件
@@ -233,3 +233,4 @@ nmap <silent> <leader>lw :LUWalk<cr>
 let g:session_autosave = 'yes'
 let g:session_default_to_last = 1
 let g:session_autoload = 'yes'
+let g:session_directory = '~/vim-sessions'
