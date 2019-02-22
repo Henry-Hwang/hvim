@@ -8,9 +8,6 @@ else
 	call vundle#begin('$HOME/.vim/bundle/')
 endif
 Plugin 'VundleVim/Vundle.vim'
-"Plugin 'scrooloose/nerdtree'
-"Plugin 'jistr/vim-nerdtree-tabs'
-"Plugin  'Xuyuanp/nerdtree-git-plugin'
 Plugin 'kien/ctrlp.vim'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/molokai.git'
@@ -27,16 +24,10 @@ Plugin 'lifepillar/vim-mucomplete'
 Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
 Plugin 'will133/vim-dirdiff'
-"Plugin 'vim-scripts/minibufexplorerpp'
+Plugin 'tpope/vim-fugitive'
 "Plugin 'scrooloose/nerdtree'
-"Plugin 'altercation/vim-colors-solarized'
-"Plugin 'jistr/vim-nerdtree-tabs'
-"Plugin	'Xuyuanp/nerdtree-git-plugin'
-"Plugin 'Valloric/YouCompleteMe'
-"Plugin 'vim-scripts/winmanager'
 call vundle#end()
 
-set helplang=cn
 set encoding=utf-8
 if has('win32') && has ('gui_running')
 	source $VIMRUNTIME/delmenu.vim
@@ -77,6 +68,7 @@ set history=1024
 " 覆盖文件时不备份
 set nobackup
 " 自动切换当前目录为当前文件所在的目录
+set autochdir
 " 搜索时忽略大小写，但在有一个或以上大写字母时仍大小写敏感
 set ignorecase
 set smartcase
@@ -210,31 +202,11 @@ else
 	let &t_EI = "\e[2 q"
 endif
 let Tlist_Ctags_Cmd = '/usr/bin/ctags'
-"Ctags可执行文件的路径，千万要写对了，否则显示no such file
 let Tlist_Show_One_File = 1
-"不同时显示多个文件的tag，只显示当前文件的
 let Tlist_Exit_OnlyWindow = 1
-"如果taglist窗口是最后一个窗口，则退出vim
 let Tlist_Auto_Open=0               "打开文件时候不自动打开Taglist窗口
 let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
 
-""""""""""""""""""""""""""""""
-" lookupfile setting
-"""""""""""""""""""""""""""""""
-let g:LookupFile_MinPatLength = 2               "最少输入2个字符才开始查找
-let g:LookupFile_PreserveLastPattern = 0        "不保存上次查找的字符串g:session_directory
-let g:LookupFile_PreservePatternHistory = 1     "保存查找历史
-let g:LookupFile_AlwaysAcceptFirst = 1          "回车打开第一个匹配项目
-let g:LookupFile_AllowNewFiles = 0              "不允许创建不存在的文件
-if filereadable("./filenametags")                "设置tag文件的名字
-let g:LookupFile_TagExpr = '"./filenametags"'
-endif
-" "映射LookupFile为,lk
-nmap <silent> <leader>lk :LUTags<cr>
-"映射LUBufs为,ll
-nmap <silent> <leader>ll :LUBufs<cr>
-"映射LUWalk为,lw
-nmap <silent> <leader>lw :LUWalk<cr>
 "[[Session management]]
 if &diff
     map ] ]c
@@ -245,6 +217,5 @@ if &diff
 else
 	let g:session_autosave = 'yes'
 	let g:session_default_to_last = 1
-	let g:session_autoload = 'yes'
 	let g:session_directory = '~/vim-sessions'
 endif
