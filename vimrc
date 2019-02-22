@@ -217,5 +217,19 @@ if &diff
 else
 	let g:session_autosave = 'yes'
 	let g:session_default_to_last = 1
+	let g:session_autoload = 'yes'
 	let g:session_directory = '~/vim-sessions'
+endif
+set undodir=~/.vim/tmp/undo//     " undo files
+set backupdir=~/.vim/tmp/backup// " backups
+set directory=~/.vim/tmp/swap//   " swap files
+" Make those folders automatically if they don't already exist.
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
 endif
