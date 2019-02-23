@@ -9,6 +9,7 @@ else
 endif
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'kien/ctrlp.vim'
+Plugin 'vim-scripts/FuzzyFinder'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/molokai.git'
 Plugin 'vim-scripts/EasyGrep.git'
@@ -18,7 +19,7 @@ Plugin 'vim-scripts/a.vim'
 Plugin 'vim-scripts/xml.vim'
 Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
-Plugin 'vim-scripts/OmniCppComplete'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-scripts/ctags.vim'
 Plugin 'lifepillar/vim-mucomplete'
 Plugin 'xolox/vim-session'
@@ -216,7 +217,7 @@ if &diff
     map [ [c
     hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
     hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
-    hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
 else
 	let g:session_autosave = 'yes'
 	let g:session_default_to_last = 1
