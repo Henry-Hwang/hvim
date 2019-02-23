@@ -25,6 +25,8 @@ Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
 Plugin 'will133/vim-dirdiff'
 Plugin 'tpope/vim-fugitive'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
 
@@ -166,8 +168,9 @@ if has('win32unix')
 endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
+nnoremap <C-s> :CtrlPBuffer<CR>
 map <leader>t :Tlist<CR>
-map <leader>b :ls<CR>:b 
+map <leader>b :ls<CR>:b<space>
 map <leader>3 :b#<CR>
 "replace word
 map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
