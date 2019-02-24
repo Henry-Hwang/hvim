@@ -20,13 +20,13 @@ Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-scripts/ctags.vim'
-Plugin 'lifepillar/vim-mucomplete'
 Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
 Plugin 'will133/vim-dirdiff'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+"Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
 
@@ -220,8 +220,8 @@ let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
 
 "[[Session management]]
 if &diff
-    map ] ]c
-    map [ [c
+    nnoremap ] ]c
+    nnoremap [ [c
     hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
     hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
 	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
