@@ -9,7 +9,6 @@ else
 endif
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'kien/ctrlp.vim'
-Plugin 'vim-scripts/FuzzyFinder'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/molokai.git'
 Plugin 'vim-scripts/EasyGrep.git'
@@ -21,13 +20,13 @@ Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-scripts/ctags.vim'
-Plugin 'lifepillar/vim-mucomplete'
 Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
 Plugin 'will133/vim-dirdiff'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+"Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
 
@@ -169,7 +168,7 @@ if has('win32unix')
 endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
-nnoremap <C-s> :CtrlPBuffer<CR>
+nnoremap <C-e> :CtrlPBuffer<CR>
 map <leader>t :Tlist<CR>
 map <leader>b :ls<CR>:b<space>
 map <leader>3 :b#<CR>
@@ -178,6 +177,14 @@ map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>,g :Bgrep <C-r><C-w><CR>
 map <leader>,f :Bfind<CR>
+if has('win32')
+	map <leader>,pp :e ~/_vimrc<CR>
+	map <leader>,sp :source ~/_vimrc<CR>
+else
+	map <leader>,pp :e ~/.vimrc<CR>
+	map <leader>,sp :source ~/.vimrc<CR>
+endif
+
 map <leader>,m /&clean-search&<CR>
 if has('win32unix')
 	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
@@ -213,8 +220,8 @@ let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
 
 "[[Session management]]
 if &diff
-    map ] ]c
-    map [ [c
+    nnoremap ] ]c
+    nnoremap [ [c
     hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
     hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
 	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
