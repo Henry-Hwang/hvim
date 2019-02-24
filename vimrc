@@ -9,7 +9,6 @@ else
 endif
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'kien/ctrlp.vim'
-Plugin 'vim-scripts/FuzzyFinder'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/molokai.git'
 Plugin 'vim-scripts/EasyGrep.git'
@@ -169,7 +168,7 @@ if has('win32unix')
 endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
-nnoremap <C-s> :CtrlPBuffer<CR>
+nnoremap <C-e> :CtrlPBuffer<CR>
 map <leader>t :Tlist<CR>
 map <leader>b :ls<CR>:b<space>
 map <leader>3 :b#<CR>
@@ -178,6 +177,14 @@ map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
 map <leader>,g :Bgrep <C-r><C-w><CR>
 map <leader>,f :Bfind<CR>
+if has('win32')
+	map <leader>,pp :e ~/_vimrc<CR>
+	map <leader>,sp :source ~/_vimrc<CR>
+else
+	map <leader>,pp :e ~/.vimrc<CR>
+	map <leader>,sp :source ~/.vimrc<CR>
+endif
+
 map <leader>,m /&clean-search&<CR>
 if has('win32unix')
 	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
