@@ -34,7 +34,6 @@ set encoding=utf-8
 if has('win32') && has ('gui_running')
 	source $VIMRUNTIME/delmenu.vim
 	source $VIMRUNTIME/menu.vim
-	language messages zh_CN.utf-8
 
 	set guioptions-=T	" 不显示工具栏
 	set guioptions-=L	" 不显示左边滚动条
@@ -169,23 +168,23 @@ endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
 nnoremap <C-e> :CtrlPBuffer<CR>
-map <leader>t :Tlist<CR>
-map <leader>b :ls<CR>:b<space>
-map <leader>3 :b#<CR>
+nnoremap <leader>t :Tlist<CR>
+nnoremap <leader>b :ls<CR>:b<space>
+nnoremap <leader>3 :b#<CR>
 "replace word
-map <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-map <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
-map <leader>,g :Bgrep <C-r><C-w><CR>
-map <leader>,f :Bfind<CR>
+nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <leader>,g :Bgrep <C-r><C-w><CR>
+nnoremap <leader>,f :Bfind<CR>
 if has('win32')
-	map <leader>,pp :e ~/_vimrc<CR>
-	map <leader>,sp :source ~/_vimrc<CR>
+	nnoremap <leader>,pp :e ~/_vimrc<CR>
+	nnoremap <leader>,sp :source ~/_vimrc<CR>
 else
-	map <leader>,pp :e ~/.vimrc<CR>
-	map <leader>,sp :source ~/.vimrc<CR>
+	nnoremap <leader>,pp :e ~/.vimrc<CR>
+	nnoremap <leader>,sp :source ~/.vimrc<CR>
 endif
 
-map <leader>,m /&clean-search&<CR>
+nnoremap <leader>,m /&clean-search&<CR>
 if has('win32unix')
 	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
 	nnoremap <silent> <leader>y :call Putclip('n', 1)<CR>
@@ -202,6 +201,9 @@ command! Ffind :execute ":cex [] | vimgrepadd /" . expand('<cword>') . "/g %" | 
 "command! Rfind :execute ":%s/" . expand('<cword>') . "/" . expand('<cword>') . "/gc"
 command! DiffT windo diffthis
 command! DiffO windo diffoff
+" calculator
+command! -nargs=+ Calc :py print <args>
+py from math import *
 "}
 
 " SSH tmux
@@ -226,9 +228,10 @@ if &diff
     hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
 	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
 else
-	let g:session_autosave = 'yes'
-	let g:session_default_to_last = 1
-	let g:session_autoload = 'yes'
+	let g:session_autosave = 'prompt'
+	let g:session_autosave_periodic = 5
+	"let g:session_default_to_last = 
+	let g:session_autoload = 'no'
 	let g:session_directory = '~/vim-sessions'
 endif
 set undodir=~/.vim/tmp/undo//     " undo files
