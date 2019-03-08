@@ -176,12 +176,15 @@ nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <leader>,g :Bgrep <C-r><C-w><CR>
 nnoremap <leader>,f :Bfind<CR>
+nnoremap <leader>,t :vertical terminal<CR>
+nnoremap <leader>,ht :terminal<CR>
+
 if has('win32')
-	nnoremap <leader>,pp :e ~/_vimrc<CR>
-	nnoremap <leader>,sp :source ~/_vimrc<CR>
+	nnoremap <leader>,. :e ~/_vimrc<CR>
+	nnoremap <leader>,.. :source ~/_vimrc<CR>
 else
-	nnoremap <leader>,pp :e ~/.vimrc<CR>
-	nnoremap <leader>,sp :source ~/.vimrc<CR>
+	nnoremap <leader>,. :e ~/.vimrc<CR>
+	nnoremap <leader>,.. :source ~/.vimrc<CR>
 endif
 
 nnoremap <leader>,m /&clean-search&<CR>
@@ -199,8 +202,8 @@ endif
 command! Bfind :execute ":cex [] | bufdo vimgrepadd /" . expand('<cword>') . "/g %" | cw
 command! Ffind :execute ":cex [] | vimgrepadd /" . expand('<cword>') . "/g %" | cw
 "command! Rfind :execute ":%s/" . expand('<cword>') . "/" . expand('<cword>') . "/gc"
-command! DiffT windo diffthis
-command! DiffO windo diffoff
+command! Difft windo diffthis
+command! Diffo windo diffoff
 " calculator
 command! -nargs=+ Calc :py print <args>
 py from math import *
