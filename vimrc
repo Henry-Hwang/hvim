@@ -8,7 +8,8 @@ else
 	call vundle#begin('$HOME/.vim/bundle/')
 endif
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
+Bundle 'tacahiroy/ctrlp-funky'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/molokai.git'
 Plugin 'vim-scripts/EasyGrep.git'
@@ -169,7 +170,8 @@ endif
 let mapleader = ","       "Set mapleader
 nnoremap <C-e> :CtrlPBuffer<CR>
 nnoremap <leader>t :Tlist<CR>
-nnoremap <leader>b :ls<CR>:b<space>
+" now I have ctrlp
+"nnoremap <leader>b :ls<CR>:b<space>
 nnoremap <leader>3 :b#<CR>
 "replace word
 nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
@@ -197,6 +199,35 @@ else
 	map <leader>y "+y
 endif
 "}
+"[[Ctrlp]]
+let g:ctrlp_map = '<leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+nnoremap <leader>cp :CtrlPMRU<CR>
+nnoremap <leader>cm :CtrlPMixed<CR>
+nnoremap <leader>b :CtrlPBuffer<CR>
+let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+    \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
+    \ }
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_match_window_bottom=1
+let g:ctrlp_max_height=15
+let g:ctrlp_match_window_reversed=0
+let g:ctrlp_mruf_max=500
+let g:ctrlp_follow_symlinks=1
+
+if has('win32')
+	let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
+else
+	let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+endif
+
+nnoremap <Leader>cf :CtrlPFunky<Cr>
+" narrow the list down with a word under cursor
+nnoremap <Leader>Cf :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+let g:ctrlp_funky_syntax_highlight = 1
+let g:ctrlp_extensions = ['funky']
+
 
 "{ [[commands]]
 command! Bfind :execute ":cex [] | bufdo vimgrepadd /" . expand('<cword>') . "/g %" | cw
