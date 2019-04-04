@@ -22,21 +22,23 @@ usage()
 
 	echo ""
 
-	echo "Usage: $0 [-f|-p|-s|-b] [ -i|-l IMAGE/LIB ]"
+	echo "Usage: $0 [-f|-p|r|-s|-b] [ -d DIR ] [ -i|-l IMAGE/LIB ]"
 
 	echo ""
-	echo "-f : flash image to device"
-	echo "-p : pull image from server"
-	echo "-s : show target information"
-	echo "-b : reboot device"
-	echo "-i : follow by the sector (boot, dtbo, system, etc.)"
-	echo "-l : follow by the libs (so, ko, xml, etc.)"
+	echo "-f : Flash image to device"
+	echo "-p : Pull image from server"
+	echo "-r : Pull image/lib from server then flashing"
+	echo "-s : Show target information"
+	echo "-b : Reboot device"
+	echo "-d : Specific a directory with the image/lib in side for flashing"
+	echo "-i : Follow by the sector (boot, dtbo, system, etc.)"
+	echo "-l : Follow by the libs (so, ko, xml, etc.)"
 
 	echo ""
-	echo "example:"
+	echo "Example:"
 	echo "./croot.sh -p -i dtbo"
-	echo "./croot.sh -p -l xml hal"
-	echo "./croot.sh -f -i boot dtbo"
+	echo "./croot.sh -rbf -l xml hal"
+	echo "./croot.sh -rf -i boot dtbo"
 	echo "./croot.sh -f -i boot dtbo"
 	
 	exit 2
@@ -149,18 +151,19 @@ push_to_device() {
 	do
 		case $lib in
 			hal)
-				adb push $target_hal_so $DTARGET_DIR_HAL
+				echo "$target_hal_so --> $DEVICE_DIR_HAL"
+				adb push $target_hal_so $DEVICE_DIR_HAL
 				;;
 			xml)
-				adb push $target_hal_xml $DTARGET_DIR_ETC
+				adb push $target_hal_xml $DEVICE_DIR_ETC
 				;;
 			modules)
-				adb push $dir_modules $DTARGET_DIR_MODULES/../
+				adb push $dir_modules $DEVICE_DIR_MODULES/../
 				;;
 			kos)
 				for ko in "${KOBJECTS[@]}";
 				do
-					adb push $dir_modules/$ko $DTARGET_DIR_MODULES
+					adb push $dir_modules/$ko $DEVICE_DIR_MODULES
 				done
 				;;
 			*)
@@ -194,16 +197,16 @@ initial() {
 }
 ####################################################################
 # Main script starts here
-initial
 unset TARGET IMAGE LIBRARY ACTION ACTION_REBOOT
 
-while getopts 'bfpsd:i:l:?h' c
+while getopts 'rbfpsd:i:l:?h' c
 do
 case $c in
 	# Show remote server information
 	f) set_variable ACTION FLASH ;;
 	p) set_variable ACTION PULL ;;
 	b) set_variable ACTION_REBOOT REBOOT ;;
+	r) set_variable ACTION_REMOTE REMOTE ;;
 	s) set_variable ACTION SHOW ;;
 	i) set_variable IMAGE $OPTARG ;;
 	l) set_variable LIBRARY $OPTARG ;;
@@ -217,8 +220,17 @@ done
 
 shift $((OPTIND-2))
 
+if [ -z "$SPECDIR" ]; then
+	initial
+fi
+
 case $ACTION in
 	FLASH)
+
+		if [ -n "$ACTION_REMOTE" ]; then
+			ssh_pull_stuff $@
+		fi
+
 		if [ -n "$IMAGE" ]; then
 			flash_to_device $@
 		elif [ -n "$LIBRARY" ]; then
