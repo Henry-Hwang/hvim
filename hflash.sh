@@ -59,7 +59,7 @@ set_variable()
 ssh_pull_stuff() {
 	local dir_product=$REMOTE_DIR_DROID/$DIR_PRODUCT
 	local target_hal_xml=$REMOTE_DIR_DROID/$TARGET_HAL_XML
-	local target_hal_so=$REMOTE_DIR_DROID/$TARGET_HAL_SO
+	local target_hal_so=$REMOTE_DIR_DROID/$TARGET_HAL_HW
 	local dir_modules=$REMOTE_DIR_DROID/$DIR_MODULES
 
 	echo "args: $@"

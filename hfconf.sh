@@ -12,7 +12,7 @@ DIR_PRODUCT=out/target/product/$TARGET
 DIR_HAL=hardware/qcom/audio
 DIR_HAL_XML=$DIR_HAL/configs/msmnile #***
 DIR_HAL_HW=$DIR_PRODUCT/vendor/lib/hw
-DIR_MODULES=$DIR_PRODUCT/vendor/lib/modules
+DIR_MODULES=$DIR_PRODUCT/dlkm/lib/modules
 
 TARGET_BOOT=$DIR_PRODUCT/boot.img
 TARGET_DTBO=$DIR_PRODUCT/dtbo.img
