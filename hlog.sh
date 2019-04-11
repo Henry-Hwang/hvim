@@ -49,12 +49,12 @@ logcat_default_filter() {
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
-	for lib in $@;
+	for patten in $@;
 	do
 		if [ -z "$filter" ]; then
-			filter=$lib
+			filter=$patten
 		else
-			filter=$filter\|$lib
+			filter=$filter\|$patten
 		fi
 		echo "$filter"
 	done
@@ -71,12 +71,12 @@ logcat_view_filter() {
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
-	for lib in $@;
+	for patten in $@;
 	do
 		if [ -z "$filter" ]; then
-			filter=$lib
+			filter=$patten
 		else
-			filter=$filter\|$lib
+			filter=$filter\|$patten
 		fi
 		echo "$filter"
 	done
@@ -93,20 +93,21 @@ dmesg_default_filter() {
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
-	for lib in $@;
+	for patten in $@;
 	do
 		if [ -z "$filter" ]; then
-			filter=$lib
+			filter=$patten
 		else
-			filter=$filter\|$lib
+			filter=$filter\|$patten
 		fi
 		echo "$filter"
 	done
 	
 	if [ -z "$GREP" ]; then
-		adb shell dmesg
+		adb shell dmesg | tee dmesg-view.txt
 	else
-		adb shell dmesg | grep -iE $filter
+		adb shell dmesg | grep -iE $filter | tee dmesg-view.txt
+
 	fi
 }
 
@@ -115,12 +116,12 @@ dmesg_view_filter() {
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
-	for lib in $@;
+	for patten in $@;
 	do
 		if [ -z "$filter" ]; then
-			filter=$lib
+			filter=$patten
 		else
-			filter=$filter\|$lib
+			filter=$filter\|$patten
 		fi
 		echo "$filter"
 	done
@@ -140,12 +141,12 @@ dmesg_loop_filter() {
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
-	for lib in $@;
+	for patten in $@;
 	do
 		if [ -z "$filter" ]; then
-			filter=$lib
+			filter=$patten
 		else
-			filter=$filter\|$lib
+			filter=$filter\|$patten
 		fi
 		echo "$filter"
 	done
@@ -158,6 +159,7 @@ dmesg_loop_filter() {
 		else
 			adb shell dmesg -c | grep -iE $filter
 		fi
+		sleep 1
 	done
 }
 ####################################################################
