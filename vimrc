@@ -8,6 +8,7 @@ else
 	call vundle#begin('$HOME/.vim/bundle/')
 endif
 Plugin 'VundleVim/Vundle.vim'
+"Plugin 'Yggdroot/LeaderF' " fast than ctrlp ?
 Plugin 'ctrlpvim/ctrlp.vim'
 Bundle 'tacahiroy/ctrlp-funky'
 Plugin 'eshion/vim-sync'

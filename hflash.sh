@@ -59,7 +59,7 @@ set_variable()
 ssh_pull_stuff() {
 	local dir_product=$REMOTE_DIR_DROID/$DIR_PRODUCT
 	local target_hal_xml=$REMOTE_DIR_DROID/$TARGET_HAL_XML
-	local target_hal_so=$REMOTE_DIR_DROID/$TARGET_HAL_SO
+	local target_hal_so=$REMOTE_DIR_DROID/$TARGET_HAL_HW
 	local dir_modules=$REMOTE_DIR_DROID/$DIR_MODULES
 
 	echo "args: $@"
@@ -151,14 +151,13 @@ push_to_device() {
 	do
 		case $lib in
 			hal)
-				echo "$target_hal_so --> $DEVICE_DIR_HAL"
 				adb push $target_hal_so $DEVICE_DIR_HAL
 				;;
 			xml)
 				adb push $target_hal_xml $DEVICE_DIR_ETC
 				;;
 			modules)
-				adb push $dir_modules $DEVICE_DIR_MODULES/../
+				adb push $dir_modules $DEVICE_DIR_MODULES/..
 				;;
 			kos)
 				for ko in "${KOBJECTS[@]}";
