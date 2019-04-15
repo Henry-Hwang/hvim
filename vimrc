@@ -27,6 +27,7 @@ Plugin 'will133/vim-dirdiff'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+
 "Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
@@ -58,7 +59,8 @@ set whichwrap+=<,>,h,l
 set number
 " 上下可视行数
 set scrolloff=4
-set noexpandtab
+" replace tab with space
+set expandtab
 " 设定 tab 长度为 4
 set tabstop=4
 " 设置按BackSpace的时候可以一次删除掉4个空格
