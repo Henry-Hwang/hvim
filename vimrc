@@ -176,6 +176,8 @@ nnoremap <leader>t :Tlist<CR>
 " now I have ctrlp
 "nnoremap <leader>b :ls<CR>:b<space>
 nnoremap <leader>3 :b#<CR>
+nnoremap <leader>bw :bw<CR>
+nnoremap <leader>bd :bd<CR>
 "replace word
 nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
@@ -183,6 +185,7 @@ nnoremap <leader>,g :Bgrep <C-r><C-w><CR>
 nnoremap <leader>,f :Bfind<CR>
 nnoremap <leader>,t :vertical terminal<CR>
 nnoremap <leader>,ht :terminal<CR>
+nnoremap <leader>b :ls<CR>
 nnoremap i a
 nnoremap a i
 if has('win32')
@@ -208,7 +211,7 @@ let g:ctrlp_map = '<leader>p'
 let g:ctrlp_cmd = 'CtrlP'
 nnoremap <leader>cp :CtrlPMRU<CR>
 nnoremap <leader>cm :CtrlPMixed<CR>
-nnoremap <leader>b :CtrlPBuffer<CR>
+nnoremap <C-a> :CtrlPBuffer<CR>
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
     \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
@@ -268,7 +271,7 @@ if &diff
 else
 	let g:session_autosave = 'prompt'
 	let g:session_autosave_periodic = 5
-	"let g:session_default_to_last = 
+	"let g:session_default_to_last =
 	let g:session_autoload = 'no'
 	let g:session_directory = '~/vim-sessions'
 endif
