@@ -23,8 +23,8 @@ usage()
 	echo ""
 	echo "-t : Create ctags file"
 	echo "-c : Create Cscope file (no ready yet)"
-	echo "-a : Create tag file for audio under kernel"
-	echo "-k : Create tag file for audio for android audio hal"
+	echo "-k : Create tag file for audio under kernel"
+	echo "-a : Create tag file for audio for android audio hal"
 	echo "-f : Specific the tags name"
 	echo "-d : Specific the directorys that tags file come from"
 
@@ -75,7 +75,7 @@ ctags_audioh_create() {
 }
 ctags_audiok_create() {
 	local filter=
-	local combined=( "${ADIRS[@]}" )
+	local combined=( "${KDIRS[@]}" )
 	echo "args: $@"
 	
 	if [ -z "$TAGDIR" ]; then
