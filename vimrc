@@ -181,7 +181,8 @@ nnoremap <leader>,g :Bgrep <C-r><C-w><CR>
 nnoremap <leader>,f :Bfind<CR>
 nnoremap <leader>,t :vertical terminal<CR>
 nnoremap <leader>,ht :terminal<CR>
-
+nnoremap i a
+nnoremap a i
 if has('win32')
 	nnoremap <leader>,. :e ~/_vimrc<CR>
 	nnoremap <leader>,.. :source ~/_vimrc<CR>

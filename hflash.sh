@@ -2,6 +2,7 @@
 
 # This script base on
 # https://www.shellscript.sh/tips/getopts/
+#ssh $CROOT find  /opt/ubt-work/src/customer/meizu/m1971/out/target/product/m1971/system/ -ctime -1 -type f  -name libaudioroute.so
 
 show_target_info() {
 	if [ ! -f ~/hfconf.sh]; then
@@ -59,8 +60,12 @@ set_variable()
 ssh_pull_stuff() {
 	local dir_product=$REMOTE_DIR_DROID/$DIR_PRODUCT
 	local target_hal_xml=$REMOTE_DIR_DROID/$TARGET_HAL_XML
+	local dir_hal_xml=$REMOTE_DIR_DROID/$DIR_HAL_XML
 	local target_hal_so=$REMOTE_DIR_DROID/$TARGET_HAL_HW
 	local dir_modules=$REMOTE_DIR_DROID/$DIR_MODULES
+	local dir_sys_lib=$REMOTE_DIR_DROID/$DIR_SYS_LIB
+	local dir_sys_lib64=$REMOTE_DIR_DROID/$DIR_SYS_LIB64
+	local dir_sys_lib_vndk=$REMOTE_DIR_DROID/$DIR_SYS_LIB_VNDK
 
 	echo "args: $@"
 	for image in $@;
@@ -75,8 +80,25 @@ ssh_pull_stuff() {
 			dtbo)
 				scp $USER@$IP:$dir_product/dtbo.img $DIR_PRODUCT
 				;;
+			route)
+				for conf in "${SYSLIBS[@]}";
+				do
+					scp $USER@$IP:$dir_sys_lib/$conf $DIR_SYS_LIB
+				done
+				for conf in "${SYSLIBS64[@]}";
+				do
+					scp $USER@$IP:$dir_sys_lib64/$conf $DIR_SYS_LIB64
+				done
+				for conf in "${SYSLIBS_VNDK[@]}";
+				do
+					scp $USER@$IP:$dir_sys_lib_vndk/$conf $DIR_SYS_LIB_VNDK
+				done
+				;;
 			xml)
-				scp $USER@$IP:$target_hal_xml $DIR_HAL_XML
+				for conf in "${XMLS[@]}";
+				do
+					scp $USER@$IP:$dir_hal_xml/$conf $DIR_HAL_XML
+				done
 				;;
 			modules)
 				scp -r $USER@$IP:$dir_modules $DIR_MODULES/../
@@ -134,10 +156,15 @@ flash_to_device() {
 push_to_device() {
 	if [ -z "$SPECDIR" ]; then
 		local target_hal_xml=$TARGET_HAL_XML
+		local dir_hal_xml=$DIR_HAL_XML
 		local target_hal_so=$TARGET_HAL_HW
 		local dir_modules=$DIR_MODULES
+		local dir_sys_lib=$DIR_SYS_LIB
+		local dir_sys_lib64=$DIR_SYS_LIB64
+		local dir_sys_lib_vndk=$DIR_SYS_LIB_VNDK
 	else
 		local target_hal_xml=$SPECDIR/$TARGET_HAL_XML
+		local dir_hal_xml=$SPECDIR/$DIR_HAL_XML
 		local target_hal_so=$SPECDIR/$TARGET_HAL_HW
 		local dir_modules=$SPECDIR/$DIR_MODULES
 	fi
@@ -153,8 +180,26 @@ push_to_device() {
 			hal)
 				adb push $target_hal_so $DEVICE_DIR_HAL
 				;;
+			route)
+				for conf in "${SYSLIBS[@]}";
+				do
+					adb push $dir_sys_lib/$conf $DEVICE_DIR_SYS_LIB
+				done
+				for conf in "${SYSLIBS64[@]}";
+				do
+					adb push $dir_sys_lib64/$conf $DEVICE_DIR_SYS_LIB64
+				done
+				for conf in "${SYSLIBS_VNDK[@]}";
+				do
+					adb push $dir_sys_lib_vndk/$conf $DEVICE_DIR_SYS_LIB_VNDK
+				done
+				;;
 			xml)
-				adb push $target_hal_xml $DEVICE_DIR_ETC
+				#adb push $target_hal_xml $DEVICE_DIR_ETC
+				for conf in "${XMLS[@]}";
+				do
+					adb push $dir_hal_xml/$conf $DEVICE_DIR_ETC
+				done
 				;;
 			modules)
 				adb push $dir_modules $DEVICE_DIR_MODULES/..
@@ -192,6 +237,15 @@ initial() {
 	fi
 	if [ ! -d $DIR_HAL_XML ]; then
 		mkdir -p $DIR_HAL_XML
+	fi
+	if [ ! -d $DIR_SYS_LIB ]; then
+		mkdir -p $DIR_SYS_LIB
+	fi
+	if [ ! -d $DIR_SYS_LIB64 ]; then
+		mkdir -p $DIR_SYS_LIB64
+	fi
+	if [ ! -d $DIR_SYS_LIB_VNDK ]; then
+		mkdir -p $DIR_SYS_LIB_VNDK
 	fi
 }
 ####################################################################
