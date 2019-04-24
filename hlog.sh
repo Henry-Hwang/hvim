@@ -61,9 +61,9 @@ logcat_default_filter() {
 	
 
 	if [ -z "$GREP" ]; then
-		adb shell logcat
+		adb wait-for-device shell logcat
 	else
-		adb shell logcat | grep -iE $filter
+		adb wait-for-device shell logcat | grep -iE $filter
 	fi
 }
 logcat_view_filter() {
@@ -89,7 +89,7 @@ logcat_view_filter() {
 	fi
 }
 dmesg_default_filter() {
-	#adb wait-for-device root
+	adb wait-for-device root
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
@@ -112,7 +112,7 @@ dmesg_default_filter() {
 }
 
 dmesg_view_filter() {
-	#adb wait-for-device root
+	adb wait-for-device root
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
@@ -137,7 +137,7 @@ dmesg_view_filter() {
 }
 
 dmesg_loop_filter() {
-	#adb wait-for-device root
+	adb wait-for-device root
 	#adb wait-for-device remount
 	local filter=
 	echo "args: $@"
@@ -155,9 +155,9 @@ dmesg_loop_filter() {
 	do
 	
 		if [ -z "$GREP" ]; then
-			adb shell dmesg -c
+			adb wait-for-device shell dmesg -c
 		else
-			adb shell dmesg -c | grep -iE $filter
+			adb wait-for-device shell dmesg -c | grep -iE $filter
 		fi
 		sleep 1
 	done
@@ -186,12 +186,12 @@ done
 
 shift $((OPTIND-2))
 
-adb wait-for-device root
-adb wait-for-device remount
+#adb wait-for-device root
+#adb wait-for-device remount
 case $ACTION in
 	LOGCAT)
 		if [ -n "$CLEAR" ]; then
-			adb shell logcat -c
+			adb wait-for-device shell logcat -c
 			reset
 		fi
 		case $ATTRIBUTE in
@@ -203,7 +203,7 @@ case $ACTION in
 	;;
 	DMESG)
 		if [ -n "$CLEAR" ]; then
-			adb shell dmesg -c
+			adb wait-for-device shell dmesg -c
 			reset
 		fi
 		case $ATTRIBUTE in
