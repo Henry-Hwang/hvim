@@ -45,6 +45,7 @@ if has('win32') && has ('gui_running')
 endif
 
 set cst "ctags 多个选择
+set fileformats=unix,dos
 " 设定配色方案
 " 自动语法高亮
 syntax on

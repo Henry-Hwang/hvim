@@ -115,6 +115,7 @@ dmesg_view_filter() {
 	adb wait-for-device root
 	#adb wait-for-device remount
 	local filter=
+	local lname=dmesg_$(date  "+%Y-%m-%d_%H:%M:%S").txt
 	echo "args: $@"
 	for patten in $@;
 	do
@@ -127,13 +128,13 @@ dmesg_view_filter() {
 	done
 	
 	if [ -z "$GREP" ]; then
-		adb shell dmesg  > dmesg-view.txt
+		adb wait-for-device shell dmesg  > $lname
 	else
-		adb shell dmesg | grep -iE $filter > dmesg-view.txt
+		adb wait-for-device shell dmesg | grep -iE $filter > $lname
 	fi
 	
 	# Show log in vim
-	vim dmesg-view.txt
+	vim $lname
 }
 
 dmesg_loop_filter() {
