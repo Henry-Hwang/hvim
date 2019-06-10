@@ -29,6 +29,10 @@ Plugin 'will133/vim-dirdiff'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+Plugin 'scrooloose/nerdtree.git'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 
 "Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
@@ -260,7 +264,11 @@ let Tlist_Show_One_File = 1
 let Tlist_Exit_OnlyWindow = 1
 let Tlist_Auto_Open=0               "打开文件时候不自动打开Taglist窗口
 let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
-
+"NERDTree
+nnoremap <silent><F2> :exec("NERDTreeToggle ".expand('%:h'))<CR>
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
+nnoremap <C-n> :NERDTree<CR>
 "[[Session management]]
 if &diff
     nnoremap ] ]c
