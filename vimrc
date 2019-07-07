@@ -109,7 +109,7 @@ set wrapscan
 " 解决自动换行格式下, 如高度在折行之后超过窗口高度结果这一行看不到的问题
 set display=lastline
 " 设置在状态行显示的信息
-set statusline=\ %f%m%r%h%w\ %=%({%{&ff}\|%{(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\")}%k\|%Y}%)\ %([%l,%L][%p%%]\ %)
+"set statusline=\ %f%m%r%h%w\ %=%({%{&ff}\|%{(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\")}%k\|%Y}%)\ %([%l,%L][%p%%]\ %)
 
 " 粘贴保持格式
 set paste
@@ -125,17 +125,20 @@ set shortmess=atl
 set background=dark
 set t_Co=256
 colorscheme molokai
-set cursorline
+"set cursorline
 set guifont=Courier_New:h11
 if has('win32unix')
 	hi CursorLine cterm=NONE ctermfg=white ctermbg=55 guifg=#293739
 else
-	hi CursorLine term=NONE ctermfg=white ctermbg=534 guibg=#293739
+	"hi CursorLine ctermfg=15 ctermbg=534 guibg=#293739
+	hi CursorLine term=underline ctermbg=236 guibg=#293739
+	"hi CursorLine term=reverse ctermfg=153 ctermbg=66 guifg=#FFFFFF guibg=#455354
+	"hi CursorLine term=NONE ctermfg=white ctermbg=214 guibg=#293739
 endif
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457
 
-"command ": h" to show all color
+"command ": hi" to show all color
 if has('win32unix')
 	function! Putclip(type, ...) range
 		let sel_save = &selection
