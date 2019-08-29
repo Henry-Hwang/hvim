@@ -4,6 +4,8 @@ TUNING_DIR="$BUILD_DIR/capi_v2_cirrus_cspl/include/tuningheaders"
 HEADERS="$BUILD_DIR/capi_v2_cirrus_cspl/source/compat.c"
 DEF16_STRING="#define USE_CASE_0_TUNING \"tuningheaders"
 DEF24_STRING="#define USE_CASE_0_TUNING_24BIT \"tuningheaders"
+CONFIG_RX_LEFT=CSPL_CONFIG_RX_LEFT
+CONFIG_RX_RIGHT=CSPL_CONFIG_RX_RIGHT
 
 CSPL_LIB=$BUILD_DIR/capi_v2_cirrus_cspl/LLVM_Debug/capi_v2_cirrus_cspl.so
 
@@ -24,7 +26,6 @@ fi
 cd $BUILD_DIR
 
 cp -v $ORI_TUNING ./
-
 #locate in build directory
 TUNING=$(basename $ORI_TUNING)
 
@@ -40,12 +41,12 @@ fi
 
 if [ "$POSTFIX" = "txt" ]; then
 	echo "txt tuning"
-	# copy txt (*.h) to current directory
-	cp -v $ORI_TUNING ./
+	H_TUNING=$(basename ${TUNING} .txt).h
+    cp -v $TUNING $H_TUNING
 elif [ "$POSTFIX" = "h" ]; then
 	echo "C header (*.h) tuning"
-	# copy txt (*.h) to current directory
-	cp -v $ORI_TUNING ./
+	H_TUNING=$(basename ${TUNING} .h).h
+    cp -v $TUNING $H_TUNING
 elif [ "$POSTFIX" = "json" ]; then
 	echo "json tuning"
 	# convert json to txt (C header *.h)
@@ -62,16 +63,32 @@ else
 	exit
 fi
 
-#get line number
-line=$(get_line_num "$DEF_STRING" "$HEADERS")
-echo $line
-
 #put the tuning in C file
 sed -i '/'"$DEF_STRING"'/c '"$DEF_STRING"'/'"$H_TUNING\""'' $HEADERS
+
+#Show Checksum
+#------------------------------------------------------------
+RX_LEFT=$(sed -n -e '/'"$CONFIG_RX_LEFT"'/=' $H_TUNING)
+STR=$(sed -n ${RX_LEFT}p $H_TUNING)
+ARRAY=(${STR//\ / })
+#for i in "${!ARRAY[@]}"; do
+#    echo "$i=>${ARRAY[i]}"
+#done
+
+# Total size : ${#ARRAY[@]}
+# The last one : $(expr ${#ARRAY[@]} - 1)
+echo ${ARRAY[$(expr ${#ARRAY[@]} - 1)]}
+#------------------------------------------------------------
 
 #copy tuning to directory & clean
 mv -v $H_TUNING $TUNING_DIR
 rm -v $TUNING
+
+if [ "$3" = "insert" ]; then
+	echo "insert tuning: $ORI_TUNING"
+	cd -
+	exit
+fi
 
 #make cspl lib for hexagon
 ./cygwin-make-setup-sdk3.4.3.sh
@@ -87,20 +104,30 @@ else
     #Put tuning and LIB together
 	cp -v $CSPL_LIB $(dirname ${ORI_TUNING})/$NEW_CSPL_LIB
 fi
+
 #Output message
 LINE_16BIT=$(sed -n -e '/'"$DEF16_STRING"'/=' $HEADERS)
 LINE_24BIT=$(sed -n -e '/'"$DEF24_STRING"'/=' $HEADERS)
 BRANCH=$(bash -c 'git branch --no-color 2> /dev/null' | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' -e 's/\//\_/g')
+
 echo "============================================="
 echo "CAPI V2 CSPL lib Information:"
 echo "Build Time: $(date +"%Y-%m-%d %H:%M:%S")"
 echo "Branch: $BRANCH"
-#Show tuning in compat.c
-echo "TUNING:"
-echo "     16BIT: $(basename "$(sed -n ${LINE_16BIT}p $HEADERS)")"
-echo "     24BIT: $(basename "$(sed -n ${LINE_24BIT}p $HEADERS)")"
-echo $NEW_CSPL_LIB
 
+echo ""
+#Show Tuning In Compat.c
+echo "TUNING:"
+echo "    16BIT: $(basename "$(sed -n ${LINE_16BIT}p $HEADERS)")"
+echo "    24BIT: $(basename "$(sed -n ${LINE_24BIT}p $HEADERS)")"
+echo ""
+echo "CSPL LIB:"
+echo "    $NEW_CSPL_LIB"
+echo ""
+echo "ADB PUSH:"
+echo "    adb wait-for-device root"
+echo "    adb wait-for-device remount"
+echo "    adb wait-for-device push $NEW_CSPL_LIB /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so"
 echo "============================================="
 # Open lib location
 cd $(dirname $ORI_TUNING)
