@@ -1,5 +1,6 @@
 #!/bin/bash
 BUILD_DIR=/home/hhuang/capiv2
+PUSH_SCRIPT=/home/hhuang/hvim/qcom-push-so.bat
 TUNING_DIR="$BUILD_DIR/capi_v2_cirrus_cspl/include/tuningheaders"
 HEADERS="$BUILD_DIR/capi_v2_cirrus_cspl/source/compat.c"
 DEF16_STRING="#define USE_CASE_0_TUNING \"tuningheaders"
@@ -69,15 +70,21 @@ sed -i '/'"$DEF_STRING"'/c '"$DEF_STRING"'/'"$H_TUNING\""'' $HEADERS
 #Show Checksum
 #------------------------------------------------------------
 RX_LEFT=$(sed -n -e '/'"$CONFIG_RX_LEFT"'/=' $H_TUNING)
-STR=$(sed -n ${RX_LEFT}p $H_TUNING)
-ARRAY=(${STR//\ / })
+RX_LEFT_STR=$(sed -n ${RX_LEFT}p $H_TUNING)
+RX_LEFT_ARRAY=(${RX_LEFT_STR//\ / })
+RX_LEFT_CHKSUM=${RX_LEFT_ARRAY[$(expr ${#RX_LEFT_ARRAY[@]} - 1)]}
+echo $RX_LEFT_CHKSUM
 #for i in "${!ARRAY[@]}"; do
 #    echo "$i=>${ARRAY[i]}"
 #done
 
 # Total size : ${#ARRAY[@]}
 # The last one : $(expr ${#ARRAY[@]} - 1)
-echo ${ARRAY[$(expr ${#ARRAY[@]} - 1)]}
+RX_RIGHT=$(sed -n -e '/'"$CONFIG_RX_RIGHT"'/=' $H_TUNING)
+RX_RIGHT_STR=$(sed -n ${RX_RIGHT}p $H_TUNING)
+RX_RIGHT_ARRAY=(${RX_RIGHT_STR//\ / })
+RX_RIGHT_CHKSUM=${RX_RIGHT_ARRAY[$(expr ${#RX_RIGHT_ARRAY[@]} - 1)]}
+echo $RX_RIGHT_CHKSUM
 #------------------------------------------------------------
 
 #copy tuning to directory & clean
@@ -100,10 +107,21 @@ cd -
 if [ ! -f "$CSPL_LIB" ]; then
 	echo "File '$CSPL_LIB' not found, Build Failed?"
 else
-	NEW_CSPL_LIB=$(basename ${CSPL_LIB} .so)_$(date +"%Y-%m-%d_%H-%M-%S").so
+	#NEW_CSPL_LIB=$(basename ${CSPL_LIB} .so)_$(date +"%Y-%m-%d_%H-%M-%S").so
+	CSPL_DIR_NAME=$(date +"%Y-%m-%d_%H-%M-%S")
+	#mkdir for lib
+	NEW_CSPL_DIR=$(dirname ${ORI_TUNING})/$CSPL_DIR_NAME
+	mkdir -p $NEW_CSPL_DIR
+
     #Put tuning and LIB together
-	cp -v $CSPL_LIB $(dirname ${ORI_TUNING})/$NEW_CSPL_LIB
+	cp -v $CSPL_LIB $NEW_CSPL_DIR
+	cp -v $PUSH_SCRIPT $NEW_CSPL_DIR
+	#Put origin tuning to OUTPUT directory
+	cp -v $ORI_TUNING $NEW_CSPL_DIR
+
+	tar -zcvf ${NEW_CSPL_DIR}.tar.gz $NEW_CSPL_DIR
 fi
+
 
 #Output message
 LINE_16BIT=$(sed -n -e '/'"$DEF16_STRING"'/=' $HEADERS)
@@ -123,11 +141,17 @@ echo "    24BIT: $(basename "$(sed -n ${LINE_24BIT}p $HEADERS)")"
 echo ""
 echo "CSPL LIB:"
 echo "    $NEW_CSPL_LIB"
+echo "CHECKSUM: $(md5sum $CSPL_LIB)"
+echo "RX LEFT_CHECKSUM: $RX_LEFT_CHKSUM"
+echo "RX RIGHT_CHECKSUM: $RX_RIGHT_CHKSUM"
 echo ""
 echo "ADB PUSH:"
-echo "    adb wait-for-device root"
-echo "    adb wait-for-device remount"
-echo "    adb wait-for-device push $NEW_CSPL_LIB /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so"
+echo "    Run qcom-push-so.bat in package"
+echo "    "
+echo "    OR"
+echo "    adb root"
+echo "    adb remount"
+echo "    adb push capi_v2_cirrus_cspl.so /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so"
 echo "============================================="
 # Open lib location
 cd $(dirname $ORI_TUNING)
