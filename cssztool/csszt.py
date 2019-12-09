@@ -21,13 +21,28 @@ F_CONFIG = "cssztool.conf"
 OS_SYSTEM = platform.system()
 
 def ampinfo_adb_init():
-	print('Hello World!')
 	os.system("adb wait-for-device")
 	os.system("adb root")
 	os.system("adb wait-for-device")
 	os.system("adb remount")
 	os.system("adb wait-for-device")
 	return
+
+# Connection look like this:
+# List of devices attached
+# Z91QAEVJUTQX6   device
+def ampinfo_adb_check_connection():
+	string = os.popen("adb devices").read()
+	info = string.split("\n")
+	if (len(info) < 2):
+		return False
+	info = info[1].split()
+	if(len(info) != 2):
+		return False
+	if(info[1].strip() != "device"):
+		return False
+	
+	return True
 
 def ampinfo_show_op_sys():
 	print(platform.system())
@@ -143,28 +158,60 @@ def ampinfo_dsp_bypass(op):
 	return
 
 def ampinfo_list(op):
-	model = "adb shell \"find DIRECTORY F_ARGS | grep G_ARGS PATTEN | xargs ls -l\""
-	os.system("adb shell \"find /vendor/lib/rfsa/adsp -type f | grep -i cirrus | xargs ls -l\"")
-	os.system("adb shell \"find /vendor/bin -type f | grep -i cirrus | xargs ls -l\"")
-	#os.system("adb shell \"find /vendor/etc -type f | grep -i cirrus | xargs ls -l\"")
-	os.system("adb shell \"find /vendor/firmware -type f| grep -i cs35 | xargs ls -l\"")
-	os.system("adb shell \"find /d/regmap -type d | grep -iE i2c\|spi\"")
+	model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs ls -l\""
+
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["capiv2 directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
+	os.system(model_t)
+
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["tool directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "").replace("@PATTEN", "cirrus")
+	os.system(model_t)
+
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["wmfw directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cs35")
+	os.system(model_t)
+
+	model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN\""
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["regmap directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type d").replace("@G_ARGS", "-iE").replace("@PATTEN", "\'i2c|spi\'")
+	os.system(model_t)
+
 	return
 
 def ampinfo_device_md5sum(op):
-	os.system("adb shell \"find /vendor/lib/rfsa/adsp -typr f | grep -i cirrus | xargs md5sum\"")
-	os.system("adb shell \"find /vendor/bin -type f | grep -i cirrus | xargs md5sum\"")
-	os.system("adb shell \"find /vendor/firmware -type f | grep -i cs35 | xargs md5sum\"")
+	model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs md5sum\""
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["capiv2 directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
+	os.system(model_t)
+
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["tool directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
+	os.system(model_t)
+	
+	model_t = model.replace("@DIRECTORY", DICT_CONFIG["wmfw directory device"])
+	model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cs35")
+	os.system(model_t)
+	
 	return
 
-def ampinfo_push(args):
-	if(args[0]=="capi"):
-	    cmd = "adb push"
-	    target = "/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so"
+def ampinfo_push_device(args):
+	model = "adb push @SOURCE @DEST"
+	model_md5 = "adb shell \"md5sum @TARGET\""
+	f_file = args[1]
+	if (os.path.exists(f_file.strip())==False):
+	    print("file on exist: " + args[1])
+	    return
 
-	os.system(cmd + " " + args[1] + " " + target)
-	os.system("md5sum " + args[1])
-	os.system("adb shell md5sum " + target)
+	if(args[0]=="capi"):
+		#push to device
+		model = model.replace("@SOURCE", f_file).replace("@DEST", DICT_CONFIG["capiv2 lib device"])
+		os.system(model)
+		
+		# md5sum, show both for comparing
+		model_md5 = model_md5.repace("@TARGET", DICT_CONFIG["capiv2 lib device"])
+	os.system(model_md5)
+	ampinfo_md5sum(f_file)
 
 	return
 
@@ -404,8 +451,9 @@ def ampinfo_read_conf():
 		lines = cfr.readlines()
 		for line in lines:
 			# Skip comment lines
-			if(line.startswith("#")):
+			if(line.startswith("#") or not len(line.strip())):
 				continue
+
 			kv = line.split("=")
 			DICT_CONFIG[kv[0].strip()] = kv[1].strip()
 	print(DICT_CONFIG)	
@@ -549,7 +597,6 @@ def ampinfo_covert_tuning(f_tuning):
 	return tuning_t
 
 def ampinfo_make_capi_v2(args):
-	ampinfo_read_conf()
 	if (OS_SYSTEM != "Windows"):
 		model = "cd ~/capiv2 && ./cygwin-make-setup-sdk3.4.3.sh && cd -"
 		f_24bit = args[0]
@@ -572,6 +619,11 @@ def ampinfo_make_capi_v2(args):
 	return
 
 ampinfo_show_op_sys()
+ampinfo_read_conf()
+if ampinfo_adb_check_connection():
+	ampinfo_adb_init()
+else:
+	print("Not device connected")
 #start here
 #
 #parser = argparse.ArgumentParser()
@@ -667,7 +719,7 @@ if arg.dev_md5sum:
 if arg.md5sum:
 	ampinfo_md5sum(arg.md5sum)
 if arg.push:
-	ampinfo_push(arg.push)
+	ampinfo_push_device(arg.push)
 if arg.reg_write:
 	ampinfo_regs_write(arg.reg_write)
 if arg.reg_read:
