@@ -7,6 +7,7 @@ import time
 import datetime
 import shutil
 import argparse
+import hashlib
 from decimal import Decimal
 #from __future__ import print_function
 L_PREFIX="SPK"
@@ -14,6 +15,9 @@ R_PREFIX="RCV"
 DSP_R_PREFIX="SPK DSP1 Protection R cd"
 DSP_L_PREFIX="RCV DSP1 Protection L cd"
 AMP_FACTOR=5.8571
+
+DICT_CONFIG = {}
+F_CONFIG = "cssztool.conf"
 OS_SYSTEM = platform.system()
 
 def ampinfo_adb_init():
@@ -24,6 +28,7 @@ def ampinfo_adb_init():
 	os.system("adb remount")
 	os.system("adb wait-for-device")
 	return
+
 def ampinfo_show_op_sys():
 	print(platform.system())
 	print(platform.platform())
@@ -34,6 +39,13 @@ def ampinfo_show_op_sys():
 	print(platform.processor())
 	return
 
+def ampinfo_md5sum(source):
+	fd = open(source)
+	md5 = hashlib.md5()
+	md5.update(fd.read().encode('utf-8'))
+	value = md5.hexdigest()
+	print(value)
+	return value
 #RCV DSP1 Protection L cd CSPL_COMMAND
 # convert 32bit string to int
 # '01 02 0A 0B' --> 0x01020A0B
@@ -139,7 +151,7 @@ def ampinfo_list(op):
 	os.system("adb shell \"find /d/regmap -type d | grep -iE i2c\|spi\"")
 	return
 
-def ampinfo_md5sum(op):
+def ampinfo_device_md5sum(op):
 	os.system("adb shell \"find /vendor/lib/rfsa/adsp -typr f | grep -i cirrus | xargs md5sum\"")
 	os.system("adb shell \"find /vendor/bin -type f | grep -i cirrus | xargs md5sum\"")
 	os.system("adb shell \"find /vendor/firmware -type f | grep -i cs35 | xargs md5sum\"")
@@ -374,8 +386,7 @@ def ampinfo_show_detail(count):
 	print ("L (%3.2f" %l_z_min, " %3.2f )ohm"  %l_z_max, "  R (%3.2f" %r_z_min, " %3.2f )ohm"  %r_z_max, "  T (%3.2f," %l_temp, "%3.2f)C" %r_temp)
 	time.sleep(1)
 	return
-DICT_CONFIG = {}
-F_CONFIG = "cssztool.conf"
+
 
 def ampinfo_conf(args):
 	model = "@EXE @CONFIG"
@@ -400,9 +411,9 @@ def ampinfo_read_conf():
 	print(DICT_CONFIG)	
 	return
 
-def ampinfo_capiv2_lib_info(repo):
-	branch = ampinfo_get_work_branch(repo)
-	list_chksum = ampinfo_get_mult_checksum(C_COMPAT)
+def ampinfo_capiv2_lib_info():
+	branch = ampinfo_get_work_branch(DICT_CONFIG["capiv2 directory"])
+	list_chksum = ampinfo_get_mult_checksum(DICT_CONFIG["compat.c"])
 	print(branch)
 	for it in list_chksum:
 		print(it)
@@ -452,7 +463,7 @@ def ampinfo_get_mult_checksum(c_compat):
 
 			line = line.replace("\"", "").strip()
 			[dirname,filename] = os.path.split(line)
-			f_tuning = DIR_CAPIV2_SRC_TUNING + filename
+			f_tuning = DICT_CONFIG["source tuning directory"] + filename
 			if (os.path.exists(f_tuning)==False):
 				continue
 			dict_chksum = aminfo_get_one_checksum(f_tuning)
@@ -503,14 +514,13 @@ def aminfo_get_one_checksum(f_tuning):
 # @tuning : [*.h/txt] tuning file
 # @bit : [16/24] 16bit/24bit tuning
 def ampinfo_tuning_update(c_file, tuning, bit):
-	dir_src = "/home/hhuang/capiv2/"
-	dir_tuning = dir_src + "/capi_v2_cirrus_cspl/include/tuningheaders/"
+	dir_tuning = DICT_CONFIG["source tuning directory"]
 	if (bit==24):
 		patten = "#define USE_CASE_0_TUNING_24BIT \"tuningheaders/"
-		model = "#define USE_CASE_0_TUNING_24BIT \"tuningheaders/NEW_TUNING\"\n"
+		model = "#define USE_CASE_0_TUNING_24BIT \"tuningheaders/@NEW_TUNING\"\n"
 	else:
 		patten = "#define USE_CASE_0_TUNING \"tuningheaders/"
-		model = "#define USE_CASE_0_TUNING \"tuningheaders/NEW_TUNING\"\n"
+		model = "#define USE_CASE_0_TUNING \"tuningheaders/@NEW_TUNING\"\n"
 	[dirname,filename] = os.path.split(tuning)
 	shutil.copyfile(tuning, dir_tuning+filename)
 
@@ -519,28 +529,25 @@ def ampinfo_tuning_update(c_file, tuning, bit):
 	with open(c_file, "w") as cfw:
 		for line in lines:
 			if patten in line:
-				line = model.replace("NEW_TUNING", filename)
+				line = model.replace("@NEW_TUNING", filename)
 			cfw.write(line)
 	return
 
 def ampinfo_covert_tuning(f_tuning):
-	covt_model = "cd DIR && json2hexagonbin.exe -t H_HEADER JSON && cd -"
+	covt_model = "cd @DIR && json2hexagonbin.exe -t @H_HEADER @JSON && cd -"
 	[dirname,filename] = os.path.split(f_tuning)
 	[fname,fename]=os.path.splitext(f_tuning)
 	
 	tuning_t = f_tuning
 	if (fename==".json"):
 		h_header = filename.replace(".json", ".h")
-		model_t = covt_model.replace("H_HEADER", h_header).replace("JSON", filename)
-		model_t = model_t.replace("DIR", dirname)
+		model_t = covt_model.replace("@H_HEADER", h_header).replace("@JSON", filename)
+		model_t = model_t.replace("@DIR", dirname)
 		print(model_t)
 		os.system(model_t)
 		tuning_t = f_tuning.replace(".json", ".h")
 	return tuning_t
 
-DIR_CAPIV2_ROOT = "/home/hhuang/capiv2/"
-DIR_CAPIV2_SRC_TUNING = DIR_CAPIV2_ROOT + "capi_v2_cirrus_cspl/include/tuningheaders/"
-C_COMPAT = DIR_CAPIV2_ROOT + "capi_v2_cirrus_cspl/source/compat.c"
 def ampinfo_make_capi_v2(args):
 	ampinfo_read_conf()
 	if (OS_SYSTEM != "Windows"):
@@ -551,17 +558,17 @@ def ampinfo_make_capi_v2(args):
 		print(f_24bit)
 		if (os.path.exists(f_24bit)==True):
 			f_24bit = ampinfo_covert_tuning(f_24bit)
-			ampinfo_tuning_update(C_COMPAT, f_24bit, 24)
+			ampinfo_tuning_update(DICT_CONFIG["compat.c"], f_24bit, 24)
 		
 		if (os.path.exists(f_16bit)==True):
 			f_16bit = ampinfo_covert_tuning(f_16bit)
-			ampinfo_tuning_update(C_COMPAT, f_16bit, 16)
+			ampinfo_tuning_update(DICT_CONFIG["compat.c"], f_16bit, 16)
 		
 		if (os.path.exists(f_24bit)) and (os.path.exists(f_16bit)):
 			print("No tuning file input!")
 		#build lib
 		os.system(model)
-		ampinfo_capiv2_lib_info(DIR_CAPIV2_ROOT)
+		ampinfo_capiv2_lib_info()
 	return
 
 ampinfo_show_op_sys()
@@ -582,10 +589,14 @@ parser.add_argument('-i', "--info",
 	metavar=('[COUNT]'),
 	type=int,
 	help="Display temp: [COUNT] = 10, 100, 1000")
-parser.add_argument('-md5', "--md5sum",
+parser.add_argument('-dmd5', "--dev_md5sum",
 	action="store_true",
 	required=False,
-	help="Show detail of cirrus stuff")
+	help="Show md5sum of cirrus stuff in android device")
+parser.add_argument('-md5', "--md5sum",
+	required=False,
+	type=str,
+	help="Show md5sum of file")
 parser.add_argument('-l', "--list",
 	action="store_true",
 	required=False,
@@ -651,6 +662,8 @@ if arg.list:
 	ampinfo_list(arg.list)
 if arg.dump_regs:
 	ampinfo_dump_registers(arg.dump_regs)
+if arg.dev_md5sum:
+	ampinfo_device_md5sum(arg.dev_md5sum)
 if arg.md5sum:
 	ampinfo_md5sum(arg.md5sum)
 if arg.push:
