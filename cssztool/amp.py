@@ -17,6 +17,9 @@ AMP_FACTOR=5.8571
 
 
 class Amp:
+	def __init__(self,conf):
+		self.conf = conf
+
 	#RCV DSP1 Protection L cd CSPL_COMMAND
 	# convert 32bit string to int
 	# '01 02 0A 0B' --> 0x01020A0B
@@ -198,7 +201,6 @@ class Amp:
 		return (z_min, z_max, temp)
 	
 	def show_temp(self, count):
-		adb_init()
 		rawdata = self.get_cal_z_value(DSP_L_PREFIX)
 		cal_z_l = self.mixer_32b_parser(rawdata)
 	
