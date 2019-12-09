@@ -7,22 +7,89 @@ import shutil
 import argparse
 import hashlib
 from decimal import Decimal
+from tool import Tool
 
 class Playback:
 	def __init__(self, conf):
 		self.conf = conf
+		self.readme = {}
 
 	def capiv2_lib_info(self):
 		branch = self.get_work_branch(self.conf["capiv2 directory"])
 		list_chksum = self.get_mult_checksum(self.conf["compat.c"])
-		print(branch)
-		for it in list_chksum:
-			print(it)
+		#for it in list_chksum:
+		#	print(it)
 		now = datetime.datetime.now()
-		print(now.strftime('%a-%b-%d-%Y_%H-%M-%S'))
+		self.readme["branch"] = branch
+		self.readme["build time"] = now.strftime('%a %b %d %Y %H:%M:%S')
+		self.readme["list checksum"] = list_chksum
 	
 		return
-	
+
+	def lib_copy_zip(self):
+		conf = self.conf
+		now = datetime.datetime.now()
+		now_str = now.strftime('%a-%b-%d-%Y_%H-%M-%S')
+		
+		new_dir = ""
+		# Copy tuning file
+		if "24bit tuning" in conf:
+			f_24bit = conf["24bit tuning"]
+			[dirname,filename] = os.path.split(f_24bit)
+			new_dir = dirname + "/capi_v2_" + now_str + "/"
+			os.mkdir(new_dir)
+			shutil.copy(f_24bit, new_dir)
+		if "16bit tuning" in conf:
+			f_16bit = conf["16bit tuning"]
+			[dirname,filename] = os.path.split(f_16bit)
+			new_dir = dirname + "/capi_v2_" + now_str + "/"
+			if (os.path.exists(new_dir)==False):
+			    os.mkdir(new_dir)
+			shutil.copy(f_16bit, new_dir)
+
+		print(new_dir)
+		if (os.path.exists(new_dir)==False):
+			print("ERROR: Tuning not founf!")
+			return
+
+		#Copy lib
+		f_lib = self.conf["capiv2 lib"]
+		if (os.path.exists(f_lib)==False):
+			shutil.rmtree(new_dir)
+			return
+
+		shutil.copy(f_lib, new_dir)
+
+		self.new_readme_files(new_dir)
+
+		Tool.zip(new_dir)
+		return
+
+	def new_readme_files(self, dir_out):
+		model_readme = "@NAME: @STRING\n"
+		f_readme = dir_out + "readme.txt"
+		with open(f_readme, "w+") as cfw:
+			cfw.write(model_readme.replace("@NAME", "BUILD TIME").replace("@STRING",self.readme["build time"]))
+			cfw.write(model_readme.replace("@NAME", "BRANCH").replace("@STRING",self.readme["branch"]))
+			for it in self.readme["list checksum"]:
+				#print(it)
+				cfw.write(model_readme.replace("@NAME", "CHECKSUM").replace("@STRING",it))
+			cfw.write(model_readme.replace("@NAME", "PUSH").replace("@STRING",""))
+			cfw.write("\tadb root\n")
+			cfw.write("\tadb remount\n")
+			cfw.write("\tadb push capi_v2_cirrus_cspl.so /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so\n")
+
+
+		# adb push script
+		f_script = dir_out + "push.bat"
+		with open(f_script, "w+") as cfw:
+				cfw.write("@echo off\n")
+				cfw.write("adb wait-for-device root\n")
+				cfw.write("adb wait-for-device remount\n")
+				cfw.write("adb wait-for-device\n")
+				cfw.write("adb push capi_v2_cirrus_cspl.so /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so\n")
+		return
+
 	def get_work_branch(self, repo):
 		model = "cd REPO && git branch && cd -"
 		model = model.replace("REPO", repo)
@@ -155,18 +222,25 @@ class Playback:
 			f_24bit = args[0]
 			f_16bit = args[1]
 			print(args)
-			print(f_24bit)
 			if (os.path.exists(f_24bit)==True):
 				f_24bit = self.covert_tuning(f_24bit)
 				self.tuning_update(self.conf["compat.c"], f_24bit, 24)
+				self.conf["24bit tuning"] = f_24bit
+				
 			
 			if (os.path.exists(f_16bit)==True):
 				f_16bit = self.covert_tuning(f_16bit)
 				self.tuning_update(self.conf["compat.c"], f_16bit, 16)
+				self.conf["16bit tuning"] = f_16bit
 			
-			if (os.path.exists(f_24bit)) and (os.path.exists(f_16bit)):
+			print("24bit: " + f_24bit)
+			print("16bit: " + f_16bit)
+			if not os.path.exists(f_24bit) and not os.path.exists(f_16bit):
 				print("No tuning file input!")
+				return
 			#build lib
 			os.system(model)
 			self.capiv2_lib_info()
+			self.lib_copy_zip()
+
 		return

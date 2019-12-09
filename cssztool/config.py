@@ -8,7 +8,6 @@ import argparse
 import hashlib
 from decimal import Decimal
 
-DICT_CONFIG = {}
 F_CONFIG = "cssztool.conf"
 class Config:
 	def __init__(self):
@@ -19,7 +18,7 @@ class Config:
 
 	def conf(self, args):
 		model = "@EXE @CONFIG"
-		if (OS_SYSTEM == "Windows"):
+		if (platform.system() == "Windows"):
 			model = model.replace("@EXE", "notepad.exe").replace("@CONFIG", F_CONFIG)
 		else:
 			model = model.replace("@EXE", "vim").replace("@CONFIG", F_CONFIG)
@@ -29,6 +28,7 @@ class Config:
 		return
 	
 	def read_conf(self, f_conf):
+		dict_conf = {}
 		with open(f_conf, "r") as cfr:
 			lines = cfr.readlines()
 			for line in lines:
@@ -37,6 +37,5 @@ class Config:
 					continue
 	
 				kv = line.split("=")
-				DICT_CONFIG[kv[0].strip()] = kv[1].strip()
-		print(DICT_CONFIG)	
-		return DICT_CONFIG
+				dict_conf[kv[0].strip()] = kv[1].strip()
+		return dict_conf
