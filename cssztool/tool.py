@@ -44,3 +44,18 @@ class Tool:
 				z.write(os.path.join(dir_path, filename), f_path + filename)
 		z.close()
 		return file_news
+
+	@classmethod
+	def file_write_lines(self, path, lines, count):
+		with open(path, "w+") as cfw:
+			for index, item in enumerate(lines):
+				cfw.write(item)
+				if(index >= count):
+					break
+		return
+
+	@classmethod
+	def date_to_str(self):
+		date = time.strftime('%Y-%m-%d_%H-%M-%S',time.localtime(time.time())).strip()
+		return date
+

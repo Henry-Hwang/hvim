@@ -7,6 +7,7 @@ import shutil
 import argparse
 import hashlib
 from decimal import Decimal
+from amp import Amp
 
 F_CONFIG = "cssztool.conf"
 class Config:

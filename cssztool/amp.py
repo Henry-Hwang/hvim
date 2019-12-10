@@ -6,19 +6,20 @@ import datetime
 import shutil
 import argparse
 import hashlib
+from regmap import Regmap
 from decimal import Decimal
 
-
-L_PREFIX="SPK"
-R_PREFIX="RCV"
-DSP_R_PREFIX="SPK DSP1 Protection R cd"
-DSP_L_PREFIX="RCV DSP1 Protection L cd"
-AMP_FACTOR=5.8571
-
-
-class Amp:
+class Amp(Regmap):
 	def __init__(self,conf):
 		self.conf = conf
+		self.comport = conf["comport"]
+		self.prefix = conf["prefix"]
+		self.dsp_prefix = conf["dsp prefix"]
+		self.factor = conf["factor"]
+		self.channel = conf["channel"]
+		self.fw_str = conf["fw str"]
+		super().__init__(self.comport)
+		return
 
 	#RCV DSP1 Protection L cd CSPL_COMMAND
 	# convert 32bit string to int
@@ -28,6 +29,7 @@ class Amp:
 		int32 = int32.replace(' ','')
 		int32 = int(int32, 16)
 		return int32
+
 	# convert String to int list
 	#  '00  00  2b  94  00  00  2b  fb  00  17  6d  b7  00  17  6d  b7'
 	#  --> 0x00002b94, 0x00002bfb, 0x00176db7, 0x00176db7
@@ -44,139 +46,112 @@ class Amp:
 	# The command should look like this:
 	#	adb shell " tinymix 'PCM Source' 'DSP'"
 	def mixer_cmd(self, control, prefixed, value):
-		model_get = "adb shell \"tinymix \'PREFIX CONTROL\'\""
-		model_set = "adb shell \"tinymix \'PREFIX CONTROL\' VALUE\""
+		model_get = "adb shell \"tinymix \'@PREFIX @CONTROL\'\""
+		model_set = "adb shell \"tinymix \'@PREFIX @CONTROL\' @VALUE\""
 		
 		model=""
 		if (value=="null"):
-			model = model_get.replace("PREFIX", prefixed).replace("CONTROL", control)
+			model = model_get.replace("@PREFIX", prefixed).replace("@CONTROL", control)
 		else:
-			model = model_set.replace("PREFIX", prefixed).replace("CONTROL", control)
-			model = model.replace("VALUE", value)
+			model = model_set.replace("@PREFIX", prefixed).replace("@CONTROL", control)
+			model = model.replace("@VALUE", value)
 		return model
 	
-	def dsp_mixer_set_value(self, control, prefixed, value):
-		cmd = self.mixer_cmd(control, prefixed, value)
+	def dsp_mixer_set_value(self, control, value):
+		cmd = self.mixer_cmd(control, self.dsp_prefix, value)
 		print(cmd)
 		os.system(cmd)
 		return
 	
-	def dsp_mixer_get_value(self, lr):
-		cmd = self.mixer_cmd(control, prefixed, "null")
+	def dsp_mixer_get_value(self, control):
+		cmd = self.mixer_cmd(control, self.dsp_prefix, "null")
 		#print(cmd)
 		string = os.popen(cmd)
 		ret = string.read()
 		return ret
 	
 	
-	def mixer_set_value(self, control, prefixed, value):
-		cmd = self.mixer_cmd(control, prefixed, value)
+	def mixer_set_value(self, control, value):
+		cmd = self.mixer_cmd(control, self.prefix, value)
 		print(cmd)
 		os.system(cmd)
 		return
 	
-	def mixer_get_value(self, control, prefixed):
-		cmd = self.mixer_cmd(control, prefixed, "null")
+	def mixer_get_value(self, control):
+		cmd = self.mixer_cmd(control, self.dsp_prefix, "null")
 		#print(cmd)
 		string = os.popen(cmd)
 		ret = string.read()
 		return ret
 	
 	def mute(self, op):
-		if (op[1]=="mute"):
+		if (op=="mute"):
 		    value = "0"
 		else:
 		    value = "1"
 	
-		if(op[0]=="left"):
-			self.mixer_set_value("AMP Enable", R_PREFIX, value)
-		elif(op[0]=="right"):
-			self.mixer_set_value("AMP Enable", L_PREFIX, value)
-		elif(op[0]=="all"):
-			self.mixer_set_value("AMP Enable", R_PREFIX, value)
-			self.mixer_set_value("AMP Enable", L_PREFIX, value)
-		else:
-			self.mixer_set_value("AMP Enable", "null", value)
+		self.mixer_set_value("AMP Enable", value)
 		return
 	
 	def dsp_bypass(self, op):
-		if (op[1]=="yes"):
-		    value = "ASPRX1"
+		if (op=="yes"):
+			value = "ASPRX1"
 		else:
-		    value = "DSP"
-	
-		if(op[0]=="left"):
-			self.mixer_set_value("PCM Source", R_PREFIX, value)
-		elif(op[0]=="right"):
-			self.mixer_set_value("PCM Source", L_PREFIX, value)
-		elif(op[0]=="all"):
-			self.mixer_set_value("PCM Source", R_PREFIX, value)
-			self.mixer_set_value("PCM Source", L_PREFIX, value)
-		else:
-			self.mixer_set_value("PCM Source", "null", value)
+			value = "DSP"
+		self.mixer_set_value("PCM Source", value)
 		return
-	def rtlog_init(self, prefix):
-		self.mixer_set_value("RAMESPERCAPTUREWI", prefix, "0x00 0x00 0x07 0xD0")
-		self.mixer_set_value("RTLOG_VARIABLE", prefix, "0x00 0x00 0x03 0x9D 0x00 0x00 0x03 0xAE")
-		self.mixer_set_value("RTLOG_COUNT", prefix, "0x00 0x00 0x00 0x02")
-		self.mixer_set_value("RTLOG_CAN_READ", prefix, "0x0 0x0 0x00 0x02")
-		self.mixer_set_value("RTLOG_ENABLE", prefix, "0x00 0x00 0x00 0x01")
+
+	def rtlog_init(self):
+		self.dsp_mixer_set_value("RAMESPERCAPTUREWI", "0x00 0x00 0x07 0xD0")
+		self.dsp_mixer_set_value("RTLOG_VARIABLE", "0x00 0x00 0x03 0x9D 0x00 0x00 0x03 0xAE")
+		self.dsp_mixer_set_value("RTLOG_COUNT", "0x00 0x00 0x00 0x02")
+		self.dsp_mixer_set_value("RTLOG_CAN_READ", "0x0 0x0 0x00 0x02")
+		self.dsp_mixer_set_value("RTLOG_ENABLE", "0x00 0x00 0x00 0x01")
 		return
 	
-	def map_route(self, on_off, prefix):
-	
-		if (side == L_PREFIX):
-			FW="Protection Left"
-		elif (prefix == R_PREFIX): #right
-			FW="Protection Left"
-		else:
-			FW="Protection"
-	
+	def fw_set_route(self, on_off):
 		if(on_off == "on"):
-			self.mixer_set_value("PCM Source", prefix, "DSP")
-			self.mixer_set_value("DSP1 Firmware", prefix, FW)
-			self.mixer_set_value("AMP Enable Switch", prefix, "1")
+			self.mixer_set_value("PCM Source", "DSP")
+			self.mixer_set_value("DSP1 Firmware", self.fw_str)
+			self.mixer_set_value("AMP Enable Switch", "1")
 		else:
-			self.mixer_set_value("DSP Booted", prefix, "0")
-			self.mixer_set_value("DSP1 Firmware", prefix, FW)
-			self.mixer_set_value("AMP Enable Switch", prefix, "0")
+			self.mixer_set_value("DSP Booted", "0")
+			self.mixer_set_value("DSP1 Firmware", self.fw_str)
+			self.mixer_set_value("AMP Enable Switch", "0")
 		return
 	
-	def firmware_reload(self, side):
-		if(side == 2):
-			self.map_route("off", L_PREFIX)
-			time.sleep(1)
-			self.map_route("on", L_PREFIX)
-		elif (side == 1):
-			self.map_route("off", R_PREFIX)
-			time.sleep(1)
-			self.map_route("on", R_PREFIX)
-		else:
-			self.map_route("off", R_PREFIX)
-			self.map_route("off", L_PREFIX)
-			time.sleep(1)
-			self.map_route("on", R_PREFIX)
-			self.map_route("on", L_PREFIX)
+	def firmware_reload(self):
+		self.fw_set_route("off")
+		time.sleep(1)
+		self.fw_set_route("on")
 		return
 	
 	# read RT data
-	def get_rtlog_data(self, prefix):
-		ret = self.mixer_get_value("RTLOG_DATA", prefix)
+	def get_rtlog_data(self):
+		ret = self.dsp_mixer_get_value("RTLOG_DATA")
 		#print ret
 		return ret
 	
 	# read calibration Z
-	def get_cal_z_value(self, prefix):
-		ret = self.mixer_get_value("CAL_R", prefix)
-		return ret
+	def get_cal_z_value(self):
+		raw = self.dsp_mixer_get_value("CAL_R")
+		cal_z = self.mixer_32b_parser(raw)
+		#get calibration value of L/R, Q10.13
+		cal_z = Decimal(self.factor * cal_z/(2<<12))
+		return cal_z
 	# read temperature
-	def get_cspl_temperature(self, prefix):
-		ret = self.mixer_get_value("CSPL_TEMPERATURE", prefix)
-		return ret
+	def get_cspl_temperature(self):
+		raw = self.dsp_mixer_get_value("CSPL_TEMPERATURE")
+		temp = self.mixer_32b_parser(raw)
+		#Q9.14
+		temp = Decimal(temp)/Decimal(2<<13)
+		return temp
 	
-	def get_cspl_ambient(self, prefix):
-		ret = self.mixer_get_value("CAL_AMBIENT", prefix)
-		return ret
+	def get_cspl_ambient(self):
+		raw = self.dsp_mixer_get_value("CAL_AMBIENT")
+		ambient = self.mixer_32b_parser(raw)
+		ambient = Decimal(ambient)
+		return ambient
 	
 	def rtlog_info(self, prefix):
 		rowdata = self.get_rtlog_data(prefix)
@@ -201,56 +176,29 @@ class Amp:
 		return (z_min, z_max, temp)
 	
 	def show_temp(self, count):
-		rawdata = self.get_cal_z_value(DSP_L_PREFIX)
-		cal_z_l = self.mixer_32b_parser(rawdata)
+		cal_z = self.get_cal_z_value()
+		ambient = self.get_cspl_ambient()
 	
-		rawdata = self.get_cal_z_value(DSP_R_PREFIX)
-		cal_z_r = self.mixer_32b_parser(rawdata)
-		
-		rawdata = self.get_cspl_ambient(DSP_L_PREFIX)
-		ambient = self.mixer_32b_parser(rawdata)
-	
-		#get calibration value of L/R, Q10.13
-		cal_z_r = Decimal(AMP_FACTOR * cal_z_r/(2<<12))
-		cal_z_l = Decimal(AMP_FACTOR * cal_z_l/(2<<12))
-		ambient = Decimal(ambient)
-	
-		print ("Ambient: %d Celsius degree," %ambient, "CAL Left: %3.2f (ohm)," %cal_z_l, "CAL Right: %3.2f (ohm)" %cal_z_r)
+		print ("Ambient: %d Celsius degree," %ambient, "CAL : %3.2f (ohm)," %cal_z)
 		print ("-------------------------------------------------------")
 		for i in range(count):
 			#get calibration value of L/R, Q10.13
-			rawdata = self.get_cspl_temperature(DSP_R_PREFIX)
-			temp_r = self.mixer_32b_parser(rawdata)
+			temp = self.get_cspl_temperature()
 	
-			rawdata = self.get_cspl_temperature(DSP_L_PREFIX)
-			temp_l = self.mixer_32b_parser(rawdata)
-		
-			#Q9.14
-			temp_r = Decimal(temp_r)/Decimal(2<<13)
-			#Q9.14
-			temp_l = Decimal(temp_l)/Decimal(2<<13)
-			print (" TEMP (%3.2f, " %temp_l, "%3.2f)" %temp_r)
+			print ("TEMP (%3.2f)" %temp)
 			time.sleep(1)
 		return
 	
 	def show_detail(self, count):
-		self.rtlog_init(DSP_R_PREFIX)
-		self.rtlog_init(DSP_L_PREFIX)
-		
-		rawdata = self.get_cal_z_value(DSP_L_PREFIX)
-		cal_z_l = self.mixer_32b_parser(rawdata)
-	
-		rawdata = self.get_cal_z_value(DSP_R_PREFIX)
-		cal_z_r = self.mixer_32b_parser(rawdata)
-	
+		self.rtlog_init()
+		rawdata = self.get_cal_z_value()
+		cal_z = self.mixer_32b_parser(rawdata)
 		#get calibration value of L/R, Q10.13
-		cal_z_r = Decimal(AMP_FACTOR * cal_z_r/(2<<12))
-		cal_z_l = Decimal(AMP_FACTOR * cal_z_l/(2<<12))
-		print (" CAL (%3.2f, " %cal_z_l, "%3.2f)" %cal_z_r ,"  FACTOR (%3.4f," %5.8571, "%3.4f)" %5.8571)
+		cal_z = Decimal(self.factor * cal_z/(2<<12))
+		print (" CAL (%3.2f, " %cal_z ," FACTOR (%3.4f," %5.8571, "%3.4f)" %5.8571)
 	
 		#for i in range(count):
-		l_z_min, l_z_max, l_temp = self.rtlog_info(DSP_L_PREFIX)
-		r_z_min, r_z_max, r_temp = self.rtlog_info(DSP_R_PREFIX)
-		print ("L (%3.2f" %l_z_min, " %3.2f )ohm"  %l_z_max, "  R (%3.2f" %r_z_min, " %3.2f )ohm"  %r_z_max, "  T (%3.2f," %l_temp, "%3.2f)C" %r_temp)
+		z_min, z_max, temp = self.rtlog_info()
+		print ("L (%3.2f" %z_min,"  R (%3.2f" %z_min, "%3.2f)C" %temp)
 		time.sleep(1)
 		return

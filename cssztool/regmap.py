@@ -9,81 +9,100 @@ import hashlib
 from decimal import Decimal
 
 class Regmap:
-	def __init__(device):
-		pass
+	def __init__(self, comport):
+		self.comport = comport
+		self.regmap_dir = "/d/regmap/" + self.comport + "/"
+		return
+	
+	def get_info(self):
+		model = "adb shell \"cat @TARGET \""
+
+		cache_bypass = self.regmap_dir + "cache_bypass"
+		name = self.regmap_dir + "name"
+		
+		model_t = model.replace("@TARGET", name)
+		name = os.popen(model_t).read().strip()
+
+		model_t = model.replace("@TARGET", cache_bypass)
+		cache_bypass = os.popen(model_t).read().strip()
+
+		comport = self.comport
+
+		return name, comport, cache_bypass
+
 	# @args is the device name 'spi1.0'
 	# /d/regmap/spi1.0/cache_bypass
 	# /d/regmap/spi1.0/cache_only
 	# /d/regmap/spi1.0/registers
 	# /d/regmap/spi1.0/range
 	# /d/regmap/spi1.0/name
-	def dump_registers(self, args):
+	def regs_dump(self):
 	
-		model = "adb shell \"cat TARGET \" > FILE"
-		model_cat = "adb shell \"cat TARGET \""
+		model = "adb shell \"cat @TARGET \""
 	
-		dir_device = "/d/regmap/" + args + "/"
-		registers = dir_device + "registers"
-		cache_bypass = dir_device + "cache_bypass"
-		cache_only = dir_device + "cache_only"
-		range_t = dir_device + "range"
-		name = dir_device + "name"
+		registers = self.regmap_dir + "registers"
 		
-		name = model_cat.replace("TARGET", name)
 		
-		name = os.popen(name).read().strip()
-		date = time.strftime('%Y-%m-%d_%H-%M-%S',time.localtime(time.time())).strip()
-		
-		#cs35l41-spi1.0-2019-12-06_21-35-46.txt
-		file_name = name + "-" + args + "-" + date + ".txt"
-		model = model.replace("TARGET", registers).replace("FILE", file_name)
+		model = model.replace("@TARGET", registers)
 	
 		print(model)
 		
 		#read registers
-		os.system(model)
+		raw = os.popen(model).read()
+		list_out = raw.split("\n")
+		return list_out
 	
-		return
-	
-	def regs_write(self, args):
+	def regs_write(self, regval):
 		model = "adb shell \"echo REG VALUE > TARGET\""
-		dir_device = "/d/regmap/" + args[0] + "/"
-		target = dir_device + "registers"
+		target = self.regmap_dir + "registers"
 	
 		model = model.replace("TARGET", target)
 	
-		wsets = args[1].split(",")
+		wsets = regval.split(",")
 		print(wsets)
 		for item in wsets:
-			reg, value = item.split("<=")
+			reg, value = item.split("=")
 			model_t = model.replace("REG", reg.strip())
 			model_t = model_t.replace("VALUE", value.strip())
 			print(model_t)
 			#write registers
 			os.system(model_t)
 		return
-	
-	def regs_read(self, args):
+		
+	def regs_read(self, regaddrs):
 		model = "adb shell \"cat TARGET | grep -iE \'PATTEN\'\""
-		dir_device = "/d/regmap/" + args[0] + "/"
-		target = dir_device + "registers"
+		target = self.regmap_dir + "registers"
 	
 		model = model.replace("TARGET", target)
 	
-		rsets = args[1].split(",")
-		length = len(rsets)
-		regs=""
+		rsets = regaddrs.split(",")
+		patten=""
 	
 		# cat /d/regmap/xxxx/registers  look like this:
 		# 0003800: 00000000
 		# 0003804: 00000001
+
 		for index, item in enumerate(rsets):
-			if (index == length -1):
-				regs = regs + item.strip().replace("0x","").zfill(7)
+			rsets[index] = item.strip().replace("0x","").zfill(7)
+
+		for index, item in enumerate(rsets):
+			if (index == len(rsets) -1):
+				patten = patten + item
 			else:
-				regs = regs + item.strip().replace("0x","").zfill(7) + "|"
+				patten = patten + item + "|"
 			#write registers
-		model = model.replace("PATTEN", regs.strip())
+		model = model.replace("PATTEN", patten.strip())
 		print(model)
-		os.system(model)
-		return
+		#os.system(model)
+		string = os.popen(model).read()
+
+		#filter
+		list_regs = string.split("\n")
+		list_out=[]
+		for reg in rsets:
+			for it in list_regs:
+				rv = it.split(":")
+				if(rv[0].strip() != reg):
+				    continue
+				list_out.append(it)
+		return list_out

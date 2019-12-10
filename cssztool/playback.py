@@ -57,7 +57,7 @@ class Playback:
 		if (os.path.exists(f_lib)==False):
 			shutil.rmtree(new_dir)
 			return
-
+		self.readme["lib md5sum"] = Tool.md5sum(f_lib)
 		shutil.copy(f_lib, new_dir)
 
 		self.new_readme_files(new_dir)
@@ -68,9 +68,13 @@ class Playback:
 	def new_readme_files(self, dir_out):
 		model_readme = "@NAME: @STRING\n"
 		f_readme = dir_out + "readme.txt"
+
+		[dirname,filename] = os.path.split(self.conf["capiv2 lib"])
 		with open(f_readme, "w+") as cfw:
+			cfw.write(model_readme.replace("@NAME", "LIB").replace("@STRING",filename))
 			cfw.write(model_readme.replace("@NAME", "BUILD TIME").replace("@STRING",self.readme["build time"]))
 			cfw.write(model_readme.replace("@NAME", "BRANCH").replace("@STRING",self.readme["branch"]))
+			cfw.write(model_readme.replace("@NAME", "MD5SUM").replace("@STRING",self.readme["lib md5sum"]))
 			for it in self.readme["list checksum"]:
 				#print(it)
 				cfw.write(model_readme.replace("@NAME", "CHECKSUM").replace("@STRING",it))

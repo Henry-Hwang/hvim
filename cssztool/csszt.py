@@ -8,10 +8,9 @@ import shutil
 import argparse
 import hashlib
 from decimal import Decimal
-from amp import Amp
+from amps import Amps
 from playback import Playback
 from config import Config
-from regmap import Regmap
 from andevice import Andevice
 from tool import Tool
 
@@ -58,23 +57,24 @@ parser.add_argument("-b", "--dsp-bypass",
 	nargs=2,
 	metavar=('[CH]', '[OP]'),
 	help="Bypass DSP: [CH] = left,right,all,mono, [OP] = yes,no")
-parser.add_argument('-d', "--dump-regs",
+parser.add_argument('-d', "--regs-dump",
 	#action="store_true",
+	nargs=2,
+	metavar=('[CH]', '[COUNT]'),
 	required=False,
-	metavar=('[DEVICE]'),
-	help="Dump amp's registers: [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'")
+	help="Dump amp's registers: [CH] = left,right,all,mono, [COUNT] = 100, 1000, ...")
 parser.add_argument('-p', "--push",
 	nargs=2,
 	metavar=('[TYPE]', '[FILE]'),
 	help="Push stuff to device: [TYPE] = capi,wmfw,bin,tool, [FILE] = source file")
-parser.add_argument('-rw', "--reg-write",
+parser.add_argument('-rw', "--regs-write",
 	nargs=2,
 	metavar=('[DEVICE]', '[REG<=VAL, ...]'),
 	type=str,
-	help="Write registers:  [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'. [REG<=VAL,...] = \"0x3804<=0x01,0x3800<=0x12, ...\" >")
-parser.add_argument('-rr', "--reg-read", 
+	help="Write registers:  [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'. [REG=VAL,...] e.g. \"0x3804<=0x01,0x3800<=0x12, ...\" >")
+parser.add_argument('-rr', "--regs-read",
 	nargs=2,
-	metavar=('[DEVICE]', '[REGS, ...]'),
+	metavar=('[DEVICE]', '[REG, ...] e.g. \"0x3804, 0x4800, ...\"'),
 	type=str,
 	help="Read registers:  [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'.")
 
@@ -101,9 +101,8 @@ arg = parser.parse_args()
 print (arg)
 
 config = Config()
-amp = Amp(config.get_conf())
+amps = Amps()
 playback = Playback(config.get_conf())
-regmap = Regmap()
 andevice = Andevice(config.get_conf())
 
 
@@ -111,11 +110,11 @@ if arg.conf:
 	config.conf(arg.conf)
 
 if arg.info:
-	amp.show_temp(arg.info)
+	amps.show_temp(arg.info)
 if arg.mute:
-	amp.mute(arg.mute)
+	amps.mute(arg.mute)
 if arg.dsp_bypass:
-	amp.dsp_bypass(arg.dsp_bypass)
+	amps.dsp_bypass(arg.dsp_bypass)
 
 if arg.list:
 	andevice.list(arg.list)
@@ -125,12 +124,12 @@ if arg.dev_md5sum:
 	andevice.device_md5sum(arg.dev_md5sum)
 if arg.push:
 	andevice.push_device(arg.push)
-if arg.reg_write:
-	regmap.regs_write(arg.reg_write)
-if arg.dump_regs:
-	regmap.dump_registers(arg.dump_regs)
-if arg.reg_read:
-	regmap.regs_read(arg.reg_read)
+if arg.regs_write:
+	amps.regs_write(arg.regs_write)
+if arg.regs_read:
+	amps.regs_read(arg.regs_read)
+if arg.regs_dump:
+	amps.regs_dump(arg.regs_dump)
 if arg.make_capi:
 	playback.make_capi_v2(arg.make_capi)
 
