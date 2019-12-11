@@ -8,10 +8,11 @@ import argparse
 import hashlib
 from decimal import Decimal
 from tool import Tool
+from config import Config
 
 class Playback:
-	def __init__(self, conf):
-		self.conf = conf
+	def __init__(self):
+		self.conf = Config().read()
 		self.readme = {}
 
 	def capiv2_lib_info(self):
@@ -28,8 +29,7 @@ class Playback:
 
 	def lib_copy_zip(self):
 		conf = self.conf
-		now = datetime.datetime.now()
-		now_str = now.strftime('%a-%b-%d-%Y_%H-%M-%S')
+		now_str = Tool.date_to_str()#now.strftime('%a-%b-%d-%Y_%H-%M-%S')
 		
 		new_dir = ""
 		# Copy tuning file

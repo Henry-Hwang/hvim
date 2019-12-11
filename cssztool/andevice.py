@@ -8,12 +8,12 @@ import argparse
 import hashlib
 from decimal import Decimal
 from tool import Tool
+from config import Config
 
 class Andevice:
-	def __init__(self, conf):
-                self.conf = conf
+	def __init__(self):
+		self.conf = Config().read()
 
-		
 	def adb_init(self, op):
 		os.system("adb wait-for-device root")
 		os.system("adb wait-for-device remount")
@@ -37,41 +37,57 @@ class Andevice:
 		return True
 	
 	def list(self, op):
-		model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs ls -l\""
+		model_list = []
+		model_shell = "adb shell \"@CMDSET\""
+		model = "find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs ls -l"
 	
 		model_t = model.replace("@DIRECTORY", self.conf["capiv2 directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
-		os.system(model_t)
-	
+		model_list.append(model_t)
+
 		model_t = model.replace("@DIRECTORY", self.conf["tool directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "").replace("@PATTEN", "cirrus")
-		os.system(model_t)
+		model_list.append(model_t)
 	
 		model_t = model.replace("@DIRECTORY", self.conf["wmfw directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cs35")
-		os.system(model_t)
+		model_list.append(model_t)
 	
-		model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN\""
+		model = "find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN"
 		model_t = model.replace("@DIRECTORY", self.conf["regmap directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type d").replace("@G_ARGS", "-iE").replace("@PATTEN", "\'i2c|spi\'")
-		os.system(model_t)
-	
+		model_list.append(model_t)
+
+		# Combin the command lines to one
+		model_combin = ";".join(model_list)
+		model_shell = model_shell.replace("@CMDSET", model_combin)
+
+		os.system(model_shell)
+
 		return
 	
 	def device_md5sum(self, op):
-		model = "adb shell \"find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs md5sum\""
+		model_list = []
+		model_shell = "adb shell \"@CMDSET\""
+		model = "find @DIRECTORY @F_ARGS | grep @G_ARGS @PATTEN | xargs md5sum"
+
 		model_t = model.replace("@DIRECTORY", self.conf["capiv2 directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
-		os.system(model_t)
+		model_list.append(model_t)
 	
 		model_t = model.replace("@DIRECTORY", self.conf["tool directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cirrus")
-		os.system(model_t)
+		model_list.append(model_t)
 		
 		model_t = model.replace("@DIRECTORY", self.conf["wmfw directory device"])
 		model_t = model_t.replace("@F_ARGS", "-type f").replace("@G_ARGS", "-i").replace("@PATTEN", "cs35")
-		os.system(model_t)
+		model_list.append(model_t)
 		
+		# Combin the command lines to one
+		model_combin = ";".join(model_list)
+		model_shell = model_shell.replace("@CMDSET", model_combin)
+
+		os.system(model_shell)
 		return
 	
 	def push_device(self, args):

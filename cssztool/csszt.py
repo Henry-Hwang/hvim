@@ -8,6 +8,7 @@ import shutil
 import argparse
 import hashlib
 from decimal import Decimal
+from explorer import Explorer
 from amps import Amps
 from playback import Playback
 from config import Config
@@ -78,6 +79,11 @@ parser.add_argument('-rr', "--regs-read",
 	type=str,
 	help="Read registers:  [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'.")
 
+parser.add_argument('-o', "--open",
+	required=False,
+	metavar=('[DIR]'),
+	type=str,
+	help="Open common directory: [DIR] = work, doc, hvim, ...")
 parser.add_argument('-s', "--detail",
 	required=False,
 	type=int,
@@ -100,10 +106,9 @@ parser.add_argument('-t', "--test",
 arg = parser.parse_args()
 print (arg)
 
-config = Config()
 amps = Amps()
-playback = Playback(config.get_conf())
-andevice = Andevice(config.get_conf())
+playback = Playback()
+andevice = Andevice()
 
 
 if arg.conf:
@@ -133,6 +138,9 @@ if arg.regs_dump:
 if arg.make_capi:
 	playback.make_capi_v2(arg.make_capi)
 
+if arg.open:
+	explorer = Explorer()
+	explorer.open(arg.open)
 if arg.test:
 	Tool.zip(arg.test)
 #un-verify
