@@ -8,40 +8,46 @@ import argparse
 import hashlib
 from decimal import Decimal
 from amp import Amp
+from conf import Conf
 from tool import Tool
 
+DEFAULT_CONFIG = {
+        "number": "2",
+        "left": {
+		"prefix"    : "RCV",
+		"dsp prefix": "RCV DSP1 Protection L cd",
+		"factor"    : "5.8571",
+		"channel"   : "left",
+		"fw str"    : "\'Protection Left\'",
+		"comport"   : "spi1.0",
+        },
+        "right": {
+                "prefix"    : "SPK",
+		"dsp prefix": "SPK DSP1 Protection R cd",
+		"factor"    : "5.8571",
+		"channel"   : "right",
+		"fw str"    : "\'Protection Right\'",
+		"comport"   : "spi1.1",
+        },
+}
+CONFIG="amps_conf.json"
 class Amps:
 	def __init__(self):
-		conf = {}
-		list_amp = []
-		self.conf = {}
-		self.conf["number"] = 2
-		
-		conf["prefix"] = "SPK"
-		conf["dsp prefix"] = "SPK DSP1 Protection R cd"
-		conf["factor"] = 5.8571
-		conf["channel"] = "right"
-		conf["fw str"] ="Protection Right"
-		conf["comport"] = "spi1.0"
-		self.conf["right"] = Amp(conf)
-
-		conf["prefix"] = "RCV"
-		conf["dsp prefix"] = "RCV DSP1 Protection L cd"
-		conf["factor"] = 5.8571
-		conf["channel"] = "left"
-		conf["fw str"] ="Protection Left"
-		conf["comport"] = "spi1.1"
-		self.conf["left"] = Amp(conf)
-		
+		path = Tool.get_root_path(CONFIG)
+		if (os.path.exists(path)==True):
+		    self.dict = Conf.read(path)
+		else:
+		    self.dict = DEFAULT_CONFIG
+		self.amp_r = Amp(self.dict["right"])
+		self.amp_l = Amp(self.dict["left"])
+	
 		return
 	
 	def show_temp(self, count):
-		if (self.conf["number"] == 2):
-			amp_l = self.conf["left"]
-			amp_r = self.conf["right"]
-			calz_l = amp_l.get_cal_z_value()
-			calz_r = amp_r.get_cal_z_value()
-			ambient = amp_l.get_cspl_ambient()
+		if (int(self.dict["number"]) == 2):
+			calz_l = self.amp_l.get_cal_z_value()
+			calz_r = self.amp_r.get_cal_z_value()
+			ambient = self.amp_l.get_cspl_ambient()
 		
 			print ("Ambient: %d Celsius degree," %ambient,
 				"CAL : %3.2f (ohm)," %calz_l,
@@ -49,46 +55,49 @@ class Amps:
 			print ("-------------------------------------------------------")
 			for i in range(count):
 				#get calibration value of L/R, Q10.13
-				temp_l = amp_l.get_cspl_temperature()
-				temp_r = amp_r.get_cspl_temperature()
+				temp_l = self.amp_l.get_cspl_temperature()
+				temp_r = self.amp_r.get_cspl_temperature()
 		
 				print ("TEMP ( %3.2f, " %temp_l, "%3.2f )" %temp_r)
 				time.sleep(1)
-		elif (self.conf["number"] == 1):
-			amp_l = self.conf["left"]
-			amp_l.show_temp(count)
+		elif (self.dict["number"] == 1):
+			self.amp_l.show_temp(count)
 		return
 
 	def mute(self, op):
 		channel = op[0]
 		on = op[1]
 		if(channel == "left" or channel == "mono"):
-			amp_l = self.conf["left"]
-			amp_l.mute(on)
+			self.amp_l.mute(on)
 		elif(channel == "right"):
-			amp_r = self.conf["right"]
-			amp_r.mute(on)
+			self.amp_r.mute(on)
 		else:
-			amp_l = self.conf["left"]
-			amp_l.mute(on)
-			amp_r = self.conf["right"]
-			amp_r.mute(on)
+			self.amp_l.mute(on)
+			self.amp_r.mute(on)
 		return
+	def digital_volume(self, vol):
+		channel = op[0]
+		on = op[1]
+		if(channel == "left" or channel == "mono"):
+			self.amp_l.digital_volume(vol)
+		elif(channel == "right"):
+			self.amp_r.digital_volume(vol)
+		else:
+			self.amp_l.digital_volume(vol)
+			self.amp_r.digital_volume(vol)
+		return
+
 
 	def dsp_bypass(self, op):
 		channel = op[0]
 		bypass = op[1]
 		if(channel == "left" or channel == "mono"):
-			amp_l = self.conf["left"]
-			amp_l.dsp_bypass(bypass)
+			self.amp_l.dsp_bypass(bypass)
 		elif(channel == "right"):
-			amp_r = self.conf["right"]
-			amp_r.dsp_bypass(bypass)
+			self.amp_r.dsp_bypass(bypass)
 		else:
-			amp_l = self.conf["left"]
-			amp_l.dsp_bypass(bypass)
-			amp_r = self.conf["right"]
-			amp_r.dsp_bypass(bypass)
+			self.amp_l.dsp_bypass(bypass)
+			self.amp_r.dsp_bypass(bypass)
 		return
 
 	def regs_write(self, op):
@@ -96,16 +105,12 @@ class Amps:
 		regval = op[1]
 	
 		if(channel == "left" or channel == "mono"):
-			amp_l =  self.conf["left"]
-			amp_l.regs_write(regval)
+			self.amp_l.regs_write(regval)
 		elif(channel == "right"):
-			amp_r =  self.conf["right"]
-			amp_r.regs_write(regval)
+			self.amp_r.regs_write(regval)
 		else:
-			amp_l =  self.conf["left"]
-			amp_l.regs_write(regval)
-			amp_r =  self.conf["right"]
-			amp_r.regs_write(regval)
+			self.amp_l.regs_write(regval)
+			self.amp_r.regs_write(regval)
 		
 		# Read back
 		wsets = regval.split(",")
@@ -128,20 +133,16 @@ class Amps:
 		regs = op[1]
 
 		if(channel == "left" or channel == "mono"):
-			amp_l =  self.conf["left"]
-			regset = amp_l.regs_read(regs)
+			regset = self.amp_l.regs_read(regs)
 			for it in regset:
 				print(it)
 		elif(channel == "right"):
-			amp_r =  self.conf["right"]
-			regset = amp_r.regs_read(regs)
+			regset = self.amp_r.regs_read(regs)
 			for it in regset:
 				print(it)
 		else:
-			amp_l =  self.conf["left"]
-			lregset = amp_l.regs_read(regs)
-			amp_r =  self.conf["right"]
-			rregset = amp_r.regs_read(regs)
+			lregset = self.amp_l.regs_read(regs)
+			rregset = self.amp_r.regs_read(regs)
 
 			print("  REG        LEFT      RIGHT")
 			print("------------------------------")
@@ -157,15 +158,13 @@ class Amps:
 		channel = op[0]
 		count = int(op[1], 10)
 		if(channel == "left" or channel == "mono"):
-			amp_l = self.conf["left"]
-			lines = amp_l.regs_dump()
-			
+			lines = self.amp_l.regs_dump()
 			for index, item in enumerate(lines):
 				print(item)
 				if(index >= count):
 				    break
 
-			name, comport, cache = amp_l.get_info()
+			name, comport, cache = self.amp_l.get_info()
 			date = Tool.date_to_str()
 			#cs35l41-spi1.0-N-2019-12-06_21-35-46.txt
 			filename = name + "-" + comport + "-" + cache+ "-" + date + ".txt"
@@ -173,8 +172,7 @@ class Amps:
 			Tool.file_write_lines(filename, lines, count)
 
 		elif(channel == "right"):
-			amp_r = self.conf["right"]
-			lines = amp_r.regs_dump()
+			lines = self.amp_r.regs_dump()
 			for index, item in enumerate(lines):
 				print(item)
 				if(index >= count):
@@ -188,10 +186,8 @@ class Amps:
 		else:
 			model = "@REG  @VLEFT  @VRIGHT"
 
-			amp_l = self.conf["left"]
-			lines_l = amp_l.regs_dump()
-			amp_r = self.conf["right"]
-			lines_r = amp_r.regs_dump()
+			lines_l = self.amp_l.regs_dump()
+			lines_r = self.amp_r.regs_dump()
 
 			for index, item in enumerate(lines_l):
 				if(index >= count):
@@ -209,4 +205,16 @@ class Amps:
 			Tool.file_write_lines(filename, lines_l, count)
 		return
 
+	def reload(self, op):
+		model = "@REG - @VLEFT  @VRIGHT"
+		channel = op[0]
+		regs = op[1]
 
+		if(channel == "left" or channel == "mono"):
+			regset = self.amp_l.reload()
+		elif(channel == "right"):
+			regset = self.amp_r.reload()
+		else:
+			regset = self.amp_l.reload()
+			regset = self.amp_r.reload()
+		return

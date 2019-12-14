@@ -6,10 +6,11 @@ import datetime
 import shutil
 import argparse
 import hashlib
+import json
 from decimal import Decimal
 from amp import Amp
 
-F_CONFIG = "cssztool.conf"
+CONFIG = "csszt_conf.json"
 DEFAULT_CONFIG = {
 	# custommer
 	"project name"  : "J2",
@@ -37,13 +38,15 @@ DEFAULT_CONFIG = {
 	"adb wait"    : "adb wait-for-device",
 	"adb push"    : "adb push capi_v2_cirrus_cspl.so /vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so"
 }
-class Config:
+class Conf:
 	def __init__(self):
                 pass
 
+	@classmethod
 	def get_conf(self):
 		return self.conf
 
+	@classmethod
 	def conf(self, args):
 		model = "@EXE @CONFIG"
 		if (platform.system() == "Windows"):
@@ -55,22 +58,14 @@ class Config:
 	
 		return
 	
+	@classmethod
+	def read(self, path):
+		f_json = open(path, "r+")
+		jstr = f_json.read()
+		#print(jstr)
+		jdict = json.loads(jstr)
+		#print(jdict)
+		return jdict
 
-	def read(self):
-		dict_conf = {}
-		
-		if (os.path.exists(F_CONFIG)==False):
-			return DEFAULT_CONFIG
-
-		with open(F_CONFIG, "r") as cfr:
-			lines = cfr.readlines()
-			for line in lines:
-				# Skip comment lines
-				if(line.startswith("#") or not len(line.strip())):
-					continue
-	
-				kv = line.split("=")
-				dict_conf[kv[0].strip()] = kv[1].strip()
-		return dict_conf
 	#def read(self):
 	#	self.read(F_CONFIG)
