@@ -8,11 +8,27 @@ import argparse
 import hashlib
 from decimal import Decimal
 from tool import Tool
-from config import Config
-
+from conf import Conf
+PB_DICT = {
+	# custommer
+	"project name":"M2091",
+	"customer":"MEIZU",
+	
+	# capi v2
+	"playback version" : "4",
+	"capiv2 directory"       :"/home/hhuang/capiv2/",
+	"capiv2 lib directory"   :"/home/hhuang/capiv2/capi_v2_cirrus_cspl/LLVM_Debug/",
+	"capiv2 lib"             :"/home/hhuang/capiv2/capi_v2_cirrus_cspl/LLVM_Debug/capi_v2_cirrus_cspl.so",
+	"source tuning directory":"/home/hhuang/capiv2/capi_v2_cirrus_cspl/include/tuningheaders/",
+	"compat.c"               :"/home/hhuang/capiv2/capi_v2_cirrus_cspl/source/compat.c",
+	
+	# android device
+	"capiv2 directory device":"/vendor/lib/rfsa/adsp/",
+	"capiv2 lib device"      :"/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so",
+}
 class Playback:
 	def __init__(self):
-		self.conf = Config().read()
+		self.conf = PB_DICT
 		self.readme = {}
 
 	def capiv2_lib_info(self):
@@ -85,9 +101,10 @@ class Playback:
 
 
 		# adb push script
-		f_script = dir_out + "push.bat"
+		f_script = dir_out + "push.txt"
 		with open(f_script, "w+") as cfw:
 				cfw.write("@echo off\n")
+				cfw.write("rem : rename 'push.txt' as 'push.bat' and run\n")
 				cfw.write("adb wait-for-device root\n")
 				cfw.write("adb wait-for-device remount\n")
 				cfw.write("adb wait-for-device\n")
@@ -110,29 +127,34 @@ class Playback:
 		patten = "#define USE_CASE_@INDEX_TUNING@_NBITS \"tuningheaders/"
 		list_chksum=[]
 		with open(c_compat, "r") as cfr:
+			count = 0;
 			lines = cfr.readlines()
-			for line in lines:
+			for index, line in enumerate(lines):
 				uc_bit = ""
 				if patten.replace("@INDEX", "0").replace("@_NBITS", "") in line:
 					uc_bit = "UC0_16BIT"
-				if patten.replace("@INDEX", "1").replace("@_NBITS", "") in line:
+				elif patten.replace("@INDEX", "1").replace("@_NBITS", "") in line:
 					uc_bit = "UC1_16BIT"
-				if patten.replace("@INDEX", "2").replace("@_NBITS", "") in line:
+				elif patten.replace("@INDEX", "2").replace("@_NBITS", "") in line:
 					uc_bit = "UC2_16BIT"
-				if patten.replace("@INDEX", "3").replace("@_NBITS", "") in line:
+				elif patten.replace("@INDEX", "3").replace("@_NBITS", "") in line:
 					uc_bit = "UC3_16BIT"
-				if patten.replace("@INDEX", "0").replace("@_NBITS", "_24BIT") in line:
+				elif patten.replace("@INDEX", "0").replace("@_NBITS", "_24BIT") in line:
 					uc_bit = "UC0_24BIT"
-				if patten.replace("@INDEX", "1").replace("@_NBITS", "_24BIT") in line:
+				elif patten.replace("@INDEX", "1").replace("@_NBITS", "_24BIT") in line:
 					uc_bit = "UC1_24BIT"
-				if patten.replace("@INDEX", "2").replace("@_NBITS", "_24BIT") in line:
+				elif patten.replace("@INDEX", "2").replace("@_NBITS", "_24BIT") in line:
 					uc_bit = "UC2_24BIT"
-				if patten.replace("@INDEX", "3").replace("@_NBITS", "_24BIT") in line:
+				elif patten.replace("@INDEX", "3").replace("@_NBITS", "_24BIT") in line:
 					uc_bit = "UC3_24BIT"
 	
 				if(uc_bit==""):
 					continue
-	
+				# Just care about first 8 tuning
+				count = 1 + count
+				if(count > 8):
+					break
+
 				line = line.replace("\"", "").strip()
 				[dirname,filename] = os.path.split(line)
 				f_tuning = self.conf["source tuning directory"] + filename
@@ -161,20 +183,20 @@ class Playback:
 					if patten.replace("@TXRX", "RX") in line:
 						elements = line.split(",")
 						dict_chksum["rx"] = elements[len(elements) - 1].strip()
-					if patten.replace("@TXRX", "TX") in line:
+					elif patten.replace("@TXRX", "TX") in line:
 						elements = line.split(",")
 						dict_chksum["tx"] = elements[len(elements) - 1].strip()
 				else:
 					if patten.replace("@TXRX", "RX").replace("@LR", "RIGHT") in line:
 						elements = line.split(",")
 						dict_chksum["rx left"] = elements[len(elements) - 1].strip()
-					if patten.replace("@TXRX", "RX").replace("@LR", "LEFT") in line:
+					elif patten.replace("@TXRX", "RX").replace("@LR", "LEFT") in line:
 						elements = line.split(",")
 						dict_chksum["rx right"] = elements[len(elements) - 1].strip()
-					if patten.replace("@TXRX", "TX").replace("@LR", "RIGHT") in line:
+					elif patten.replace("@TXRX", "TX").replace("@LR", "RIGHT") in line:
 						elements = line.split(",")
 						dict_chksum["tx right"] = elements[len(elements) - 1].strip()
-					if patten.replace("@TXRX", "TX").replace("@LR", "LEFT") in line:
+					elif patten.replace("@TXRX", "TX").replace("@LR", "LEFT") in line:
 						elements = line.split(",")
 						dict_chksum["tx left"] = elements[len(elements) - 1].strip()
 	
@@ -185,26 +207,67 @@ class Playback:
 	# @c_file : [compat.c] which include @tuning
 	# @tuning : [*.h/txt] tuning file
 	# @bit : [16/24] 16bit/24bit tuning
-	def tuning_update(self, c_file, tuning, bit):
+	def update_tuning_in_c_file(self, c_file, tuning, bit, usecase):
+		print("3 args")
 		dir_tuning = self.conf["source tuning directory"]
 		if (bit==24):
-			patten = "#define USE_CASE_0_TUNING_24BIT \"tuningheaders/"
-			model = "#define USE_CASE_0_TUNING_24BIT \"tuningheaders/@NEW_TUNING\"\n"
+			patten = "#define USE_CASE_@USECASE_TUNING_24BIT \"tuningheaders/"
+			model = "#define USE_CASE_@USECASE_TUNING_24BIT \"tuningheaders/@NEW_TUNING\"\n"
 		else:
-			patten = "#define USE_CASE_0_TUNING \"tuningheaders/"
-			model = "#define USE_CASE_0_TUNING \"tuningheaders/@NEW_TUNING\"\n"
+			patten = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/"
+			model = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/@NEW_TUNING\"\n"
+
+		patten = patten.replace("@USECASE", usecase)
+		model = model.replace("@USECASE", usecase)
+
 		[dirname,filename] = os.path.split(tuning)
 		shutil.copyfile(tuning, dir_tuning+filename)
 	
 		with open(c_file, "r") as cfr:
 			lines = cfr.readlines()
 		with open(c_file, "w") as cfw:
-			for line in lines:
+			for index, line in enumerate(lines):
 				if patten in line:
+					# Just care about first 2 tuning
 					line = model.replace("@NEW_TUNING", filename)
+					patten = "SKIP-THE-REST-LINES"
 				cfw.write(line)
 		return
+	def tuning_update(self, c_file, tuning, bit, usecase):
+		print("3 args")
+		dir_tuning = self.conf["source tuning directory"]
+		if (bit==24):
+			patten = "#define USE_CASE_@USECASE_TUNING_24BIT \"tuningheaders/"
+			model = "#define USE_CASE_@USECASE_TUNING_24BIT \"tuningheaders/@NEW_TUNING\"\n"
+		else:
+			patten = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/"
+			model = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/@NEW_TUNING\"\n"
+
+		patten = patten.replace("@USECASE", usecase)
+		model = model.replace("@USECASE", usecase)
+
+		[dirname,filename] = os.path.split(tuning)
+		shutil.copyfile(tuning, dir_tuning+filename)
 	
+		with open(c_file, "r") as cfr:
+			lines = cfr.readlines()
+		with open(c_file, "w") as cfw:
+			for index, line in enumerate(lines):
+				if patten in line:
+					# Just care about first 2 tuning
+					line = model.replace("@NEW_TUNING", filename)
+					patten = "SKIP-THE-REST-LINES"
+				cfw.write(line)
+		return
+
+	def update_tuning(self, c_file, tuning, bit):
+		self.update_tuning_in_c_file(c_file, tuning, bit, "0")
+		return
+
+	def insert_tuning(self, c_file, tuning, bit, usecase):
+		self.update_tuning_in_c_file(c_file, tuning, bit, usecase)
+		return
+
 	def covert_tuning(self, f_tuning):
 		covt_model = "cd @DIR && json2hexagonbin.exe -t @H_HEADER @JSON && cd -"
 		[dirname,filename] = os.path.split(f_tuning)

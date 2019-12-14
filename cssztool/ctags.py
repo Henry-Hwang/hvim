@@ -11,7 +11,7 @@ from decimal import Decimal
 import subprocess
 from amps import Amps
 from playback import Playback
-from config import Config
+from conf import Conf
 from andevice import Andevice
 from tool import Tool
 
@@ -29,8 +29,9 @@ class Ctags:
 		self.conf = CTAG_DICT
 		pass
 	def create_ctags(self, args):
-		model = "ctags -R @DIRS ; ls -l tags"
+		model = "ctags -R @DIRS"
 		paths = " ".join(self.conf[args])
 		model = model.replace("@DIRS", paths)
 		print(model)
 		os.system(model)
+		os.system("ls -l tags")

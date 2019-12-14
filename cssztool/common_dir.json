@@ -1,0 +1,17 @@
+{
+"doc"    : "C:/work/doc/",
+"cust"   : "C:/work/customer/",
+"src"    : "C:/work/src/",
+"thub"    : "C:/work/src/aus/linux",
+"work"   : "C:/work/",
+"capiv2" : "C:/work/src/aus/amps/playback/CSPL/firmware/workspace_eclipse_for_QCOM_generic/",
+"hvim"   : "C:/cygwin64/home/hhuang/hvim/",
+"chome"  : "C:/cygwin64/home/hhuang/",
+"meizu"  : "C:/work/customer/",
+"xiaomi" : "C:/work/customer/",
+"vivo"   : "C:/work/customer/",
+"huawei" : "C:/work/customer/",
+"datasheet":"C:/work/doc/datasheet/",
+"expense": "C:/work/doc/expense/",
+"train"  : "C:/work/doc/train/"
+}

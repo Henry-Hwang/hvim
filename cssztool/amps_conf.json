@@ -1,0 +1,19 @@
+{
+"number": "2",
+"left": {
+          "prefix"    : "RCV",
+          "dsp prefix": "RCV DSP1 Protection L cd",
+          "factor"    : "5.8571",
+          "channel"   : "left",
+          "fw str"    : "'Protection Left'",
+          "comport"   : "spi1.0"
+        },
+"right": {
+          "prefix"    : "SPK",
+          "dsp prefix": "SPK DSP1 Protection R cd",
+          "factor"    : "5.8571",
+          "channel"   : "right",
+          "fw str"    : "'Protection Right'",
+          "comport"   : "spi1.1"
+         }
+}

@@ -8,16 +8,22 @@ import argparse
 import hashlib
 from decimal import Decimal
 from tool import Tool
-from config import Config
+from conf import Conf
+from musicpack import Musicpack
+from capiv2pack import Capiv2pack
 
 class Andevice:
 	def __init__(self):
-		self.conf = Config().read()
+		pass
 
 	def adb_init(self, op):
 		os.system("adb wait-for-device root")
 		os.system("adb wait-for-device remount")
 		os.system("adb wait-for-device")
+		os.system("adb disable-verity")
+		os.system("adb shell \"setenforce 0\"")
+		os.system("adb shell \"setprop sys.usb.config diag,adb\"")
+
 		return
 	
 	# Connection look like this:
@@ -90,27 +96,23 @@ class Andevice:
 		os.system(model_shell)
 		return
 	
-	def push_device(self, args):
-		model = "adb push @SOURCE @DEST"
-		model_md5 = "adb shell \"md5sum @TARGET\""
-		f_file = args[1]
-		if (os.path.exists(f_file.strip())==False):
-		    print("file on exist: " + args[1])
-		    return
-	
-		Tool.md5sum(f_file)
-		if(args[0]=="capi"):
-			[fname,fename]=os.path.splitext(f_file)
-			if (fename != ".so"):
-				print("ERROR: Capiv2 lib shoud has extend '.so' : " + f_file)
-				return
-			#push to device
-			model = model.replace("@SOURCE", f_file).replace("@DEST", self.conf["capiv2 lib device"])
+	def push(self, op):
+		type_t = op[0]
+		if (platform.system() == "Windows"):
+			files = Tool.windows_dir(op[1])
+		else:
+			files = op[1]
+
+		if (type_t == "music"):
+			model = "adb push @SRC @DEST"
+			dir_music = "C:/work/music/Music/cs-test-music/"
+			if (platform.system() == "Windows"):
+				files = Tool.windows_dir(dir_music)
+
+			model = model.replace("@SRC", dir_music).replace("@DEST", "/sdcard/Music/")
+			print(model)
 			os.system(model)
-			
-			# md5sum, show both for comparing
-			model_md5 = model_md5.repace("@TARGET", self.conf["capiv2 lib device"])
-		os.system(model_md5)
-		Tool.md5sum(f_file)
-	
+		if(type_t=="capiv2"):
+			Capiv2pack().push(files)
 		return
+		

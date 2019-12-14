@@ -1,0 +1,20 @@
+{
+"params": {
+           "diag fw":"/vendor/firmware/cs35l41-dsp1-diag.wmfw",
+           "left fw":"/vendor/firmware/cs35l41-dsp1-spk-prot-left.wmfw",
+           "right fw":"/vendor/firmware/cs35l41-dsp1-spk-prot-right.wmfw",
+           "left bin":"/vendor/firmware/cs35l41-dsp1-spk-prot-left.bin",
+           "right bin":"/vendor/firmware/cs35l41-dsp1-spk-prot-right.bin",
+           "rcv hf dt": "/vendor/firmware/cs35l41-dsp1-rcv-dt-handfree.txt",
+           "rcv m dt": "/vendor/firmware/cs35l41-dsp1-rcv-dt-music.txt",
+           "spk hf dt": "/vendor/firmware/cs35l41-dsp1-spk-dt-handfree.txt",
+           "spk m dt": "/vendor/firmware/cs35l41-dsp1-spk-dt-music.txt",
+           "capiv2 lib": "/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so",
+           "status tool": "/vendor/bin/cirrus_sp_status_rx",
+           "load tool": "/vendor/bin/cirrus_sp_load_tuning",
+           "ucm": "/vendor/etc/mixer_paths_meizu.xml",
+           "hal so": "/vendor/lib/hw/audio.primary.kona.so",
+           "q6 ko": "/vendor/lib/modules/audio_q6.ko",
+           "amp ko": "/vendor/lib/modules/audio_cs35l41.ko"
+          }
+}

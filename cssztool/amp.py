@@ -10,14 +10,14 @@ from regmap import Regmap
 from decimal import Decimal
 
 class Amp(Regmap):
-	def __init__(self,conf):
-		self.conf = conf
-		self.comport = conf["comport"]
-		self.prefix = conf["prefix"]
-		self.dsp_prefix = conf["dsp prefix"]
-		self.factor = conf["factor"]
-		self.channel = conf["channel"]
-		self.fw_str = conf["fw str"]
+	def __init__(self, conf):
+		self.dict = conf
+		self.comport = self.dict["comport"]
+		self.prefix = self.dict["prefix"]
+		self.dsp_prefix = self.dict["dsp prefix"]
+		self.factor = float(self.dict["factor"])
+		self.channel = self.dict["channel"]
+		self.fw_str = self.dict["fw str"]
 		super().__init__(self.comport)
 		return
 
@@ -44,7 +44,7 @@ class Amp(Regmap):
 		return (_1st, _2nd, _3rd, _4th)
 	
 	# The command should look like this:
-	#	adb shell " tinymix 'PCM Source' 'DSP'"
+	# adb shell " tinymix 'PCM Source' 'DSP'"
 	def mixer_cmd(self, control, prefixed, value):
 		model_get = "adb shell \"tinymix \'@PREFIX @CONTROL\'\""
 		model_set = "adb shell \"tinymix \'@PREFIX @CONTROL\' @VALUE\""
@@ -69,7 +69,6 @@ class Amp(Regmap):
 		string = os.popen(cmd)
 		ret = string.read()
 		return ret
-	
 	
 	def mixer_set_value(self, control, value):
 		cmd = self.mixer_cmd(control, self.prefix, value)
@@ -100,6 +99,12 @@ class Amp(Regmap):
 			value = "DSP"
 		self.mixer_set_value("PCM Source", value)
 		return
+	def digital_volume(self, vol):
+		self.mixer_set_value("Digital PCM Volume", vol)
+		return
+	def pcm_gain(self, vol):
+		self.mixer_set_value("AMP PCM Gain", vol)
+		return
 
 	def rtlog_init(self):
 		self.dsp_mixer_set_value("RAMESPERCAPTUREWI", "0x00 0x00 0x07 0xD0")
@@ -113,14 +118,13 @@ class Amp(Regmap):
 		if(on_off == "on"):
 			self.mixer_set_value("PCM Source", "DSP")
 			self.mixer_set_value("DSP1 Firmware", self.fw_str)
-			self.mixer_set_value("AMP Enable Switch", "1")
+			self.mixer_set_value("DSP1 Preload Switch", "1")
 		else:
 			self.mixer_set_value("DSP Booted", "0")
-			self.mixer_set_value("DSP1 Firmware", self.fw_str)
-			self.mixer_set_value("AMP Enable Switch", "0")
+			self.mixer_set_value("DSP1 Preload Switch", "0")
 		return
 	
-	def firmware_reload(self):
+	def reload(self):
 		self.fw_set_route("off")
 		time.sleep(1)
 		self.fw_set_route("on")
