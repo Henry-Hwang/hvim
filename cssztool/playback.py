@@ -43,38 +43,31 @@ class Playback:
 	
 		return
 
-	def lib_copy_zip(self):
+	def lib_copy_zip(self, dir_output):
 		conf = self.conf
 		now_str = Tool.date_to_str()#now.strftime('%a-%b-%d-%Y_%H-%M-%S')
 		
-		new_dir = ""
-		# Copy tuning file
-		if "24bit tuning" in conf:
-			f_24bit = conf["24bit tuning"]
-			[dirname,filename] = os.path.split(f_24bit)
-			new_dir = dirname + "/capi_v2_" + now_str + "/"
-			os.mkdir(new_dir)
-			shutil.copy(f_24bit, new_dir)
-		if "16bit tuning" in conf:
-			f_16bit = conf["16bit tuning"]
-			[dirname,filename] = os.path.split(f_16bit)
-			new_dir = dirname + "/capi_v2_" + now_str + "/"
-			if (os.path.exists(new_dir)==False):
-			    os.mkdir(new_dir)
-			shutil.copy(f_16bit, new_dir)
+		new_dir = dir_output + "/capi_v2_" + now_str + "/"
+		os.mkdir(new_dir)
 
+			
 		print(new_dir)
 		if (os.path.exists(new_dir)==False):
 			print("ERROR: Tuning not founf!")
 			return
 
+		# Copy tuning file
+		for key, tuning in self.conf["tunings"].items():
+			shutil.copy(tuning, new_dir)
+
 		#Copy lib
-		f_lib = self.conf["capiv2 lib"]
-		if (os.path.exists(f_lib)==False):
+		lib = self.conf["capiv2 lib"]
+		if (os.path.exists(lib)==False):
 			shutil.rmtree(new_dir)
 			return
-		self.readme["lib md5sum"] = Tool.md5sum(f_lib)
-		shutil.copy(f_lib, new_dir)
+
+		self.readme["lib md5sum"] = Tool.md5sum(lib)
+		shutil.copy(lib, new_dir)
 
 		self.new_readme_files(new_dir)
 
@@ -122,10 +115,9 @@ class Playback:
 				branch=line
 				break
 		return branch
-	
-	def get_mult_checksum(self, c_compat):
+	def get_all_tunings(self, c_compat):
 		patten = "#define USE_CASE_@INDEX_TUNING@_NBITS \"tuningheaders/"
-		list_chksum=[]
+		dict_tuning={}
 		with open(c_compat, "r") as cfr:
 			count = 0;
 			lines = cfr.readlines()
@@ -160,8 +152,18 @@ class Playback:
 				f_tuning = self.conf["source tuning directory"] + filename
 				if (os.path.exists(f_tuning)==False):
 					continue
-				dict_chksum = self.get_one_checksum(f_tuning)
-				list_chksum.append(str(dict_chksum) + " : " + uc_bit + " : " +filename)
+				dict_tuning[uc_bit] = f_tuning
+		return dict_tuning
+	
+	def get_mult_checksum(self, c_compat):
+		patten = "#define USE_CASE_@INDEX_TUNING@_NBITS \"tuningheaders/"
+		list_chksum=[]
+		dict_tuning = self.conf["tunings"]
+
+		for key, value in dict_tuning.items():
+			dict_chksum = self.get_one_checksum(value)
+			list_chksum.append(str(dict_chksum) + " : " + key + " : " + value)
+
 		return list_chksum
 	
 	def get_one_checksum(self, f_tuning):
@@ -217,8 +219,8 @@ class Playback:
 			patten = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/"
 			model = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/@NEW_TUNING\"\n"
 
-		patten = patten.replace("@USECASE", usecase)
-		model = model.replace("@USECASE", usecase)
+		patten = patten.replace("@USECASE", str(usecase))
+		model = model.replace("@USECASE", str(usecase))
 
 		[dirname,filename] = os.path.split(tuning)
 		shutil.copyfile(tuning, dir_tuning+filename)
@@ -234,7 +236,6 @@ class Playback:
 				cfw.write(line)
 		return
 	def tuning_update(self, c_file, tuning, bit, usecase):
-		print("3 args")
 		dir_tuning = self.conf["source tuning directory"]
 		if (bit==24):
 			patten = "#define USE_CASE_@USECASE_TUNING_24BIT \"tuningheaders/"
@@ -243,8 +244,8 @@ class Playback:
 			patten = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/"
 			model = "#define USE_CASE_@USECASE_TUNING \"tuningheaders/@NEW_TUNING\"\n"
 
-		patten = patten.replace("@USECASE", usecase)
-		model = model.replace("@USECASE", usecase)
+		patten = patten.replace("@USECASE", str(usecase))
+		model = model.replace("@USECASE", str(usecase))
 
 		[dirname,filename] = os.path.split(tuning)
 		shutil.copyfile(tuning, dir_tuning+filename)
@@ -264,10 +265,6 @@ class Playback:
 		self.update_tuning_in_c_file(c_file, tuning, bit, "0")
 		return
 
-	def insert_tuning(self, c_file, tuning, bit, usecase):
-		self.update_tuning_in_c_file(c_file, tuning, bit, usecase)
-		return
-
 	def covert_tuning(self, f_tuning):
 		covt_model = "cd @DIR && json2hexagonbin.exe -t @H_HEADER @JSON && cd -"
 		[dirname,filename] = os.path.split(f_tuning)
@@ -283,31 +280,25 @@ class Playback:
 			tuning_t = f_tuning.replace(".json", ".h")
 		return tuning_t
 	
-	def make_capi_v2(self, args):
+	def make_capi_v2(self, make, tuning, bit, uc, ver):
 		if (platform.system() != "Windows"):
 			model = "cd ~/capiv2 && ./cygwin-make-setup-sdk3.4.3.sh && cd -"
-			f_24bit = args[0]
-			f_16bit = args[1]
-			print(args)
-			if (os.path.exists(f_24bit)==True):
-				f_24bit = self.covert_tuning(f_24bit)
-				self.tuning_update(self.conf["compat.c"], f_24bit, 24)
-				self.conf["24bit tuning"] = f_24bit
-				
+			if (os.path.exists(tuning)==True):
+				tuning = self.covert_tuning(tuning)
+				self.tuning_update(self.conf["compat.c"], tuning, bit, uc)
+				self.conf["tuning"] = tuning
 			
-			if (os.path.exists(f_16bit)==True):
-				f_16bit = self.covert_tuning(f_16bit)
-				self.tuning_update(self.conf["compat.c"], f_16bit, 16)
-				self.conf["16bit tuning"] = f_16bit
-			
-			print("24bit: " + f_24bit)
-			print("16bit: " + f_16bit)
-			if not os.path.exists(f_24bit) and not os.path.exists(f_16bit):
+			print("Tuning: " + tuning + ", BIT = ", bit, ", usecase = ", uc, "version = ", ver)
+			self.conf["playback version"] = str(ver)
+			if not os.path.exists(tuning):
 				print("No tuning file input!")
 				return
+			[dirname,filename] = os.path.split(tuning)
 			#build lib
-			os.system(model)
-			self.capiv2_lib_info()
-			self.lib_copy_zip()
+			if (make=='Y'):
+				os.system(model)
+				self.conf["tunings"] = self.get_all_tunings(self.conf["compat.c"])
+				self.capiv2_lib_info()
+				self.lib_copy_zip(dirname + "/")
 
 		return

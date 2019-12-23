@@ -37,7 +37,6 @@ class Explorer:
 	def __init__(self):
 		self.dict = {}
 		path = Tool.get_root_path(CONFIG)
-		print(path)
 		if (os.path.exists(path)==True):
 		    self.dict = Conf.read(path)
 		else:
@@ -45,7 +44,6 @@ class Explorer:
 		return
 	def open(self, args):
 		model = "@EXE @PATH"
-		print(platform.system())
 		if(platform.system()=="Windows"):
 			path = self.dict[args].replace("/","\\")
 			model = model.replace("@EXE", "explorer").replace("@PATH", path)

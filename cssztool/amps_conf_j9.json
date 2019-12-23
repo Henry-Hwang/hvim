@@ -1,0 +1,82 @@
+{
+	"number": "1",
+	"left": {
+			"property": {
+				"prefix"    : "",
+				"dsp prefix": "DSP1 Protection cd",
+				"factor"    : "5.8571",
+				"channel"   : "left",
+				"fw str"    : "'Protection'",
+				"comport"   : "2-0050"
+			},
+			"capture": {
+				"cmds":[
+					"tinymix 'QUAT_MI2S_TX Channels' 'Two'",
+				"tinymix 'QUAT MI2S TX MONO' 'Right'",
+				"tinymix 'ASP TX Enable Switch' 1",
+				"tinymix 'ASP TX1 Source' 'DSPTX1'",
+				"tinymix 'ASP TX2 Source' 'DSPTX1'",
+				"tinymix 'MultiMedia1 Mixer QUAT_MI2S_TX' 1",
+				"tinymix 'QUAT_MI2S_TX SampleRate' KHZ_48",
+				"tinymix 'QUAT_MI2S_TX Format' S16_LE",
+				"tinycap @OUTPUT -D 0 -d 0 -r 48000 -c 2"
+				]
+			},
+			"mute": {
+				"cmds":[
+					"tinymix 'AMP Enable' '0'"
+				]
+			},
+			"unmute": {
+				"cmds":[
+					"tinymix 'AMP Enable' '1'"
+				]
+			},
+			"dsp-hookup": {
+				"cmds":[
+					"tinymix 'PCM Source' '1'"
+				]
+			},
+			"dsp-bypass": {
+				"cmds":[
+					"tinymix 'PCM Source' '1'"
+				]
+			},
+
+			"load": {
+				"cmds":[
+					"tinymix 'PCM Source' 'DSP'",
+				"tinymix 'DSP1 Firmware' 'Protection Right'",
+				"tinymix 'DSP1 Preload Switch' '1'"
+				]
+				},
+
+			"unload": {
+				"cmds":[
+				"tinymix 'DSP Booted' 0",
+				"tinymix 'DSP1 Preload Switch' '0'"
+			]
+			},
+
+			"reload-pb":{
+				"cmds":[
+					"tinymix 'DSP Booted' 0",
+				"tinymix 'DSP1 Preload Switch' '0'",
+				"@SEC-DELAY 0.5",
+				"tinymix 'PCM Source' 'DSP'",
+				"tinymix 'DSP1 Firmware' 'Protection'",
+				"tinymix 'DSP1 Preload Switch' '1'"
+				]
+			},
+			"reload-diag":{
+				"cmds":[
+					"tinymix 'DSP Booted' 0",
+				"tinymix 'DSP1 Preload Switch' '0'",
+				"@SEC-DELAY 3",
+				"tinymix 'PCM Source' 'DSP'",
+				"tinymix 'DSP1 Firmware' 'Diag'",
+				"tinymix 'DSP1 Preload Switch' '1'"
+				]
+			}
+	}
+}

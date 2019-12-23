@@ -8,25 +8,26 @@ import hashlib
 from tool import Tool
 from conf import Conf
 DEFAULT_CONFIG = {
-        "params": ["/vendor/firmware/cs35l41-dsp1-diag.wmfw",
-                 "/vendor/firmware/cs35l41-dsp1-spk-prot-left.wmfw",
-                 "/vendor/firmware/cs35l41-dsp1-spk-prot-right.wmfw"
-                 "/vendor/firmware/cs35l41-dsp1-spk-prot-left.bin",
-                 "/vendor/firmware/cs35l41-dsp1-spk-prot-right.bin"
-                 "/vendor/firmware/cs35l41-dsp1-rcv-dt-handfree.txt",
-                 "/vendor/firmware/cs35l41-dsp1-rcv-dt-music.txt",
-                 "/vendor/firmware/cs35l41-dsp1-spk-dt-handfree.txt",
-                 "/vendor/firmware/cs35l41-dsp1-spk-dt-music.txt",
-                 "/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so",
-                 "/vendor/bin/cirrus_sp_status_rx",
-                 "/vendor/bin/cirrus_sp_load_tuning",
-                 "/vendor/etc/mixer_path_meizu.xml",
-                 #"/vendor/etc/acdbdata/*",
-                 #"/vendor/lib/hw/audio.primary.kona.so",
-                 "/vendor/lib/modules/audio_q6.ko",
-                 "/vendor/lib/modules/audio_cs35l41.ko",
-                ],
+    "params": {
+	   "diag fw":"/vendor/firmware/cs35l41-dsp1-diag.wmfw",
+           "left fw":"/vendor/firmware/cs35l41-dsp1-spk-prot-left.wmfw",
+           "right fw":"/vendor/firmware/cs35l41-dsp1-spk-prot-right.wmfw",
+           "left bin":"/vendor/firmware/cs35l41-dsp1-spk-prot-left.bin",
+           "right bin":"/vendor/firmware/cs35l41-dsp1-spk-prot-right.bin",
+           "rcv hf dt": "/vendor/firmware/cs35l41-dsp1-rcv-dt-handfree.txt",
+           "rcv m dt": "/vendor/firmware/cs35l41-dsp1-rcv-dt-music.txt",
+           "spk hf dt": "/vendor/firmware/cs35l41-dsp1-spk-dt-handfree.txt",
+           "spk m dt": "/vendor/firmware/cs35l41-dsp1-spk-dt-music.txt",
+           "capiv2 lib": "/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so",
+           "status tool": "/vendor/bin/cirrus_sp_status_rx",
+           "load tool": "/vendor/bin/cirrus_sp_load_tuning",
+           "ucm": "/vendor/etc/mixer_paths_meizu.xml",
+           "hal so": "/vendor/lib/hw/audio.primary.kona.so",
+           "q6 ko": "/vendor/lib/modules/audio_q6.ko",
+           "amp ko": "/vendor/lib/modules/audio_cs35l41.ko"
+    }
 }
+
 CONFIG="csparam_conf.json"
 class Csparams:
 	def __init__(self):
@@ -52,8 +53,6 @@ class Csparams:
 			os.system(model_t)
 		
 		Tool.tree(dir_bk)
-#		for i in Tool.tree(dir_bk):
-#			print(i,end='')
 		return
 
 	def restore(self, dir_bk):
@@ -62,7 +61,6 @@ class Csparams:
 			print("ERROR: no files for backup")
 			return
 
-		#TODO: get all files to bk_list
 		bk_list = []
 		for rootdir, dirs, files in os.walk(dir_bk):
 			for file in files:

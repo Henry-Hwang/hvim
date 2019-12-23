@@ -8,16 +8,17 @@ import argparse
 import hashlib
 from regmap import Regmap
 from decimal import Decimal
+from tool import Tool
 
 class Amp(Regmap):
-	def __init__(self, conf):
-		self.dict = conf
-		self.comport = self.dict["comport"]
-		self.prefix = self.dict["prefix"]
-		self.dsp_prefix = self.dict["dsp prefix"]
-		self.factor = float(self.dict["factor"])
-		self.channel = self.dict["channel"]
-		self.fw_str = self.dict["fw str"]
+	def __init__(self, dict):
+		self.dict = dict
+		self.comport = self.dict["property"]["comport"]
+		self.prefix = self.dict["property"]["prefix"]
+		self.dsp_prefix = self.dict["property"]["dsp prefix"]
+		self.factor = float(self.dict["property"]["factor"])
+		self.channel = self.dict["property"]["channel"]
+		self.fw_str = self.dict["property"]["fw str"]
 		super().__init__(self.comport)
 		return
 
@@ -42,7 +43,22 @@ class Amp(Regmap):
 		_4th = int(log[24:32], 16)
 		#Q10.13, @5.18
 		return (_1st, _2nd, _3rd, _4th)
-	
+
+	def execute(self, op):
+		model = "adb shell \"@CMDS\""
+		model_d = "sleep @TIME"
+		mixers = self.dict[op]["cmds"]
+		for index, item in enumerate(mixers):
+			if "@SEC-DELAY" in item:
+				sec = item.replace("@SEC-DELAY ", "").strip()
+				mixers[index] = Tool.MODEL_S_SLEEP.replace("@TIME", sec)
+
+		cmds = ";".join(mixers)
+		model = Tool.MODEL_ADBSH.replace("@CMDS", cmds)
+		print(model.replace(";","\n"))
+		os.system(model)
+		return
+
 	# The command should look like this:
 	# adb shell " tinymix 'PCM Source' 'DSP'"
 	def mixer_cmd(self, control, prefixed, value):
@@ -83,25 +99,10 @@ class Amp(Regmap):
 		ret = string.read()
 		return ret
 	
-	def mute(self, op):
-		if (op=="mute"):
-		    value = "0"
-		else:
-		    value = "1"
-	
-		self.mixer_set_value("AMP Enable", value)
-		return
-	
-	def dsp_bypass(self, op):
-		if (op=="yes"):
-			value = "ASPRX1"
-		else:
-			value = "DSP"
-		self.mixer_set_value("PCM Source", value)
-		return
 	def digital_volume(self, vol):
 		self.mixer_set_value("Digital PCM Volume", vol)
 		return
+
 	def pcm_gain(self, vol):
 		self.mixer_set_value("AMP PCM Gain", vol)
 		return
@@ -112,22 +113,6 @@ class Amp(Regmap):
 		self.dsp_mixer_set_value("RTLOG_COUNT", "0x00 0x00 0x00 0x02")
 		self.dsp_mixer_set_value("RTLOG_CAN_READ", "0x0 0x0 0x00 0x02")
 		self.dsp_mixer_set_value("RTLOG_ENABLE", "0x00 0x00 0x00 0x01")
-		return
-	
-	def fw_set_route(self, on_off):
-		if(on_off == "on"):
-			self.mixer_set_value("PCM Source", "DSP")
-			self.mixer_set_value("DSP1 Firmware", self.fw_str)
-			self.mixer_set_value("DSP1 Preload Switch", "1")
-		else:
-			self.mixer_set_value("DSP Booted", "0")
-			self.mixer_set_value("DSP1 Preload Switch", "0")
-		return
-	
-	def reload(self):
-		self.fw_set_route("off")
-		time.sleep(1)
-		self.fw_set_route("on")
 		return
 	
 	# read RT data

@@ -1,4 +1,5 @@
 {
+	"number": "2",
 	"left": {
 			"property": {
 				"prefix"    : "RCV",
@@ -164,5 +165,6 @@
 					"echo 0x3806 0x0001 @REGMAP-REGISTERS"
 				]
 			}
+
 	}
 }

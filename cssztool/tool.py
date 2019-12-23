@@ -12,6 +12,13 @@ from decimal import Decimal
 PREFIX = ['└─ ', '├─ ']
 INDENTION = ['│  ', ' '*4]
 class Tool:
+	
+	MODEL_ADBSH = "adb shell \"@CMDS\""
+	MODEL_W_REGS = "echo @REG @VAL > /d/regmap/@COMPORT/registers"
+	MODEL_W_TMIX = "tinymix '@CONTROL' '@VALUE'"
+	MODEL_R_TMIX = "tinymix '@CONTROL'"
+	MODEL_S_SLEEP = "sleep @TIME"
+
 	@classmethod
 	def show_op_sys(self):
 		print(platform.system())
@@ -31,6 +38,8 @@ class Tool:
 		md5.update(fd.read().encode('utf-8'))
 		value = md5.hexdigest()
 		'''
+		# This command line work on windows as well
+		# CertUtil -hashfile xxxx.bin MD5
 		model = "md5sum @FILE"
 		model = model.replace("@FILE", source)
 		value = os.popen(model).read().strip()
