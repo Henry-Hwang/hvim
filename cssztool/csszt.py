@@ -67,7 +67,6 @@ parser.add_argument('-it', "--insert-t",
 	help="CAPIV2: Insert tuning to source, without building. [BITs]=24,16 [UC]=0,1,2,3 ... [TUNING]= 'path to tuning'")
 parser.add_argument('-mc', "--make-capi",
 	required=False,
-	default='Y',
 	type=str,
 	choices=['Y', 'N'],
 	help="CAPIV2: Make CAPI V2 Playback. eg. %(prog)s -mc Y -f pb4_handfree.h -b 16 -i 3 -v 4")
