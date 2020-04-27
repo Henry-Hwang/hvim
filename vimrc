@@ -33,7 +33,7 @@ Plugin 'godlygeek/tabular'
 Plugin 'plasticboy/vim-markdown'
 Plugin 'scrooloose/nerdtree.git'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
-
+Plugin 'scrooloose/nerdcommenter'
 "Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
@@ -125,7 +125,7 @@ set shortmess=atl
 set background=dark
 set t_Co=256
 colorscheme molokai
-"set cursorline
+set cursorline
 set guifont=Courier_New:h11
 if has('win32unix')
 	hi CursorLine cterm=NONE ctermfg=white ctermbg=55 guifg=#293739
