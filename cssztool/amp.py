@@ -106,6 +106,12 @@ class Amp(Regmap):
 	def pcm_gain(self, vol):
 		self.mixer_set_value("AMP PCM Gain", vol)
 		return
+	def digital_volume(self, vol):
+		self.mixer_set_value("Digital PCM Volume", vol)
+		return
+	def pcm_gain(self, vol):
+		self.mixer_set_value("AMP PCM Gain", vol)
+		return
 
 	def rtlog_init(self):
 		self.dsp_mixer_set_value("RAMESPERCAPTUREWI", "0x00 0x00 0x07 0xD0")

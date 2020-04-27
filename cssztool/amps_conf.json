@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
 	"left": {
 			"property": {
 				"prefix"    : "RCV",
@@ -165,4 +166,23 @@
 				]
 			}
 	}
+=======
+"number": "2",
+"left": {
+          "prefix"    : "RCV",
+          "dsp prefix": "RCV DSP1 Protection L cd",
+          "factor"    : "5.8571",
+          "channel"   : "left",
+          "fw str"    : "'Protection Left'",
+          "comport"   : "spi1.0"
+        },
+"right": {
+          "prefix"    : "SPK",
+          "dsp prefix": "SPK DSP1 Protection R cd",
+          "factor"    : "5.8571",
+          "channel"   : "right",
+          "fw str"    : "'Protection Right'",
+          "comport"   : "spi1.1"
+         }
+>>>>>>> cf03a58cb10723052030d20e46531b65a56bcb53
 }

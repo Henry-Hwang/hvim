@@ -81,7 +81,6 @@ parser.add_argument("--push",
 parser.add_argument('-rw', "--regs-write",
 	type=str,
 	help="AMP: Write registers:  [DEVICE] = spi1.0, 2-0040. show [DEVICE] by '--list'. [REG=VAL,...] e.g. \"0x3804<=0x01,0x3800<=0x12, ...\" >")
-
 parser.add_argument('-rr', "--regs-read",
 	type=str,
 	help="AMP: Read registers e.g. \"0x3804, 0x4800, ...\"")
@@ -104,7 +103,6 @@ parser.add_argument("--out",
 	type=str,
 	help="SYS: specific a file for operation")
 
-parser.add_argument('-t', "--ctags",
 	required=False,
 	metavar=('[OP]'),
 	type=str,

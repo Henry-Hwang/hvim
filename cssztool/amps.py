@@ -74,14 +74,13 @@ class Amps:
 
 			calz = str(round(amp.get_cal_z_value(), 2))
 			ambient = str(round(amp.get_cspl_ambient(),2))
-		
+	
 			print ("Ambient: " + ambient)
 			print ("Calz: " + calz)
 			print ("-------------------------------------------------------")
 			for i in range(count):
 				#get calibration value of L/R, Q10.13
 				temp = str(round(amp.get_cspl_temperature(),2))
-		
 				print ("TEMP:" + temp)
 				time.sleep(1)
 		return
@@ -135,7 +134,6 @@ class Amps:
 			for key, value in self.dict.items():
 				rset = value["ampobj"].regs_read(regs)
 				list_regset.append(rset)
-
 			print("  REG        LEFT      RIGHT")
 			print("------------------------------")
 			for i in range(len(list_regset[0])):
