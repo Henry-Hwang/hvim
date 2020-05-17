@@ -1,0 +1,125 @@
+"插件管理
+"git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+
+set rtp+=$HOME/.vim/bundle/Vundle.vim/
+call vundle#begin('$HOME/.vim/bundle/')
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
+Bundle 'tacahiroy/ctrlp-funky'
+Plugin 'eshion/vim-sync'
+Plugin 'vim-scripts/molokai.git'
+Plugin 'vim-scripts/taglist.vim'
+Plugin 'vim-scripts/a.vim'
+Plugin 'vim-scripts/c.vim'
+Plugin 'vim-scripts/ctags.vim'
+Plugin 'xolox/vim-misc'
+Plugin 'will133/vim-dirdiff'
+Plugin 'tpope/vim-fugitive'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'godlygeek/tabular'
+Plugin 'scrooloose/nerdtree.git'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'scrooloose/nerdcommenter'
+call vundle#end()
+
+set encoding=utf-8
+
+set cst
+set fileformats=unix,dos
+syntax on
+filetype on
+filetype plugin on
+hi Comment ctermfg=cyan
+set backspace=indent,eol,start
+set whichwrap+=<,>,h,l
+set number
+set scrolloff=4
+set expandtab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set smarttab
+set history=1024
+set nobackup
+set autochdir
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+set noerrorbells
+set novisualbell
+set nowrap
+set mat=2
+set hidden
+set smartindent
+set laststatus=2
+set showmatch
+set wrapscan
+set display=lastline
+set paste
+set list
+set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
+set shortmess=atl
+set background=dark
+set t_Co=256
+colorscheme molokai
+set cursorline
+set guifont=Courier_New:h11
+hi CursorLine term=underline ctermbg=236 guibg=#293739
+hi Comment term=bold ctermfg=60 guifg=#465457
+
+"command ": hi" to show all color
+"{ [[map keys]]
+let mapleader = ","       "Set mapleader
+nnoremap <C-e> :CtrlPBuffer<CR>
+nnoremap <leader>t :Tlist<CR>
+nnoremap <C-e> :Ex<CR>
+nnoremap <leader>3 :b#<CR>
+nnoremap <leader>bw :bw<CR>
+nnoremap <leader>bd :bd<CR>
+"replace word
+nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <leader>,t :vertical terminal<CR>
+nnoremap <leader>b :ls<CR>
+map <leader>p "+p
+map <leader>y "+y
+"}
+"[[Ctrlp]]
+let g:ctrlp_map = '<leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+nnoremap <leader>cp :CtrlPMRU<CR>
+nnoremap <leader>cm :CtrlPMixed<CR>
+nnoremap <C-a> :CtrlPBuffer<CR>
+let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+    \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
+    \ }
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_match_window_bottom=1
+let g:ctrlp_max_height=15
+let g:ctrlp_match_window_reversed=0
+let g:ctrlp_mruf_max=500
+let g:ctrlp_follow_symlinks=1
+
+let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+
+nnoremap <Leader>cf :CtrlPFunky<Cr>
+" narrow the list down with a word under cursor
+nnoremap <Leader>Cf :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+let g:ctrlp_funky_syntax_highlight = 1
+let g:ctrlp_extensions = ['funky']
+
+
+"{ [[commands]]
+command! Difft windo diffthis
+command! Diffo windo diffoff
+"}
+
+"[[Session management]]
+nnoremap ] ]c
+nnoremap [ [c
+hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none

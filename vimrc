@@ -184,6 +184,7 @@ nnoremap <C-e> :CtrlPBuffer<CR>
 nnoremap <leader>t :Tlist<CR>
 " now I have ctrlp
 "nnoremap <leader>b :ls<CR>:b<space>
+nnoremap <C-e> :Ex<CR>
 nnoremap <leader>3 :b#<CR>
 nnoremap <leader>bw :bw<CR>
 nnoremap <leader>bd :bd<CR>
