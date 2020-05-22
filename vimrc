@@ -1,7 +1,9 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
-if has('win32') && has ('gui_runing')
+if has('win32')
+	let $HOME="C:\\Users\\hhuang"
+	let &pythonthreedll = 'C:\Python38\python38.dll'
 	set rtp+=$HOME\.vim\bundle\Vundle.vim
 	call vundle#begin()
 else
@@ -21,7 +23,7 @@ Plugin 'vim-scripts/a.vim'
 Plugin 'vim-scripts/xml.vim'
 Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
-Plugin 'Valloric/YouCompleteMe'
+"Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-scripts/ctags.vim'
 Plugin 'xolox/vim-session'
 Plugin 'xolox/vim-misc'
@@ -34,6 +36,8 @@ Plugin 'plasticboy/vim-markdown'
 Plugin 'scrooloose/nerdtree.git'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
 "Plugin 'rprichard/winpty'
 "Plugin 'scrooloose/nerdtree'
 call vundle#end()
@@ -57,7 +61,7 @@ syntax on
 " 检测文件类型
 filetype on
 " 检测文件类型插件
-filetype plugin on
+filetype plugin indent on
 hi Comment ctermfg=cyan
 " 不设定在插入状态无法用退格键和 Delete 键删除回车符
 set backspace=indent,eol,start
@@ -130,10 +134,7 @@ set guifont=Courier_New:h11
 if has('win32unix')
 	hi CursorLine cterm=NONE ctermfg=white ctermbg=55 guifg=#293739
 else
-	"hi CursorLine ctermfg=15 ctermbg=534 guibg=#293739
 	hi CursorLine term=underline ctermbg=236 guibg=#293739
-	"hi CursorLine term=reverse ctermfg=153 ctermbg=66 guifg=#FFFFFF guibg=#455354
-	"hi CursorLine term=NONE ctermfg=white ctermbg=214 guibg=#293739
 endif
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457
@@ -180,11 +181,10 @@ if has('win32unix')
 endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
-nnoremap <C-e> :CtrlPBuffer<CR>
+nnoremap <C-e> :Ex<CR>
 nnoremap <leader>t :Tlist<CR>
 " now I have ctrlp
 "nnoremap <leader>b :ls<CR>:b<space>
-nnoremap <C-e> :Ex<CR>
 nnoremap <leader>3 :b#<CR>
 nnoremap <leader>bw :bw<CR>
 nnoremap <leader>bd :bd<CR>
@@ -196,13 +196,9 @@ nnoremap <leader>,f :Bfind<CR>
 nnoremap <leader>,t :vertical terminal<CR>
 nnoremap <leader>,ht :terminal<CR>
 nnoremap <leader>b :ls<CR>
-if has('win32')
-	nnoremap <leader>,. :e ~/_vimrc<CR>
-	nnoremap <leader>,.. :source ~/_vimrc<CR>
-else
-	nnoremap <leader>,. :e ~/.vimrc<CR>
-	nnoremap <leader>,.. :source ~/.vimrc<CR>
-endif
+
+nnoremap <leader>,. :e $MYVIMRC<CR>
+nnoremap <leader>,.. :source $MYVIMRC<CR>
 
 nnoremap <leader>,m /&clean-search&<CR>
 if has('win32unix')
@@ -268,6 +264,19 @@ let Tlist_Show_One_File = 1
 let Tlist_Exit_OnlyWindow = 1
 let Tlist_Auto_Open=0               "打开文件时候不自动打开Taglist窗口
 let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
+
+" Trigger configuration. Do not use <tab> if you use 
+" https://github.com/Valloric/YouCompleteMe.
+let g:UltiSnipsExpandTrigger="<C-Tab>"
+let g:UltiSnipsJumpForwardTrigger="<C-Tab>"
+let g:UltiSnipsJumpBackwardTrigger="<S-Tab>"
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit="vertical"
+if has('win32')
+let g:UltiSnipsSnippetDirectories=[$HOME.'\.vim\mysnippets']
+else
+let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/mysnippets']
+endif
 "NERDTree
 nnoremap <silent><F2> :exec("NERDTreeToggle ".expand('%:h'))<CR>
 let g:NERDTreeDirArrowExpandable = '+'
