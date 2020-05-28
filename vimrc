@@ -182,23 +182,19 @@ endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
 nnoremap <C-e> :Ex<CR>
-nnoremap <leader>t :Tlist<CR>
 " now I have ctrlp
 "nnoremap <leader>b :ls<CR>:b<space>
-nnoremap <leader>3 :b#<CR>
-nnoremap <leader>bw :bw<CR>
-nnoremap <leader>bd :bd<CR>
+nnoremap <leader>bw :bw!<CR>
+nnoremap <C-f><C-f> :FZF %:p:h
 "replace word
-nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
-nnoremap <leader>,g :Bgrep <C-r><C-w><CR>
-nnoremap <leader>,f :Bfind<CR>
-nnoremap <leader>,t :vertical terminal<CR>
-nnoremap <leader>,ht :terminal<CR>
-nnoremap <leader>b :ls<CR>
+nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <C-s> :g/<C-r><C-w>/<CR>
+nnoremap <C-s><C-s> :g/,C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-f> /<C-r><C-w><CR>
+nnoremap <leader>t :vertical terminal<CR>
 
-nnoremap <leader>,. :e $MYVIMRC<CR>
-nnoremap <leader>,.. :source $MYVIMRC<CR>
+nnoremap <leader>. :e $MYVIMRC<CR>
+nnoremap <leader>.. :source $MYVIMRC<CR>
 
 nnoremap <leader>,m /&clean-search&<CR>
 if has('win32unix')
@@ -207,14 +203,12 @@ if has('win32unix')
 	nnoremap <silent> <leader>p :call Getclip()<CR>
 else
 	map <leader>p "+p
-	map <leader>y "+y
+	map <leader>y "+yy
 endif
 "}
 "[[Ctrlp]]
 let g:ctrlp_map = '<leader>p'
 let g:ctrlp_cmd = 'CtrlP'
-nnoremap <leader>cp :CtrlPMRU<CR>
-nnoremap <leader>cm :CtrlPMixed<CR>
 nnoremap <C-a> :CtrlPBuffer<CR>
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
@@ -241,8 +235,6 @@ let g:ctrlp_extensions = ['funky']
 
 
 "{ [[commands]]
-command! Bfind :execute ":cex [] | bufdo vimgrepadd /" . expand('<cword>') . "/g %" | cw
-command! Ffind :execute ":cex [] | vimgrepadd /" . expand('<cword>') . "/g %" | cw
 "command! Rfind :execute ":%s/" . expand('<cword>') . "/" . expand('<cword>') . "/gc"
 command! Difft windo diffthis
 command! Diffo windo diffoff
@@ -259,12 +251,6 @@ else
 	let &t_SI = "\e[5 q"
 	let &t_EI = "\e[2 q"
 endif
-let Tlist_Ctags_Cmd = '/usr/bin/ctags'
-let Tlist_Show_One_File = 1
-let Tlist_Exit_OnlyWindow = 1
-let Tlist_Auto_Open=0               "打开文件时候不自动打开Taglist窗口
-let Tlist_Use_Right_Window = 0      "在右侧窗口中显示taglist窗口
-
 " Trigger configuration. Do not use <tab> if you use 
 " https://github.com/Valloric/YouCompleteMe.
 let g:UltiSnipsExpandTrigger="<C-Tab>"
@@ -277,11 +263,6 @@ let g:UltiSnipsSnippetDirectories=[$HOME.'\.vim\mysnippets']
 else
 let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/mysnippets']
 endif
-"NERDTree
-nnoremap <silent><F2> :exec("NERDTreeToggle ".expand('%:h'))<CR>
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
-nnoremap <C-n> :NERDTree<CR>
 "[[Session management]]
 if &diff
     nnoremap ] ]c
