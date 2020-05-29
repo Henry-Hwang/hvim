@@ -182,17 +182,19 @@ endif
 "{ [[map keys]]
 let mapleader = ","       "Set mapleader
 nnoremap <C-e> :Ex<CR>
-nnoremap <leader>t :Tlist<CR>
 " now I have ctrlp
 "nnoremap <leader>b :ls<CR>:b<space>
-nnoremap <leader>3 :b#<CR>
-nnoremap <leader>bw :bw<CR>
+nnoremap <leader>bw :bw!<CR>
+nnoremap <C-f><C-f> :FZF %:p:h
 "replace word
-nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-nnoremap <leader>,t :vertical terminal<CR>
+nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <C-s> :g/<C-r><C-w>/<CR>
+nnoremap <C-s><C-s> :g/,C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-f> /<C-r><C-w><CR>
+nnoremap <leader>t :vertical terminal<CR>
 
-nnoremap <leader>,. :e $MYVIMRC<CR>
-nnoremap <leader>,.. :source $MYVIMRC<CR>
+nnoremap <leader>. :e $MYVIMRC<CR>
+nnoremap <leader>.. :source $MYVIMRC<CR>
 
 nnoremap <leader>,m /&clean-search&<CR>
 if has('win32unix')
@@ -201,7 +203,7 @@ if has('win32unix')
 	nnoremap <silent> <leader>p :call Getclip()<CR>
 else
 	map <leader>p "+p
-	map <leader>y "+y
+	map <leader>y "+yy
 endif
 "}
 "[[Ctrlp]]

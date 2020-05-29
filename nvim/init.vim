@@ -1,10 +1,18 @@
 function! DoRemote(arg)
     UpdateRemotePlugins
 endfunction
-let $HOME="C:\\Users\\hhuang"
-let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
-let $PYTHON = 'C:\Python27\python' 
-let $PYTHON3 = 'C:\Python38\python' 
+if has('win32')
+    let $PYTHON = 'C:\Python27\python'
+    let $PYTHON3 = 'C:\Python38\python'
+    let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
+    let $HOME="C:\\Users\\hhuang"
+    let $DIR_TEMP = $XDG_CONFIG_HOME
+else
+    let $DIR_PLUGIN='~/.config/nvim/plugged'
+    let $PYTHON = '/usr/bin/python'
+    let $PYTHON3 = '/usr/bin/python3'
+    let $DIR_TEMP = '~/.config/nvim'
+endif
 
 call plug#begin($DIR_PLUGIN)
 " looking
@@ -43,6 +51,7 @@ Plug 'xolox/vim-misc'
 Plug 'itchyny/calendar.vim'
 Plug 'junegunn/vim-journal'
 Plug 'junegunn/fzf'
+Plug 'jremmen/vim-ripgrep'
 " navigation
 "Plug 'scrooloose/nerdtree'
 Plug 'ctrlpvim/ctrlp.vim'
@@ -50,6 +59,7 @@ Plug 'wesleyche/SrcExpl'
 Plug 'majutsushi/tagbar'
 Plug 'rizzatti/dash.vim'
 Plug 'eugen0329/vim-esearch'
+Plug 'ludovicchabant/vim-gutentags'
 " c/c++
 " java
 Plug 'artur-shaik/vim-javacomplete2'
@@ -58,10 +68,11 @@ Plug 'mattn/emmet-vim'
 " scala
 Plug 'ensime/ensime-vim', { 'do': function('DoRemote') }
 Plug 'derekwyatt/vim-scala'
+Plug 'universal-ctags/ctags'
 call plug#end()
 
-let g:python_host_prog = 'C:\Python27\python' 
-let g:python3_host_prog = 'C:\Python38\python' 
+let g:python_host_prog = $PYTHON
+let g:python3_host_prog = $PYTHON3
 " Fundamental settings
 set fileencoding=utf-8
 set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1
@@ -103,17 +114,30 @@ let mapleader = ","       "Set mapleader
 imap <leader><leader> <esc>:
 "nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
-nnoremap <C-f> :FZF %:p:h
-nmap <leader>p "*p
-nmap <leader>p "*y
-nnoremap <leader><leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <C-f><C-f> :FZF %:p:h
+nnoremap <leader>bw :bw!<CR>
+if has('win32unix')
+	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
+	nnoremap <silent> <leader>y :call Putclip('n', 1)<CR>
+	nnoremap <silent> <leader>p :call Getclip()<CR>
+else
+	map <leader>p "+p
+	map <leader>y "+yy
+endif
+nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <C-s> :g/<C-r><C-w>/<CR>
+nnoremap <C-s><C-s> :g/,C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-f> /<C-r><C-w><CR>
+nnoremap <C-g> :Rg <C-r><C-w> %:p:h
+"<CR>:vnew
+
 " <space> => fold/unfold current code
 " tips: zR => unfold all; zM => fold all
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
 nnoremap <leader>. :e $XDG_CONFIG_HOME\nvim\init.vim<CR>
 nnoremap <leader>.. :source $XDG_CONFIG_HOME\nvim\init.vim<CR>
-nmap tt :vs\|Topen<CR>
+nmap <leader>t :vs\|Topen<CR>
 nmap tn :Tnext<CR>
 nmap tq :TcloseaAll!<CR>
 " te => send current line/selected lines to the terminal
@@ -224,6 +248,66 @@ endif
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
 
+if has('win32unix')
+	function! Putclip(type, ...) range
+		let sel_save = &selection
+		let &selection = "inclusive"
+		let reg_save = @@
+		if a:type == 'n'
+			silent exe a:firstline . "," . a:lastline . "y"
+		elseif a:type == 'c'
+			silent exe a:1 . "," . a:2 . "y"
+		else
+			silent exe "normal! `<" . a:type . "`>y"
+		endif
+	
+		"call system('putclip', @@)  " if you're using an old Cygwin
+		"call system('clip.exe', @@) " if you're using Bash on Windows
+	
+		"As of Cygwin 1.7.13, the /dev/clipboard device was added to provide
+		"access to the native Windows clipboard. It provides the added benefit
+		"of supporting utf-8 characters which putclip currently does not. Based
+		"on a tip from John Beckett, use the following:
+		call writefile(split(@@,"\n"), '/dev/clipboard')
+	
+		let &selection = sel_save
+		let @@ = reg_save
+	endfunction
+	function! Getclip()
+		let reg_save = @@
+		"let @@ = system('getclip')
+		"Much like Putclip(), using the /dev/clipboard device to access to the
+		"native Windows clipboard for Cygwin 1.7.13 and above. It provides the
+		"added benefit of supporting utf-8 characters which getclip currently does
+		"not. Based again on a tip from John Beckett, use the following:
+		let @@ = join(readfile('/dev/clipboard'), "\n")
+		setlocal paste
+		exe 'normal p'
+		setlocal nopaste
+		let @@ = reg_save
+	endfunction
+endif
+
+" gutentags搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归 "
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+
+" 所生成的数据文件的名称 "
+let g:gutentags_ctags_tagfile = '.tags'
+
+" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录 "
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+" 检测 ~/.cache/tags 不存在就新建 "
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+
+" 配置 ctags 的参数 "
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+
+
 " Automatics
 function! ToStartify()
     if winnr("$") == 1 && buffer_name(winbufnr(winnr())) != ""
@@ -235,6 +319,6 @@ endfunction
 au! QuitPre * call ToStartify()
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 autocmd BufWritePost *.scala :EnTypeCheck
-cd $XDG_CONFIG_HOME
+cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
