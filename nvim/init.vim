@@ -43,6 +43,7 @@ Plug 'neomake/neomake'
 Plug 'kassio/neoterm'
 Plug 'chrisbra/NrrwRgn'
 " misc
+Plugin 'will133/vim-dirdiff'
 Plug 'asins/vimcdoc'
 Plug 'junegunn/vim-github-dashboard'
 " documentation
@@ -51,7 +52,7 @@ Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'itchyny/calendar.vim'
 Plug 'junegunn/vim-journal'
-Plug 'junegunn/fzf'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'jremmen/vim-ripgrep'
 " navigation
 "Plug 'scrooloose/nerdtree'
@@ -211,6 +212,7 @@ let g:startify_skiplist = [
             \ ]
 let g:startify_bookmarks = [
             \ { 'c': '$MYVIMRC' },
+            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -308,6 +310,8 @@ let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 
 
+command! Difft windo diffthis
+command! Diffo windo diffoff
 " Automatics
 function! ToStartify()
     if winnr("$") == 1 && buffer_name(winbufnr(winnr())) != ""

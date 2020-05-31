@@ -1,0 +1,101 @@
+
+初始化vim
+ git clone https://github.com/Henry-Hwang/hvim.git
+
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+
+# Support system clickboard
+sudo apt-get install vim-gui-common
+
+# Count number
+:%s/patten/&/gn
+
+# Filter
+:g/patten/        # List all lines with patten
+:g/patten/d       # Delete all lines with patten
+:g/patten/yank A  # Copy all lines with patten
+
+# Replace
+:%s/src/dest/gc
+
+# Bookmark
+ma # Set boolmark a
+mA # Set boolmark A
+‘a # Jump to a
+
+# Copy word under cursor
+yw
+
+# Delete word
+daw	- #Delete a word
+bdw	- #Delete a word
+
+
+# Copy mult lines
+"ayy  # Copy to "a
+"b3yy # Copy to "b register
+"ap # Paste "a
+"bp # Paste "b
+
+# Change file format
+:set ff=unix
+:set ff=dos
+
+# Open mult files
+:args *.c
+
+# Colume insert
+- CTRL+v
+- I
+- <type word>
+- ESC ESC
+
+
+# Colume replace insert
+- CTRL + v
+- c
+- <type word>
+- ESC ESC
+
+# Copy word to command mode
+<CTRL + r> <CTRL + w>
+
+# Scroll
+zt scrolls to the top
+zz scrolls to the middle
+zb scrolls to the bottom
+
+# Run shell command
+:!pwd
+
+# Expand path
+:e %:p<Tab>  # Full file path
+:e %:p:h <Tab> # Full directory
+
+# TAB replace by SPACE
+:set ts=4
+:set expandtab
+:%retab!
+
+
+# SPACE replace by TAB
+:set ts=4
+:set noexpandtab
+:%retab!
+
+vimdiff
+]c          # next difference
+[c          # previous difference
+do          # diff obtain
+dp          # diff put
+zo          # open folded text
+zc          # close folded text
+:diffupdate # re-scan the files for differences
+
+# ASCII and Hex edit
+:%!xxd      # To Hex edit
+:%!xxd -r   # To ASCII edit
+
+# Ctrlp
+<C + o> + v # Open vertical 
+<C + o> + h # Open horizon
