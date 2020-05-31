@@ -7,6 +7,7 @@ if has('win32')
     let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
     let $HOME="C:\\Users\\hhuang"
     let $DIR_TEMP = $XDG_CONFIG_HOME
+    let $MYVIMRC = '$XDG_CONFIG_HOME\nvim\init.vim'
 else
     let $DIR_PLUGIN='~/.config/nvim/plugged'
     let $PYTHON = '/usr/bin/python'
@@ -97,12 +98,12 @@ set ignorecase        "ignore the case when search texts
 set smartcase         "if searching text contains uppercase case will not be ignored
 set autochdir
 set number           "line number
-set cursorline       "hilight the line of the cursor
 set nowrap           "no line wrapping
 set cst "ctags 多个选择
 "colorscheme gruvbox  "use the theme gruvbox
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
+hi CursorLine cterm=bold,reverse ctermfg=238 ctermbg=253 gui=bold,reverse guifg=#455354 guibg=fg
 " change the color of chars over the width of 80 into blue
 " (uncomment to enable it)
 "au BufWinEnter * let w:m2=matchadd('Underlined', '\%>' . 80 . 'v.\+', -1)
@@ -135,8 +136,8 @@ nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 " tips: zR => unfold all; zM => fold all
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
-nnoremap <leader>. :e $XDG_CONFIG_HOME\nvim\init.vim<CR>
-nnoremap <leader>.. :source $XDG_CONFIG_HOME\nvim\init.vim<CR>
+nnoremap <leader>. :e $MYVIMRC<CR>
+nnoremap <leader>.. :source $MYVIMRC<CR>
 nmap <leader>t :vs\|Topen<CR>
 nmap tn :Tnext<CR>
 nmap tq :TcloseaAll!<CR>
@@ -209,8 +210,7 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vimrc' },
-            \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
+            \ { 'c': '$MYVIMRC' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
