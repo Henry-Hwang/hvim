@@ -4,9 +4,10 @@ endfunction
 if has('win32')
     let $PYTHON = 'C:\Python27\python' 
     let $PYTHON3 = 'C:\Python38\python' 
-    let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
-    let $HOME="C:\\Users\\hhuang"
     let $DIR_TEMP = $XDG_CONFIG_HOME
+    let $HOME="C:\\Users\\hhuang"
+    let $MYVIMRC = '$XDG_CONFIG_HOME\nvim\init.vim'
+    let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
 else
     let $DIR_PLUGIN='~/.config/nvim/plugged'
     let $PYTHON = '/usr/bin/python' 
@@ -15,66 +16,40 @@ else
 endif
 
 call plug#begin($DIR_PLUGIN)
-" looking
 Plug 'mhinz/vim-startify'
-Plug 'Yggdroot/indentLine'
-Plug 'ryanoasis/vim-devicons'
 Plug 'myusuf3/numbers.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'ianks/gruvbox'
+
 Plug 'vim-scripts/molokai'
-Plug 'airblade/vim-gitgutter'
-Plug 'altercation/vim-colors-solarized'
-" completion/templating
-Plug 'jiangmiao/auto-pairs'
-Plug 'ervandew/supertab'
-Plug 'tpope/vim-endwise'
-"Plug 'scrooloose/nerdcommenter'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
-" command extention
 Plug 'wellle/targets.vim'
 Plug 'tpope/vim-surround'
-Plug 'terryma/vim-multiple-cursors'
-" utils
-Plug 'neomake/neomake'
-Plug 'kassio/neoterm'
-Plug 'chrisbra/NrrwRgn'
-" misc
-Plugin 'will133/vim-dirdiff'
+Plug 'will133/vim-dirdiff'
 Plug 'asins/vimcdoc'
-Plug 'junegunn/vim-github-dashboard'
-" documentation
-Plug 'rhysd/nyaovim-markdown-preview'
 Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'itchyny/calendar.vim'
 Plug 'junegunn/vim-journal'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'jremmen/vim-ripgrep'
-" navigation
-"Plug 'scrooloose/nerdtree'
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'wesleyche/SrcExpl'
-Plug 'majutsushi/tagbar'
-Plug 'rizzatti/dash.vim'
-Plug 'eugen0329/vim-esearch'
 Plug 'ludovicchabant/vim-gutentags'
-" c/c++
-" java
-Plug 'artur-shaik/vim-javacomplete2'
-" python
-Plug 'mattn/emmet-vim'
-" scala
 Plug 'ensime/ensime-vim', { 'do': function('DoRemote') }
-Plug 'derekwyatt/vim-scala'
 Plug 'universal-ctags/ctags'
+Plug 'tacahiroy/ctrlp-funky'
+Plug 'eshion/vim-sync'
+Plug 'vim-scripts/a.vim'
+Plug 'vim-scripts/xml.vim'
+Plug 'vim-scripts/python.vim'
+Plug 'vim-scripts/c.vim'
+Plug 'scrooloose/nerdcommenter'
 call plug#end()
 
 let g:python_host_prog = $PYTHON 
 let g:python3_host_prog = $PYTHON3 
-" Fundamental settings
+set encoding=utf-8
 set fileencoding=utf-8
 set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1
 set fileformat=unix
@@ -101,17 +76,23 @@ set number           "line number
 set cursorline       "hilight the line of the cursor
 set nowrap           "no line wrapping
 set cst "ctags 多个选择
-"colorscheme gruvbox  "use the theme gruvbox
+set softtabstop=4
+set smarttab
+set history=1024
+set nobackup
+set incsearch
+set hlsearch
+set noerrorbells
+set novisualbell
+set laststatus=2
+set showmatch
+set wrapscan
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
-" change the color of chars over the width of 80 into blue
-" (uncomment to enable it)
-"au BufWinEnter * let w:m2=matchadd('Underlined', '\%>' . 80 . 'v.\+', -1)
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
-" Shortcuts
-" \\ => go to command mode
 let mapleader = ","       "Set mapleader
+"command ": hi" to show all color
 imap <leader><leader> <esc>:
 "nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
@@ -136,27 +117,18 @@ nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 " tips: zR => unfold all; zM => fold all
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
-nnoremap <leader>. :e $XDG_CONFIG_HOME\nvim\init.vim<CR>
-nnoremap <leader>.. :source $XDG_CONFIG_HOME\nvim\init.vim<CR>
-nmap <leader>t :vs\|Topen<CR>
-nmap tn :Tnext<CR>
-nmap tq :TcloseaAll!<CR>
-" te => send current line/selected lines to the terminal
-nnoremap <silent> te :TREPLSend<CR>
-" tE => send the thole current file to the terminal
-nnoremap <silent> tE :TREPLSendFile<CR>
-" tm => toggle the markdown preview
+nnoremap <leader>. :e $MYVIMRC<CR>
+nnoremap <leader>.. :source $MYVIMRC<CR>
+
+nnoremap <leader>t :vertical terminal<CR>
+nnoremap <leader>,m /&clean-search&<CR>
 let g:markdown_preview_on = 0
 au! BufWinEnter *.md,*.markdown,*.mdown let g:markdown_preview_on = g:markdown_preview_auto || g:markdown_preview_on  
 au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_preview_auto && g:markdown_preview_on  
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
 " Airline
-let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline_powerline_fonts = 1
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-endif
 let g:indentLine_color_gui = "#504945"
 " Markdown_preview (a plugin in nyaovim)
 let g:markdown_preview_eager = 1
@@ -168,19 +140,7 @@ let g:multi_cursor_next_key='<tab>'
 let g:multi_cursor_prev_key='b'
 let g:multi_cursor_skip_key='x'
 let g:multi_cursor_quit_key='q'
-" Neomake
-let g:neomake_cpp_enabled_makers = ['clang']
-let g:neomake_cpp_clang_args = ['-Wall', '-Wextra', '-std=c++11', '-o', '%:p:r']
-let g:neomake_cpp_gcc_args = ['-Wall', '-Wextra', '-std=c++11', '-o', '%:p:r']
-let g:neomake_scala_enabled_markers = ['fsc', 'scalastyle']
-let g:neomake_scala_scalac_args = ['-Ystop-after:parser', '-Xexperimental']
-" Neoterm
-let g:neoterm_size=20
-" toogle the terminal
-" kills the current job (send a <c-c>)
-nnoremap <silent> tc :call neoterm#kill()<cr>
-" Notes
-let g:notes_directories = ['~/.config/nvim/note/notes-in-vim']
+
 " Startify
 command! -nargs=1 CD cd <args> | Startify
 autocmd User Startified setlocal cursorline
@@ -290,29 +250,46 @@ if has('win32unix')
 	endfunction
 endif
 
-" gutentags搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归 "
+command! Difft windo diffthis
+command! Diffo windo diffoff
+" gutentags stop at the point list bellow"
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
 
-" 所生成的数据文件的名称 "
+" ctag name"
 let g:gutentags_ctags_tagfile = '.tags'
 
-" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录 "
+" Put all tags in ~/.cache/tags"
 let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
-" 检测 ~/.cache/tags 不存在就新建 "
 if !isdirectory(s:vim_tags)
    silent! call mkdir(s:vim_tags, 'p')
 endif
 
-" 配置 ctags 的参数 "
+" ctags settings "
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 
+" calculator
+command! -nargs=+ Calc :py print <args>
+py from math import *
+"}
 
 
-command! Difft windo diffthis
-command! Diffo windo diffoff
+"if has('win32')
+"let g:UltiSnipsSnippetDirectories=[$HOME.'\.vim\mysnippets']
+"else
+"let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/mysnippets']
+"endif
+"[[Session management]]
+if &diff
+    nnoremap ] ]c
+    nnoremap [ [c
+    hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+    hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+
+endif
 " Automatics
 function! ToStartify()
     if winnr("$") == 1 && buffer_name(winbufnr(winnr())) != ""
