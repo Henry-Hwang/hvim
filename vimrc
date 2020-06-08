@@ -1,6 +1,6 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-
+" wget https://github.com/Henry-Hwang/hvim/blob/master/vimrc
 set rtp+=$HOME/.vim/bundle/Vundle.vim/
 call vundle#begin('$HOME/.vim/bundle/')
 let $PYTHON = '/usr/bin/python'
@@ -312,3 +312,16 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
+
+set undodir=~/.vim/tmp/undo//     " undo files
+set backupdir=~/.vim/tmp/backup// " backups
+set directory=~/.vim/tmp/swap//   " swap files
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif

@@ -174,9 +174,10 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vimrc' },
-            \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
-            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
+            \ { 'n': '~/note.txt' },
+            \ { 'c': '~/hvim/vim-note.txt' },
+            \ { 't': '~/hvim/tmux-note.txt' },
+            \ { 'y': '~/hvim/nvim/init.vim' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -263,3 +264,16 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
+
+set undodir=~/.vim/tmp/undo//     " undo files
+set backupdir=~/.vim/tmp/backup// " backups
+set directory=~/.vim/tmp/swap//   " swap files
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif
