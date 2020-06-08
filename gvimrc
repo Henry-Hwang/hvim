@@ -179,7 +179,7 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vimrc' },
+            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
             \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
             \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
             \ ]

@@ -1,22 +1,11 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
-if has('win32')
-    let $PYTHON = 'C:\Python27\python' 
-    let $PYTHON3 = 'C:\Python38\python' 
-
-    let $DIR_TEMP = $XDG_CONFIG_HOME
-    let $HOME="C:\\Users\\hhuang"
-    let &pythonthreedll = 'C:\Python38\python38.dll'
-    set rtp+=$HOME\.vim\bundle\Vundle.vim
-    call vundle#begin()
-else
-    set rtp+=$HOME/.vim/bundle/Vundle.vim/
-    call vundle#begin('$HOME/.vim/bundle/')
-    let $PYTHON = '/usr/bin/python' 
-    let $PYTHON3 = '/usr/bin/python3' 
-    let $DIR_TEMP = '~/.config/nvim'
-endif
+set rtp+=$HOME/.vim/bundle/Vundle.vim/
+call vundle#begin('$HOME/.vim/bundle/')
+let $PYTHON = '/usr/bin/python'
+let $PYTHON3 = '/usr/bin/python3'
+let $DIR_TEMP = '~/.vim/tmp'
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'mhinz/vim-startify'
 Plugin 'myusuf3/numbers.vim'
@@ -27,7 +16,6 @@ Plugin 'vim-scripts/molokai'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'wellle/targets.vim'
-Plugin 'tpope/vim-surround'
 Plugin 'will133/vim-dirdiff'
 Plugin 'asins/vimcdoc'
 Plugin 'xolox/vim-notes'
@@ -38,8 +26,8 @@ Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'jremmen/vim-ripgrep'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'ludovicchabant/vim-gutentags'
-"Plugin 'ensime/ensime-vim', { 'do': function('DoRemote') }
 Plugin 'universal-ctags/ctags'
+Plugin 'majutsushi/tagbar'
 Plugin 'tacahiroy/ctrlp-funky'
 Plugin 'eshion/vim-sync'
 Plugin 'vim-scripts/a.vim'
@@ -49,8 +37,8 @@ Plugin 'vim-scripts/c.vim'
 Plugin 'scrooloose/nerdcommenter'
 call vundle#end()
 
-let g:python_host_prog = $PYTHON 
-let g:python3_host_prog = $PYTHON3 
+let g:python_host_prog = $PYTHON
+let g:python3_host_prog = $PYTHON3
 set encoding=utf-8
 set fileencoding=utf-8
 set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1
@@ -60,15 +48,6 @@ filetype on
 filetype plugin on
 filetype plugin indent on
 syntax on
-if has('win32') && has ('gui_running')
-	source $VIMRUNTIME/delmenu.vim
-	source $VIMRUNTIME/menu.vim
-
-	set guioptions-=T	" 不显示工具栏
-	set guioptions-=L	" 不显示左边滚动条
-	set guioptions-=r	" 不显示右边滚动条
-	set guioptions-=m
-endif
 
 " Some useful settings
 set mat=2            "keep modified buffer
@@ -96,6 +75,7 @@ set softtabstop=4
 set smarttab
 set history=1024
 set nobackup
+set noswapfile
 set incsearch
 set hlsearch
 set noerrorbells
@@ -109,11 +89,6 @@ set list
 set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
 
 set shortmess=atl
-if !isdirectory("~/.vim/tmp")
-   silent! call mkdir("~/.vim/tmp", 'p')
-endif
-" Set swap file location
-set directory="~/.vim/tmp"
 
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
@@ -144,9 +119,11 @@ else
 endif
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/,C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>:vnew<CR>p
 nnoremap <C-f> /<C-r><C-w><CR>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
+"select a function
+nnoremap <leader>f [[%v%h0
 "<CR>:vnew
 
 " <space> => fold/unfold current code
@@ -163,6 +140,7 @@ au! BufWinEnter *.md,*.markdown,*.mdown let g:markdown_preview_on = g:markdown_p
 au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_preview_auto && g:markdown_preview_on  
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
 " Airline
+let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
 " Markdown_preview (a plugin in nyaovim)
 let g:markdown_preview_eager = 1
@@ -204,9 +182,10 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vimrc' },
-            \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
-            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
+            \ { 'n': '~/note.txt' },
+            \ { 'c': '~/hvim/vim-note.txt' },
+            \ { 't': '~/hvim/tmux-note.txt' },
+            \ { 'y': '~/hvim/nvim/init.vim' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -235,11 +214,7 @@ let g:ctrlp_match_window_reversed=0
 let g:ctrlp_mruf_max=500
 let g:ctrlp_follow_symlinks=1
 
-if has('win32')
-	let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
-else
-	let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
-endif
+let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
 
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
@@ -303,7 +278,6 @@ endif
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
-
 " calculator
 command! -nargs=+ Calc :py print <args>
 py from math import *
@@ -318,19 +292,11 @@ else
 	let &t_EI = "\e[2 q"
 endif
 
-"if has('win32')
-"let g:UltiSnipsSnippetDirectories=[$HOME.'\.vim\mysnippets']
-"else
-"let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/mysnippets']
-"endif
 "[[Session management]]
 if &diff
-    nnoremap ] ]c
-    nnoremap [ [c
     hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
     hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
 	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
-
 endif
 " Automatics
 function! ToStartify()
