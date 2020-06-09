@@ -1,4 +1,6 @@
+
 let $DIR_PLUGIN='~/.config/nvim/plugged'
+
 let $PYTHON = '/usr/bin/python'
 let $PYTHON3 = '/usr/bin/python3'
 let $DIR_TEMP = '~/.vim/tmp'
@@ -97,7 +99,7 @@ let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set t_Co=256
 set guifont=Courier_New:h11
 hi CursorLine cterm=bold,reverse ctermfg=238 ctermbg=253 gui=bold,reverse guifg=#455354 guibg=fg
-set cul
+set cursorline       "hilight the line of the cursor
 
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457

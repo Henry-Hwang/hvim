@@ -64,7 +64,6 @@ set ignorecase        "ignore the case when search texts
 set smartcase         "if searching text contains uppercase case will not be ignored
 set autochdir
 set number           "line number
-set cursorline       "hilight the line of the cursor
 set nowrap           "no line wrapping
 set cst "ctags 多个选择
 
@@ -100,6 +99,7 @@ if has('win32unix')
 else
 	hi CursorLine term=underline ctermbg=236 guibg=#293739
 endif
+set cursorline       "hilight the line of the cursor
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457
 let mapleader = ","       "Set mapleader
@@ -119,7 +119,7 @@ else
 endif
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>
 nnoremap <C-f> /<C-r><C-w><CR>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 "select a function
