@@ -1,81 +1,41 @@
-function! DoRemote(arg)
-    UpdateRemotePlugins
-endfunction
-if has('win32')
-    let $PYTHON = 'C:\Python27\python'
-    let $PYTHON3 = 'C:\Python38\python'
-    let $DIR_PLUGIN='C:\cygwin64\home\hhuang\hvim\nvim\plugged'
-    let $HOME="C:\\Users\\hhuang"
-    let $DIR_TEMP = $XDG_CONFIG_HOME
-    let $MYVIMRC = '$XDG_CONFIG_HOME\nvim\init.vim'
-else
-    let $DIR_PLUGIN='~/.config/nvim/plugged'
-    let $PYTHON = '/usr/bin/python'
-    let $PYTHON3 = '/usr/bin/python3'
-    let $DIR_TEMP = '~/.config/nvim'
-endif
-
+let $DIR_PLUGIN='~/.config/nvim/plugged'
+let $PYTHON = '/usr/bin/python' 
+let $PYTHON3 = '/usr/bin/python3' 
+let $DIR_TEMP = '~/.vim/tmp'
 call plug#begin($DIR_PLUGIN)
-" looking
 Plug 'mhinz/vim-startify'
-Plug 'Yggdroot/indentLine'
-Plug 'ryanoasis/vim-devicons'
 Plug 'myusuf3/numbers.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'ianks/gruvbox'
+
 Plug 'vim-scripts/molokai'
-Plug 'airblade/vim-gitgutter'
-Plug 'altercation/vim-colors-solarized'
-" completion/templating
-Plug 'jiangmiao/auto-pairs'
-Plug 'ervandew/supertab'
-Plug 'tpope/vim-endwise'
-"Plug 'scrooloose/nerdcommenter'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
-" command extention
 Plug 'wellle/targets.vim'
-Plug 'tpope/vim-surround'
-Plug 'terryma/vim-multiple-cursors'
-" utils
-Plug 'neomake/neomake'
-Plug 'kassio/neoterm'
-Plug 'chrisbra/NrrwRgn'
-" misc
-Plugin 'will133/vim-dirdiff'
+Plug 'will133/vim-dirdiff'
 Plug 'asins/vimcdoc'
-Plug 'junegunn/vim-github-dashboard'
-" documentation
-Plug 'rhysd/nyaovim-markdown-preview'
 Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'itchyny/calendar.vim'
 Plug 'junegunn/vim-journal'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'jremmen/vim-ripgrep'
-" navigation
-"Plug 'scrooloose/nerdtree'
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'wesleyche/SrcExpl'
-Plug 'majutsushi/tagbar'
-Plug 'rizzatti/dash.vim'
-Plug 'eugen0329/vim-esearch'
 Plug 'ludovicchabant/vim-gutentags'
-" c/c++
-" java
-Plug 'artur-shaik/vim-javacomplete2'
-" python
-Plug 'mattn/emmet-vim'
-" scala
-Plug 'ensime/ensime-vim', { 'do': function('DoRemote') }
-Plug 'derekwyatt/vim-scala'
 Plug 'universal-ctags/ctags'
+Plug 'majutsushi/tagbar'
+Plug 'tacahiroy/ctrlp-funky'
+Plug 'eshion/vim-sync'
+Plug 'vim-scripts/a.vim'
+Plug 'vim-scripts/xml.vim'
+Plug 'vim-scripts/python.vim'
+Plug 'vim-scripts/c.vim'
+Plug 'scrooloose/nerdcommenter'
 call plug#end()
 
 let g:python_host_prog = $PYTHON
 let g:python3_host_prog = $PYTHON3
-" Fundamental settings
+set encoding=utf-8
 set fileencoding=utf-8
 set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1
 set fileformat=unix
@@ -84,6 +44,13 @@ filetype on
 filetype plugin on
 filetype plugin indent on
 syntax on
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+set guioptions-=T	" 不显示工具栏
+set guioptions-=L	" 不显示左边滚动条
+set guioptions-=r	" 不显示右边滚动条
+set guioptions-=m
+
 " Some useful settings
 set mat=2            "keep modified buffer
 set scrolloff=4
@@ -101,36 +68,53 @@ set autochdir
 set number           "line number
 set nowrap           "no line wrapping
 set cst "ctags 多个选择
-"colorscheme gruvbox  "use the theme gruvbox
+
+hi Comment ctermfg=cyan
+set backspace=indent,eol,start
+set whichwrap+=<,>,h,l
+set softtabstop=4
+set smarttab
+set history=1024
+set nobackup
+set noswapfile
+set incsearch
+set hlsearch
+set noerrorbells
+set novisualbell
+set laststatus=2
+set showmatch
+set wrapscan
+set display=lastline
+set paste
+set list
+set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
+
+set shortmess=atl
+
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
-hi CursorLine cterm=bold,reverse ctermfg=238 ctermbg=253 gui=bold,reverse guifg=#455354 guibg=fg
-" change the color of chars over the width of 80 into blue
-" (uncomment to enable it)
-"au BufWinEnter * let w:m2=matchadd('Underlined', '\%>' . 80 . 'v.\+', -1)
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-
-" Shortcuts
-" \\ => go to command mode
+set t_Co=256
+set guifont=Courier_New:h11
+hi CursorLine term=underline ctermbg=236 guibg=#293739
+"[[syntax]]
+hi Comment term=bold ctermfg=60 guifg=#465457
 let mapleader = ","       "Set mapleader
+"command ": hi" to show all color
 imap <leader><leader> <esc>:
 "nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
 nnoremap <C-f><C-f> :FZF %:p:h
 nnoremap <leader>bw :bw!<CR>
-if has('win32unix')
-	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
-	nnoremap <silent> <leader>y :call Putclip('n', 1)<CR>
-	nnoremap <silent> <leader>p :call Getclip()<CR>
-else
-	map <leader>p "+p
-	map <leader>y "+yy
-endif
+map <leader>p "+p
+map <leader>y "+yy
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/,C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>:vnew<CR>p
 nnoremap <C-f> /<C-r><C-w><CR>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
+"select a function
+nnoremap <leader>f [[%v%h0
 "<CR>:vnew
 
 " <space> => fold/unfold current code
@@ -139,25 +123,15 @@ nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
 nnoremap <leader>. :e $MYVIMRC<CR>
 nnoremap <leader>.. :source $MYVIMRC<CR>
-nmap <leader>t :vs\|Topen<CR>
-nmap tn :Tnext<CR>
-nmap tq :TcloseaAll!<CR>
-" te => send current line/selected lines to the terminal
-nnoremap <silent> te :TREPLSend<CR>
-" tE => send the thole current file to the terminal
-nnoremap <silent> tE :TREPLSendFile<CR>
-" tm => toggle the markdown preview
+
+nnoremap <leader>t :vertical terminal<CR>
+nnoremap <leader>,m /&clean-search&<CR>
 let g:markdown_preview_on = 0
 au! BufWinEnter *.md,*.markdown,*.mdown let g:markdown_preview_on = g:markdown_preview_auto || g:markdown_preview_on  
 au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_preview_auto && g:markdown_preview_on  
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
 " Airline
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline_powerline_fonts = 1
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-endif
+let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
 " Markdown_preview (a plugin in nyaovim)
 let g:markdown_preview_eager = 1
@@ -169,19 +143,7 @@ let g:multi_cursor_next_key='<tab>'
 let g:multi_cursor_prev_key='b'
 let g:multi_cursor_skip_key='x'
 let g:multi_cursor_quit_key='q'
-" Neomake
-let g:neomake_cpp_enabled_makers = ['clang']
-let g:neomake_cpp_clang_args = ['-Wall', '-Wextra', '-std=c++11', '-o', '%:p:r']
-let g:neomake_cpp_gcc_args = ['-Wall', '-Wextra', '-std=c++11', '-o', '%:p:r']
-let g:neomake_scala_enabled_markers = ['fsc', 'scalastyle']
-let g:neomake_scala_scalac_args = ['-Ystop-after:parser', '-Xexperimental']
-" Neoterm
-let g:neoterm_size=20
-" toogle the terminal
-" kills the current job (send a <c-c>)
-nnoremap <silent> tc :call neoterm#kill()<cr>
-" Notes
-let g:notes_directories = ['~/.config/nvim/note/notes-in-vim']
+
 " Startify
 command! -nargs=1 CD cd <args> | Startify
 autocmd User Startified setlocal cursorline
@@ -241,77 +203,50 @@ let g:ctrlp_match_window_reversed=0
 let g:ctrlp_mruf_max=500
 let g:ctrlp_follow_symlinks=1
 
-if has('win32')
-	let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
-else
-	let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
-endif
+let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
 
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
 
-if has('win32unix')
-	function! Putclip(type, ...) range
-		let sel_save = &selection
-		let &selection = "inclusive"
-		let reg_save = @@
-		if a:type == 'n'
-			silent exe a:firstline . "," . a:lastline . "y"
-		elseif a:type == 'c'
-			silent exe a:1 . "," . a:2 . "y"
-		else
-			silent exe "normal! `<" . a:type . "`>y"
-		endif
-	
-		"call system('putclip', @@)  " if you're using an old Cygwin
-		"call system('clip.exe', @@) " if you're using Bash on Windows
-	
-		"As of Cygwin 1.7.13, the /dev/clipboard device was added to provide
-		"access to the native Windows clipboard. It provides the added benefit
-		"of supporting utf-8 characters which putclip currently does not. Based
-		"on a tip from John Beckett, use the following:
-		call writefile(split(@@,"\n"), '/dev/clipboard')
-	
-		let &selection = sel_save
-		let @@ = reg_save
-	endfunction
-	function! Getclip()
-		let reg_save = @@
-		"let @@ = system('getclip')
-		"Much like Putclip(), using the /dev/clipboard device to access to the
-		"native Windows clipboard for Cygwin 1.7.13 and above. It provides the
-		"added benefit of supporting utf-8 characters which getclip currently does
-		"not. Based again on a tip from John Beckett, use the following:
-		let @@ = join(readfile('/dev/clipboard'), "\n")
-		setlocal paste
-		exe 'normal p'
-		setlocal nopaste
-		let @@ = reg_save
-	endfunction
-endif
-
-" gutentags搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归 "
+command! Difft windo diffthis
+command! Diffo windo diffoff
+" gutentags stop at the point list bellow"
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
 
-" 所生成的数据文件的名称 "
+" ctag name"
 let g:gutentags_ctags_tagfile = '.tags'
 
-" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录 "
+" Put all tags in ~/.cache/tags"
 let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
-" 检测 ~/.cache/tags 不存在就新建 "
 if !isdirectory(s:vim_tags)
    silent! call mkdir(s:vim_tags, 'p')
 endif
 
-" 配置 ctags 的参数 "
+" ctags settings "
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+" calculator
+command! -nargs=+ Calc :py print <args>
+py from math import *
+"}
 
+" SSH tmux
+if exists('$TMUX')
+	let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+	let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
+else
+	let &t_SI = "\e[5 q"
+	let &t_EI = "\e[2 q"
+endif
 
-command! Difft windo diffthis
-command! Diffo windo diffoff
+"[[Session management]]
+if &diff
+    hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+    hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+endif
 " Automatics
 function! ToStartify()
     if winnr("$") == 1 && buffer_name(winbufnr(winnr())) != ""

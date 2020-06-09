@@ -1,14 +1,15 @@
-"插件管理
+"Install Plugin manager
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
-set rtp+=$HOME/.vim/bundle/Vundle.vim/
-call vundle#begin('$HOME/.vim/bundle/')
-let $PYTHON = '/usr/bin/python'
-let $PYTHON3 = '/usr/bin/python3'
+let $PYTHON = 'C:\Python27\python'
+let $PYTHON3 = 'C:\Python38\python'
 let $DIR_TEMP = '~/.vim/tmp'
+let $HOME="C:\\Users\\hhuang"
+let &pythonthreedll = 'C:\Python38\python38.dll'
+set rtp+=$HOME\.vim\bundle\Vundle.vim
+call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'mhinz/vim-startify'
-Plugin 'myusuf3/numbers.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 
@@ -48,6 +49,12 @@ filetype on
 filetype plugin on
 filetype plugin indent on
 syntax on
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+set guioptions-=T	" 不显示工具栏
+set guioptions-=L	" 不显示左边滚动条
+set guioptions-=r	" 不显示右边滚动条
+set guioptions-=m
 
 " Some useful settings
 set mat=2            "keep modified buffer
@@ -95,11 +102,7 @@ set background=dark "use the light version of gruvbox
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set t_Co=256
 set guifont=Courier_New:h11
-if has('win32unix')
-	hi CursorLine cterm=NONE ctermfg=white ctermbg=55 guifg=#293739
-else
-	hi CursorLine term=underline ctermbg=236 guibg=#293739
-endif
+hi CursorLine term=underline ctermbg=236 guibg=#293739
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457
 let mapleader = ","       "Set mapleader
@@ -109,14 +112,8 @@ imap <leader><leader> <esc>:
 nnoremap <C-e> :Ex<CR>
 nnoremap <C-f><C-f> :FZF %:p:h
 nnoremap <leader>bw :bw!<CR>
-if has('win32unix')
-	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
-	nnoremap <silent> <leader>y :call Putclip('n', 1)<CR>
-	nnoremap <silent> <leader>p :call Getclip()<CR>
-else
-	map <leader>p "+p
-	map <leader>y "+yy
-endif
+map <leader>p "+p
+map <leader>y "+yy
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
 nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>:vnew<CR>p
@@ -130,8 +127,8 @@ nnoremap <leader>f [[%v%h0
 " tips: zR => unfold all; zM => fold all
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
-nnoremap <leader>. :e $MYVIMRC<CR>
-nnoremap <leader>.. :source $MYVIMRC<CR>
+nnoremap <leader>. :e $GVIMRC<CR>
+nnoremap <leader>.. :source $GVIMRC<CR>
 
 nnoremap <leader>t :vertical terminal<CR>
 nnoremap <leader>,m /&clean-search&<CR>
@@ -182,10 +179,9 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'n': '~/note.txt' },
-            \ { 'c': '~/hvim/vim-note.txt' },
-            \ { 't': '~/hvim/tmux-note.txt' },
-            \ { 'y': '~/hvim/nvim/init.vim' },
+            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
+            \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
+            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -214,50 +210,10 @@ let g:ctrlp_match_window_reversed=0
 let g:ctrlp_mruf_max=500
 let g:ctrlp_follow_symlinks=1
 
-let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+let g:ctrlp_user_command = 'dir %s /-n /b /s /a-d'  " Windows
 
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
-
-if has('win32unix')
-	function! Putclip(type, ...) range
-		let sel_save = &selection
-		let &selection = "inclusive"
-		let reg_save = @@
-		if a:type == 'n'
-			silent exe a:firstline . "," . a:lastline . "y"
-		elseif a:type == 'c'
-			silent exe a:1 . "," . a:2 . "y"
-		else
-			silent exe "normal! `<" . a:type . "`>y"
-		endif
-	
-		"call system('putclip', @@)  " if you're using an old Cygwin
-		"call system('clip.exe', @@) " if you're using Bash on Windows
-	
-		"As of Cygwin 1.7.13, the /dev/clipboard device was added to provide
-		"access to the native Windows clipboard. It provides the added benefit
-		"of supporting utf-8 characters which putclip currently does not. Based
-		"on a tip from John Beckett, use the following:
-		call writefile(split(@@,"\n"), '/dev/clipboard')
-	
-		let &selection = sel_save
-		let @@ = reg_save
-	endfunction
-	function! Getclip()
-		let reg_save = @@
-		"let @@ = system('getclip')
-		"Much like Putclip(), using the /dev/clipboard device to access to the
-		"native Windows clipboard for Cygwin 1.7.13 and above. It provides the
-		"added benefit of supporting utf-8 characters which getclip currently does
-		"not. Based again on a tip from John Beckett, use the following:
-		let @@ = join(readfile('/dev/clipboard'), "\n")
-		setlocal paste
-		exe 'normal p'
-		setlocal nopaste
-		let @@ = reg_save
-	endfunction
-endif
 
 command! Difft windo diffthis
 command! Diffo windo diffoff
@@ -312,16 +268,3 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
-
-set undodir=~/.vim/tmp/undo//     " undo files
-set backupdir=~/.vim/tmp/backup// " backups
-set directory=~/.vim/tmp/swap//   " swap files
-if !isdirectory(expand(&undodir))
-    call mkdir(expand(&undodir), "p")
-endif
-if !isdirectory(expand(&backupdir))
-    call mkdir(expand(&backupdir), "p")
-endif
-if !isdirectory(expand(&directory))
-    call mkdir(expand(&directory), "p")
-endif
