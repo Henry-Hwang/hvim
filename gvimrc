@@ -1,6 +1,6 @@
 "Install Plugin manager
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-
+" wget https://github.com/Henry-Hwang/hvim/blob/master/gvimrc
 let $PYTHON = 'C:\Python27\python'
 let $PYTHON3 = 'C:\Python38\python'
 let $DIR_TEMP = '~/.vim/tmp'

@@ -1,6 +1,6 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-
+" wget https://github.com/Henry-Hwang/hvim/blob/master/vimrc
 set rtp+=$HOME/.vim/bundle/Vundle.vim/
 call vundle#begin('$HOME/.vim/bundle/')
 let $PYTHON = '/usr/bin/python'

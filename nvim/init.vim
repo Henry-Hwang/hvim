@@ -1,6 +1,6 @@
 let $DIR_PLUGIN='~/.config/nvim/plugged'
-let $PYTHON = '/usr/bin/python' 
-let $PYTHON3 = '/usr/bin/python3' 
+let $PYTHON = '/usr/bin/python'
+let $PYTHON3 = '/usr/bin/python3'
 let $DIR_TEMP = '~/.vim/tmp'
 call plug#begin($DIR_PLUGIN)
 Plug 'mhinz/vim-startify'
@@ -96,7 +96,9 @@ set background=dark "use the light version of gruvbox
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 set t_Co=256
 set guifont=Courier_New:h11
-hi CursorLine term=underline ctermbg=236 guibg=#293739
+hi CursorLine cterm=bold,reverse ctermfg=238 ctermbg=253 gui=bold,reverse guifg=#455354 guibg=fg
+set cul
+
 "[[syntax]]
 hi Comment term=bold ctermfg=60 guifg=#465457
 let mapleader = ","       "Set mapleader
@@ -110,7 +112,7 @@ map <leader>p "+p
 map <leader>y "+yy
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>:vnew<CR>p
+nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>
 nnoremap <C-f> /<C-r><C-w><CR>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 "select a function
@@ -173,8 +175,10 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': '$MYVIMRC' },
-            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
+            \ { 'n': '~/note.txt' },
+            \ { 'c': '~/hvim/vim-note.txt' },
+            \ { 't': '~/hvim/tmux-note.txt' },
+            \ { 'y': '~/hvim/nvim/init.vim' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -261,3 +265,17 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
+autocmd InsertEnter * set cul
+
+set undodir=~/.vim/tmp/undo/     " undo files
+set backupdir=~/.vim/tmp/backup/ " backups
+set directory=~/.vim/tmp/swap/   " swap files
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif
