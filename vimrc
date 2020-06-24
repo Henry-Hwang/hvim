@@ -35,6 +35,13 @@ Plugin 'vim-scripts/xml.vim'
 Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'iamcco/mathjax-support-for-mkdp'
+Plugin 'iamcco/markdown-preview.vim'
+Plugin 'fidian/hexmode'
+Plugin 'name5566/vim-bookmark'
+"Plugin 'rhysd/vim-clang-format'
+"Plugin 'Shougo/vimproc.vim'
+
 call vundle#end()
 
 let g:python_host_prog = $PYTHON
@@ -107,7 +114,7 @@ let mapleader = ","       "Set mapleader
 imap <leader><leader> <esc>:
 "nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
-nnoremap <C-f><C-f> :FZF %:p:h
+nnoremap <C-f> :FZF %:p:h
 nnoremap <leader>bw :bw!<CR>
 if has('win32unix')
 	vnoremap <silent> <leader>y :call Putclip(visualmode(), 1)<CR>
@@ -119,15 +126,16 @@ else
 endif
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>
-nnoremap <C-f> /<C-r><C-w><CR>
+nnoremap ss :let @a='' <bar> g/<C-r><C-w>/yank A
+nnoremap ff /<C-r><C-w>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
-"select a function
+nnoremap <C-a> :CtrlPBuffer<CR>
 nnoremap <leader>f [[%v%h0
-"<CR>:vnew
+nnoremap <leader>m :Startify<CR>
+nnoremap <leader>ws :w %:p:h
+nnoremap <C-h> :Hexmode<CR>
 
-" <space> => fold/unfold current code
-" tips: zR => unfold all; zM => fold all
+nnoremap <silent> <leader>l :call Setwrap()<CR>
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n> 
 nnoremap <leader>. :e $MYVIMRC<CR>
@@ -139,6 +147,7 @@ let g:markdown_preview_on = 0
 au! BufWinEnter *.md,*.markdown,*.mdown let g:markdown_preview_on = g:markdown_preview_auto || g:markdown_preview_on  
 au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_preview_auto && g:markdown_preview_on  
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
+let g:vbookmark_bookmarkSaveFile = $HOME . '/.vimbookmark'
 " Airline
 let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
@@ -152,7 +161,19 @@ let g:multi_cursor_next_key='<tab>'
 let g:multi_cursor_prev_key='b'
 let g:multi_cursor_skip_key='x'
 let g:multi_cursor_quit_key='q'
+let g:hexmode_patterns = '*.bin,*.exe,*.dat,*.o,*.wmfw,*.wav,*.mp3'
 
+let g:wrap_line_count=0
+function! Setwrap()
+    "exec "normal \<c-w>c"
+    if g:wrap_line_count ># 0
+		set nowrap
+		let g:wrap_line_count=0
+    else
+		set wrap
+		let g:wrap_line_count=1
+    endif
+endfunction
 " Startify
 command! -nargs=1 CD cd <args> | Startify
 autocmd User Startified setlocal cursorline
@@ -202,7 +223,6 @@ let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
 "[[Ctrlp]]
 let g:ctrlp_cmd = 'CtrlP'
-nnoremap <C-a> :CtrlPBuffer<CR>
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
     \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
@@ -278,9 +298,6 @@ endif
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
-" calculator
-command! -nargs=+ Calc :py print <args>
-py from math import *
 "}
 
 " SSH tmux
@@ -313,9 +330,9 @@ cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
 
-set undodir=~/.vim/tmp/undo//     " undo files
-set backupdir=~/.vim/tmp/backup// " backups
-set directory=~/.vim/tmp/swap//   " swap files
+set undodir=~/.vim/tmp/undo/     " undo files
+set backupdir=~/.vim/tmp/backup/ " backups
+set directory=~/.vim/tmp/swap/   " swap files
 if !isdirectory(expand(&undodir))
     call mkdir(expand(&undodir), "p")
 endif

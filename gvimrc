@@ -10,6 +10,7 @@ set rtp+=$HOME\.vim\bundle\Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'mhinz/vim-startify'
+Plugin 'myusuf3/numbers.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 
@@ -36,6 +37,13 @@ Plugin 'vim-scripts/xml.vim'
 Plugin 'vim-scripts/python.vim'
 Plugin 'vim-scripts/c.vim'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'iamcco/mathjax-support-for-mkdp'
+Plugin 'iamcco/markdown-preview.vim'
+Plugin 'fidian/hexmode'
+Plugin 'name5566/vim-bookmark'
+"Plugin 'rhysd/vim-clang-format'
+"Plugin 'Shougo/vimproc.vim'
+
 call vundle#end()
 
 let g:python_host_prog = $PYTHON
@@ -110,23 +118,24 @@ let mapleader = ","       "Set mapleader
 imap <leader><leader> <esc>:
 "nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
-nnoremap <C-f><C-f> :FZF %:p:h
+nnoremap <C-f> :FZF %:p:h
 nnoremap <leader>bw :bw!<CR>
 map <leader>p "+p
 map <leader>y "+yy
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap <C-s><C-s> :g/<C-r><C-w>/yank A<CR>
-nnoremap <C-f> /<C-r><C-w><CR>
+nnoremap ss :let @a='' <bar> g/<C-r><C-w>/yank A
+nnoremap ff /<C-r><C-w>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
-"select a function
+nnoremap <C-a> :CtrlPBuffer<CR>
 nnoremap <leader>f [[%v%h0
-"<CR>:vnew
+nnoremap <leader>m :Startify<CR>
+nnoremap <leader>ws :w %:p:h
+nnoremap <C-h> :Hexmode<CR>
 
-" <space> => fold/unfold current code
-" tips: zR => unfold all; zM => fold all
+nnoremap <silent> <leader>l :call Setwrap()<CR>
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
-tnoremap <Esc> <C-\><C-n> 
+tnoremap <Esc> <C-\><C-n>
 nnoremap <leader>. :e $GVIMRC<CR>
 nnoremap <leader>.. :source $GVIMRC<CR>
 
@@ -136,6 +145,7 @@ let g:markdown_preview_on = 0
 au! BufWinEnter *.md,*.markdown,*.mdown let g:markdown_preview_on = g:markdown_preview_auto || g:markdown_preview_on  
 au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_preview_auto && g:markdown_preview_on  
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
+let g:vbookmark_bookmarkSaveFile = $HOME . '/.vimbookmark'
 " Airline
 let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
@@ -149,7 +159,19 @@ let g:multi_cursor_next_key='<tab>'
 let g:multi_cursor_prev_key='b'
 let g:multi_cursor_skip_key='x'
 let g:multi_cursor_quit_key='q'
+let g:hexmode_patterns = '*.bin,*.exe,*.dat,*.o,*.wmfw,*.wav,*.mp3'
 
+let g:wrap_line_count=0
+function! Setwrap()
+    "exec "normal \<c-w>c"
+    if g:wrap_line_count ># 0
+		set nowrap
+		let g:wrap_line_count=0
+    else
+		set wrap
+		let g:wrap_line_count=1
+    endif
+endfunction
 " Startify
 command! -nargs=1 CD cd <args> | Startify
 autocmd User Startified setlocal cursorline
@@ -179,9 +201,13 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
-            \ { 'y': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
-            \ { 'p': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
+            \ { 'a': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
+            \ { 'b': 'C:\cygwin64\home\hhuang\hvim\tmux-note.txt' },
+            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\android-note.txt' },
+            \ { 'd': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
+            \ { 'e': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
+            \ { 'f': 'C:\Users\hhuang\Bin\' },
+            \ { 'f': 'C:\work\doc\technote\cirrus-note\' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
@@ -198,7 +224,6 @@ let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
 
 "[[Ctrlp]]
 let g:ctrlp_cmd = 'CtrlP'
-nnoremap <C-a> :CtrlPBuffer<CR>
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
     \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
@@ -268,3 +293,16 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
+
+set undodir=~/.vim/tmp/undo/     " undo files
+set backupdir=~/.vim/tmp/backup/ " backups
+set directory=~/.vim/tmp/swap/   " swap files
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif

@@ -99,3 +99,9 @@ zc          # close folded text
 # Ctrlp
 <C + o> + v # Open vertical 
 <C + o> + h # Open horizon
+
+#Bookmark
+mm #Set and cancel a bookmark. call VbookmarkToggle
+mn #Jump to next bookmark. call VbookmarkNext
+mp #Jump to the pre bookmark. call VbookmarkPrevious
+ma #Delete all bookmark. call VbookmarkClearAll
