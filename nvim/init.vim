@@ -33,6 +33,12 @@ Plug 'vim-scripts/xml.vim'
 Plug 'vim-scripts/python.vim'
 Plug 'vim-scripts/c.vim'
 Plug 'scrooloose/nerdcommenter'
+Plugin 'iamcco/mathjax-support-for-mkdp'
+Plugin 'iamcco/markdown-preview.vim'
+Plugin 'fidian/hexmode'
+Plugin 'name5566/vim-bookmark'
+"Plugin 'rhysd/vim-clang-format'
+"Plugin 'Shougo/vimproc.vim'
 call plug#end()
 
 let g:python_host_prog = $PYTHON
@@ -46,12 +52,6 @@ filetype on
 filetype plugin on
 filetype plugin indent on
 syntax on
-source $VIMRUNTIME/delmenu.vim
-source $VIMRUNTIME/menu.vim
-set guioptions-=T	" 不显示工具栏
-set guioptions-=L	" 不显示左边滚动条
-set guioptions-=r	" 不显示右边滚动条
-set guioptions-=m
 
 " Some useful settings
 set mat=2            "keep modified buffer
@@ -114,7 +114,7 @@ map <leader>p "+p
 map <leader>y "+yy
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap ss :let @a='' <bar> g/<C-r><C-w>/yank A
+nnoremap <S-s> :let @a='' <bar> g/<C-r><C-w>/yank A
 nnoremap ff /<C-r><C-w>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 nnoremap <C-a> :CtrlPBuffer<CR>
