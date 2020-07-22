@@ -41,9 +41,6 @@ Plugin 'iamcco/mathjax-support-for-mkdp'
 Plugin 'iamcco/markdown-preview.vim'
 Plugin 'fidian/hexmode'
 Plugin 'name5566/vim-bookmark'
-Plugin 'elzr/vim-json'
-Plugin 'Rykka/riv.vim'
-Plugin 'PProvost/vim-ps1'
 "Plugin 'rhysd/vim-clang-format'
 "Plugin 'Shougo/vimproc.vim'
 
@@ -141,7 +138,7 @@ nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 tnoremap <Esc> <C-\><C-n>
 nnoremap <leader>. :e $GVIMRC<CR>
 nnoremap <leader>.. :source $GVIMRC<CR>
-nnoremap <leader>j :%!python -m json.tool<CR>
+
 nnoremap <leader>t :vertical terminal<CR>
 nnoremap <leader>,m /&clean-search&<CR>
 let g:markdown_preview_on = 0
@@ -204,7 +201,10 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'a': 'C:\Users\hhuang\hvim\' },
+            \ { 'a': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
+            \ { 'b': 'C:\cygwin64\home\hhuang\hvim\tmux-note.txt' },
+            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\android-note.txt' },
+            \ { 'd': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
             \ { 'e': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
             \ { 'f': 'C:\Users\hhuang\Bin\' },
             \ { 'f': 'C:\work\doc\technote\cirrus-note\' },
