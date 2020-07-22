@@ -126,7 +126,7 @@ else
 endif
 nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
 nnoremap <C-s> :g/<C-r><C-w>/<CR>
-nnoremap ss :let @a='' <bar> g/<C-r><C-w>/yank A
+nnoremap <S-s> :let @a='' <bar> g/<C-r><C-w>/yank A
 nnoremap ff /<C-r><C-w>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 nnoremap <C-a> :CtrlPBuffer<CR>
