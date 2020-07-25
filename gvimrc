@@ -69,7 +69,7 @@ set mat=2            "keep modified buffer
 set scrolloff=4
 set hidden           "keep modified buffer
 set smartindent
-set expandtab         "tab to spaces
+set noexpandtab         "tab to spaces
 set tabstop=4         "the width of a tab
 set shiftwidth=4      "the width for indent
 set foldenable
@@ -135,7 +135,7 @@ nnoremap <C-h> :Hexmode<CR>
 
 nnoremap <silent> <leader>l :call Setwrap()<CR>
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
-tnoremap <Esc> <C-\><C-n>
+"tnoremap <Esc> <C-\><C-n>
 nnoremap <leader>. :e $GVIMRC<CR>
 nnoremap <leader>.. :source $GVIMRC<CR>
 
@@ -201,12 +201,9 @@ let g:startify_skiplist = [
             \ 'nyaovimrc.html',
             \ ]
 let g:startify_bookmarks = [
-            \ { 'a': 'C:\cygwin64\home\hhuang\hvim\vim-note.txt' },
-            \ { 'b': 'C:\cygwin64\home\hhuang\hvim\tmux-note.txt' },
-            \ { 'c': 'C:\cygwin64\home\hhuang\hvim\android-note.txt' },
-            \ { 'd': 'C:\cygwin64\home\hhuang\hvim\nvim\init.vim' },
             \ { 'e': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
-            \ { 'f': 'C:\Users\hhuang\Bin\' },
+            \ { 'f': 'C:\Users\hhuang\hvim\bash' },
+            \ { 'f': 'C:\Users\hhuang\hvim\cmdlet' },
             \ { 'f': 'C:\work\doc\technote\cirrus-note\' },
             \ ]
 let g:startify_custom_footer =
@@ -287,7 +284,7 @@ function! ToStartify()
         exec "normal \<c-w>w"
     endif
 endfunction
-au! QuitPre * call ToStartify()
+"au! QuitPre * call ToStartify()
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
