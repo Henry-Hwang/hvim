@@ -1,5 +1,5 @@
-Function Dbg-Prdebug {
-    Adb-init
+Function Dprdbg {
+    Ainit
     adb shell "echo 'file soc-utils.c +p' > /sys/kernel/debug/dynamic_debug/control"
     adb shell "echo 'file soc-dapm.c +p' > /sys/kernel/debug/dynamic_debug/control"
     adb shell "echo 'file soc-pcm.c +p' > /sys/kernel/debug/dynamic_debug/control"
@@ -8,20 +8,20 @@ Function Dbg-Prdebug {
 }
 
 #Dbg-KernLoop -Patten "cs35|cirrus"
-Function Dbg-LoopKern {
+Function DLdmesg {
     param([String]$Patten)
-    Adb-init
+    Ainit
     echo $Patten
     while(1) {
        # adb shell dmesg -c | rg -ie "cs35|cspl|cirrus|-0040|-0041|kona"
-       adb shell dmesg -T -c | rg -ie $Patten
+       adb shell dmesg -c | rg -ie $Patten
     }
 }
 
 #Dbg-KernLoop -Patten "cs35|cirrus"
-Function Dbg-LoopLogcat {
+Function DLlogcat {
     param([String]$Patten)
-    Adb-init
+    Ainit
     echo $Patten
     while(1) {
        adb shell logcat -d | rg -ie $Patten
@@ -29,46 +29,86 @@ Function Dbg-LoopLogcat {
     }
 }
 
-Function Dbg-minidm {
-    Adb-init
+Function Dminidm {
+    Ainit
     adb shell setprop sys.usb.config diag,adb
     adb wait-for-device
     sleep 2
     mode
 }
 
-Function Dbg-ShowFirmware {
-    Adb-init
+Function Dshowfw {
+    Ainit
     adb shell "find /vendor/firmware/ -name '*cs35*' | xargs ls -l"
     adb shell "find /vendor/firmware/ -name '*cs35*' | xargs md5sum"
 }
 
-Function Dbg-Dmesg {
+Function DTmix {
     param([String]$Name)
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    $FileName="$Name" + "-" + "dmesg-" + "$TimeStr" + ".txt"
-    adb shell dmesg > $FileName
+	if ($Name -eq '') {
+		$FileName="Tinymix-" + "$TimeStr" + ".txt"
+	} else {
+		$FileName="$Name" + "-" + "Tinymix-" + "$TimeStr" + ".txt"
+	}
+    adb shell tinymix > $FileName
     echo $FileName
+	gvim $FileName
 }
 
-Function Dbg-Dump {
-    param([String]$Device1, $Device2)
-    Adb-Init
+Function Dlogcat {
+    param([String]$Name)
+    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+	if ($Name -eq '') {
+		$FileName="logcat-" + "$TimeStr" + ".txt"
+	} else {
+		$FileName="$Name" + "-" + "logcat-" + "$TimeStr" + ".txt"
+	}
+    adb shell logcat -d > $FileName
+    echo $FileName
+	gvim $FileName
+}
+
+Function Ddmesg {
+    param([String]$Name)
+    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+	if ($Name -eq '') {
+		$FileName="dmesg-" + "$TimeStr" + ".txt"
+	} else {
+		$FileName="$Name" + "-" + "dmesg-" + "$TimeStr" + ".txt"
+	}
+    adb shell dmesg > $FileName
+    echo $FileName
+	gvim $FileName
+}
+
+Function Ddump {
+    param([String]$Device1, $Device2, $Prefix, $SoundCard)
 
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+    if ($Prefix -ne '') {
+        $Prefix=$Prefix + "-"
+    }
+    $Dapm1="/d/asoc/" + $SoundCard + "/" + $Device1 + "/" + "dapm/*"
+    $Dapm2="/d/asoc/" + $SoundCard + "/" + $Device2 + "/" + "dapm/*"
+
     $Regmap="/d/regmap"
     $NodeBypass1=$Regmap + "/" + $Device1 + "/" + "cache_bypass"
     $NodeBypass2=$Regmap + "/" + $Device2 + "/" + "cache_bypass"
     $NodeRegisters1=$Regmap + "/" + $Device1 + "/" + "registers"
     $NodeRegisters2=$Regmap + "/" + $Device2 + "/" + "registers"
-    $DumpDir = "Dump-" + $TimeStr
+    $DumpDir = $Prefix + "Dump-" + $TimeStr
+
     new-item -path . -name $DumpDir -type directory
     Set-Location -Path $DumpDir
-    $RegName1 = $Device1 + "-" + "registers" + $TimeStr + ".txt"
-    $RegName2 = $Device2 + "-" + "registers" + $TimeStr + ".txt"
-    $TinymixName = "Tinymix-" + $TimeStr + ".txt"
-    $DmesgName = "Dmesg-" + $TimeStr + ".txt"
-    $LogcatName = "Logcat-" + $TimeStr + ".txt"
+
+    $DapmName1 = $Prefix + $Device1 + "-dapm-" + $TimeStr + ".txt"
+    $DapmName2 = $Prefix + $Device2 + "-dapm-" + $TimeStr + ".txt"
+    $RegName1 = $Prefix + $Device1 + "-registers-" + $TimeStr + ".txt"
+    $RegName2 = $Prefix + $Device2 + "-registers-" + $TimeStr + ".txt"
+    $TinymixName = $Prefix + "Tinymix-" + $TimeStr + ".txt"
+    $DmesgName = $Prefix + "Dmesg-" + $TimeStr + ".txt"
+    $LogcatName = $Prefix + "Logcat-" + $TimeStr + ".txt"
 
    # echo $NodeBypass1
    # echo $NodeBypass2
@@ -90,60 +130,77 @@ Function Dbg-Dump {
     adb shell "cat $NodeRegisters2" > $RegName2
     adb shell "echo N > $NodeBypass1"
     adb shell "echo N > $NodeBypass2"
+    adb shell "cat $Dapm1" > $DapmName1
+    adb shell "cat $Dapm2" > $DapmName2
     #
     Set-Location -Path ..
     Get-ChildItem -Path $DumpDir
 }
 
 
-Function Dbg-Backup {
+Function Dbackup {
     param([String]$Name)
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+    Ainit
+
+	if ($Name -ne '') {
+		$Name=$Name+"-"
+	}
+
+	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
     $BackupDir = $Name + "Backup-" + $TimeStr
-    new-item -path . -name $BackupDir -type directory
+
+	new-item -path . -name $BackupDir -type directory
+    new-item -path $BackupDir -name lib -type directory
     Set-Location -Path $BackupDir
-    adb pull /vendor/lib .
+
+	adb pull /vendor/lib/modules lib/
+    adb pull /vendor/lib/hw lib/
+    adb pull /vendor/lib/rfsa lib/
     adb pull /vendor/etc .
     adb pull /vendor/firmware .
-    Set-Location -Path ..
+
+	Set-Location -Path ..
     Get-ChildItem -Path $BackupDir
 }
 
-Function Dbg-ShowFirmware {
-    Adb-Init
-    adb shell "find /vendor/firmware/ -name '*cs35*' | xargs ls -l"
-    adb shell "find /vendor/firmware/ -name '*cs35*' | xargs md5sum"
-}
-
-Function Dbg-Wisce {
-    Adb-Init
+Function Dwisce {
+    Ainit
     adb forward tcp:22349 tcp:22349
     adb shell
 }
 
-Function Dbg-AudioKill {
+Function Daudio-kill {
     adb shell "pgrep -f audioserver | xargs kill"
 }
 
-Function Dbg-Log {
-    param([String]$Name)
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    $LogDir = $Name + "Log-" + $TimeStr
-    $DmesgName = $Name + "Dmesg-" + $TimeStr+".txt"
-    $LogcatName = $Name + "Logcat-" + $TimeStr+".txt"
-    new-item -path . -name $LogDir -type directory
-    Set-Location -Path $LogDir
-    adb shell dmesg > $DmesgName
-    adb shell logcat -d > $LogcatName
-    gvim $DmesgName $LogcatName
-    Set-Location -Path ..
-    Get-ChildItem -Path $LogDir
+Function Dlogs {
+	param([String]$Name)
 
+	if ($Name -ne '') {
+		$Name=$Name+"-"
+	}
+
+	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+	$LogDir = $Name + "Log-" + $TimeStr
+	$DmesgName = $Name + "Dmesg-" + $TimeStr+".txt"
+	$LogcatName = $Name + "Logcat-" + $TimeStr+".txt"
+	$TmixName = $Name + "Tinymix-" + $TimeStr+".txt"
+
+	new-item -path . -name $LogDir -type directory
+	Set-Location -Path $LogDir
+
+	adb shell dmesg > $DmesgName
+	adb shell logcat -d > $LogcatName
+	adb shell tinymix > $TmixName
+
+	gvim $DmesgName $LogcatName $TmixName
+
+	Set-Location -Path ..
+	Get-ChildItem -Path $LogDir
 }
 
-Function Dbg-Registers {
+Function Ddump-regs {
     param([String]$Device1, $Device2)
-    Adb-Init
 
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
     $Regmap="/d/regmap"

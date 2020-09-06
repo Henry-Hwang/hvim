@@ -1,19 +1,34 @@
 
-Function Cd-Xiaomi {Set-Location -Path C:\work\customer\xiaomi}
-Function Cd-Meizu {Set-Location -Path C:\work\customer\meizu}
-Function Cd-Cspl {Set-Location -Path C:\work\src\aus\amps\cspl}
-Function Cd-Hvim {Set-Location -Path C:\cygwin64\home\hhuang\hvim}
-Function Cd-Capiv2 {Set-Location -Path C:\work\src\aus\amps\playback\CSPL\firmware\workspace_eclipse_for_QCOM_generic}
-Function Cd-Music {Set-Location -Path C:\work\music\Music}
-Function Cd-Scspb {Set-Location -Path C:\work\src\aus\scs\scs_playback}
-Function Cd-Work {Set-Location -Path C:\work}
-Function Cd-Technote {Set-Location -Path C:\work\doc\technote}
-Function Cd-Expense {Set-Location -Path C:\work\doc\expense}
-Function Cd-Datasheet {Set-Location -Path C:\work\doc\datasheet}
-Function Cd-Cirrus-Linux {Set-Location -Path C:\work\src\aus\cirrus-linux}
-Function Cd-Ormis {Set-Location -Path C:\work\src\aus\amps\ormis}
-Function Cd-Amps {Set-Location -Path C:\work\src\aus\amps}
-Function Cd-Scs {Set-Location -Path C:\work\src\aus\scs}
+Function GXiaomi {Set-Location -Path C:\work\customer\xiaomi}
+Function GMeizu {Set-Location -Path C:\work\customer\meizu}
+Function GCspl {Set-Location -Path C:\work\src\aus\amps\cspl}
+Function GHvim {Set-Location -Path C:\cygwin64\home\hhuang\hvim}
+Function GCapiv2 {Set-Location -Path C:\work\src\aus\amps\playback\CSPL\firmware\workspace_eclipse_for_QCOM_generic}
+Function GMusic {Set-Location -Path C:\work\music\Music}
+Function GScspb {Set-Location -Path C:\work\src\aus\scs\scs_playback}
+Function GWork {Set-Location -Path C:\work}
+Function GTechnote {Set-Location -Path C:\work\docs\technote}
+Function GExpense {Set-Location -Path C:\work\docs\expense}
+Function GDatasheet {Set-Location -Path C:\work\docs\datasheet}
+Function GCirrus-Linux {Set-Location -Path C:\work\src\aus\cirrus-linux}
+Function GOrmis {Set-Location -Path C:\work\src\aus\amps\ormis}
+Function GAmps {Set-Location -Path C:\work\src\aus\amps}
+Function GScs {Set-Location -Path C:\work\src\aus\scs}
+Function GHaloSDK {Set-Location -Path C:\Users\hhuang\Documents\CirrusLogic\SDKs\HaloCore\SDK}
 
-Function Start-Hvim {start C:\cygwin64\home\hhuang\hvim}
-Function Start-Meizu {Start C:\work\customer\meizu}
+Function OXiaomi {start C:\work\customer\xiaomi}
+Function OMeizu {start C:\work\customer\meizu}
+Function OCspl {start C:\work\src\aus\amps\cspl}
+Function OHvim {start C:\Users\hhuang\hvim}
+Function OCapiv2 {start C:\work\src\aus\amps\playback\CSPL\firmware\workspace_eclipse_for_QCOM_generic}
+Function OMusic {start C:\work\music\Music}
+Function OScspb {start C:\work\src\aus\scs\scs_playback}
+Function OWork {start C:\work}
+Function OTechnote {start C:\work\docs\technote}
+Function OExpense {start C:\work\docs\expense}
+Function ODatasheet {start C:\work\docs\datasheet}
+Function OCirrus-Linux {start C:\work\src\aus\cirrus-linux}
+Function OOrmis {start C:\work\src\aus\amps\ormis}
+Function OAmps {start C:\work\src\aus\amps}
+Function OScs {start C:\work\src\aus\scs}
+Function OHaloSDK {Start C:\Users\hhuang\Documents\CirrusLogic\SDKs\HaloCore\SDK}

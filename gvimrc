@@ -41,6 +41,7 @@ Plugin 'iamcco/mathjax-support-for-mkdp'
 Plugin 'iamcco/markdown-preview.vim'
 Plugin 'fidian/hexmode'
 Plugin 'name5566/vim-bookmark'
+Plugin 'PProvost/vim-ps1'
 "Plugin 'rhysd/vim-clang-format'
 "Plugin 'Shougo/vimproc.vim'
 
@@ -69,7 +70,7 @@ set mat=2            "keep modified buffer
 set scrolloff=4
 set hidden           "keep modified buffer
 set smartindent
-set noexpandtab         "tab to spaces
+set expandtab         "tab to spaces
 set tabstop=4         "the width of a tab
 set shiftwidth=4      "the width for indent
 set foldenable
@@ -103,7 +104,7 @@ set list
 set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
 
 set shortmess=atl
-
+set shell=powershell
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -127,10 +128,12 @@ nnoremap <C-s> :g/<C-r><C-w>/<CR>
 nnoremap <S-s> :let @a='' <bar> g/<C-r><C-w>/yank A
 nnoremap ff /<C-r><C-w>
 nnoremap <C-g> :Rg <C-r><C-w> %:p:h
+nnoremap <leader>g :Rg <C-r><C-w> %:p
 nnoremap <C-a> :CtrlPBuffer<CR>
 nnoremap <leader>f [[%v%h0
 nnoremap <leader>m :Startify<CR>
 nnoremap <leader>ws :w %:p:h
+nnoremap <leader>bt :set buftype=<CR>
 nnoremap <C-h> :Hexmode<CR>
 
 nnoremap <silent> <leader>l :call Setwrap()<CR>
