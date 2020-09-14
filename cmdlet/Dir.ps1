@@ -13,6 +13,7 @@ Function GDatasheet {Set-Location -Path C:\work\docs\datasheet}
 Function GCirrus-Linux {Set-Location -Path C:\work\src\aus\cirrus-linux}
 Function GOrmis {Set-Location -Path C:\work\src\aus\amps\ormis}
 Function GAmps {Set-Location -Path C:\work\src\aus\amps}
+Function GHal {Set-Location -Path C:\work\src\audio-hal}
 Function GScs {Set-Location -Path C:\work\src\aus\scs}
 Function GHaloSDK {Set-Location -Path C:\Users\hhuang\Documents\CirrusLogic\SDKs\HaloCore\SDK}
 
@@ -30,5 +31,6 @@ Function ODatasheet {start C:\work\docs\datasheet}
 Function OCirrus-Linux {start C:\work\src\aus\cirrus-linux}
 Function OOrmis {start C:\work\src\aus\amps\ormis}
 Function OAmps {start C:\work\src\aus\amps}
+Function OHal {Start C:\work\src\audio-hal}
 Function OScs {start C:\work\src\aus\scs}
 Function OHaloSDK {Start C:\Users\hhuang\Documents\CirrusLogic\SDKs\HaloCore\SDK}

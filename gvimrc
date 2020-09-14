@@ -1,52 +1,46 @@
-"Install Plugin manager
-"git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-" wget https://github.com/Henry-Hwang/hvim/blob/master/gvimrc
 let $PYTHON = 'C:\Python27\python'
 let $PYTHON3 = 'C:\Python38\python'
 let $DIR_TEMP = '~/.vim/tmp'
 let $HOME="C:\\Users\\hhuang"
-let &pythonthreedll = 'C:\Python38\python38.dll'
-set rtp+=$HOME\.vim\bundle\Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'mhinz/vim-startify'
-Plugin 'myusuf3/numbers.vim'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+call plug#begin('~/.vim/plugged')
+Plug 'mhinz/vim-startify'
+Plug 'myusuf3/numbers.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 
-Plugin 'vim-scripts/molokai'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'wellle/targets.vim'
-Plugin 'will133/vim-dirdiff'
-Plugin 'asins/vimcdoc'
-Plugin 'xolox/vim-notes'
-Plugin 'xolox/vim-misc'
-Plugin 'itchyny/calendar.vim'
-Plugin 'junegunn/vim-journal'
-Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plugin 'jremmen/vim-ripgrep'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'ludovicchabant/vim-gutentags'
-Plugin 'universal-ctags/ctags'
-Plugin 'majutsushi/tagbar'
-Plugin 'tacahiroy/ctrlp-funky'
-Plugin 'eshion/vim-sync'
-Plugin 'vim-scripts/a.vim'
-Plugin 'vim-scripts/xml.vim'
-Plugin 'vim-scripts/python.vim'
-Plugin 'vim-scripts/c.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'iamcco/mathjax-support-for-mkdp'
-Plugin 'iamcco/markdown-preview.vim'
-Plugin 'fidian/hexmode'
-Plugin 'name5566/vim-bookmark'
-Plugin 'PProvost/vim-ps1'
+Plug 'vim-scripts/molokai'
+Plug 'wellle/targets.vim'
+Plug 'will133/vim-dirdiff'
+Plug 'asins/vimcdoc'
+Plug 'xolox/vim-notes'
+Plug 'xolox/vim-misc'
+Plug 'itchyny/calendar.vim'
+Plug 'junegunn/vim-journal'
+"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'jremmen/vim-ripgrep'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'universal-ctags/ctags'
+Plug 'majutsushi/tagbar'
+Plug 'tacahiroy/ctrlp-funky'
+Plug 'eshion/vim-sync'
+Plug 'vim-scripts/a.vim'
+Plug 'vim-scripts/xml.vim'
+Plug 'vim-scripts/python.vim'
+Plug 'vim-scripts/c.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'iamcco/mathjax-support-for-mkdp'
+Plug 'iamcco/markdown-preview.vim'
+Plug 'fidian/hexmode'
+Plug 'name5566/vim-bookmark'
+Plug 'PProvost/vim-ps1'
 "Plugin 'rhysd/vim-clang-format'
 "Plugin 'Shougo/vimproc.vim'
 
-call vundle#end()
+call plug#end()
 
+let &pythonthreedll = 'C:\Python38\python38.dll'
+let &pythondll = 'C:\Python27\python27.dll'
 let g:python_host_prog = $PYTHON
 let g:python3_host_prog = $PYTHON3
 set encoding=utf-8
@@ -83,7 +77,7 @@ set number           "line number
 set nowrap           "no line wrapping
 set cst "ctags 多个选择
 
-hi Comment ctermfg=cyan
+"hi Comment ctermfg=cyan
 set backspace=indent,eol,start
 set whichwrap+=<,>,h,l
 set softtabstop=4
@@ -105,6 +99,7 @@ set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
 
 set shortmess=atl
 set shell=powershell
+"set shell=wt
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -113,7 +108,7 @@ set guifont=Courier_New:h11
 hi CursorLine term=underline ctermbg=236 guibg=#293739
 set cursorline       "hilight the line of the cursor
 "[[syntax]]
-hi Comment term=bold ctermfg=60 guifg=#465457
+hi Comment term=bold ctermfg=600 guifg=#999000
 let mapleader = ","       "Set mapleader
 "command ": hi" to show all color
 imap <leader><leader> <esc>:
@@ -212,16 +207,6 @@ let g:startify_bookmarks = [
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']
 highlight StartifyFooter  ctermfg=240
-" UltiSnip
-" <tab> => expand the snippets
-let g:UltiSnipsExpandTrigger = '<tab>'
-" <ctrl-d> => list available snippets start with the chars before the cursor
-let g:UltiSnipsListSnippets = '<c-d>'
-" <enter> => go to the next placeholder
-let g:UltiSnipsJumpForwardTrigger = '<enter>'
-" <shift-enter> => go to the previous placeholder
-let g:UltiSnipsJumpBackwardTrigger = '<c-k>'
-
 "[[Ctrlp]]
 let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_custom_ignore = {

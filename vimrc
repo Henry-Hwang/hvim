@@ -1,11 +1,12 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 " wget https://github.com/Henry-Hwang/hvim/blob/master/vimrc
-set rtp+=$HOME/.vim/bundle/Vundle.vim/
-call vundle#begin('$HOME/.vim/bundle/')
+
+call plug#begin('~/.vim/plugged')
+"set rtp+=$HOME/.vim/bundle/Vundle.vim/
+"call vundle#begin('$HOME/.vim/bundle/')
 let $PYTHON = '/usr/bin/python'
 let $PYTHON3 = '/usr/bin/python3'
-let $DIR_TEMP = '~/.vim/tmp'
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'mhinz/vim-startify'
 Plugin 'myusuf3/numbers.vim'
@@ -39,11 +40,12 @@ Plugin 'iamcco/mathjax-support-for-mkdp'
 Plugin 'iamcco/markdown-preview.vim'
 Plugin 'fidian/hexmode'
 Plugin 'name5566/vim-bookmark'
+Plug 'name5566/vim-bookmark'
 "Plugin 'rhysd/vim-clang-format'
 "Plugin 'Shougo/vimproc.vim'
 
-call vundle#end()
-
+"call vundle#end()
+call plug#end()
 let g:python_host_prog = $PYTHON
 let g:python3_host_prog = $PYTHON3
 set encoding=utf-8
