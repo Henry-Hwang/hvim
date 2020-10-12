@@ -16,10 +16,10 @@ Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'itchyny/calendar.vim'
 Plug 'junegunn/vim-journal'
-"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'jremmen/vim-ripgrep'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ludovicchabant/vim-gutentags'
+"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'universal-ctags/ctags'
 Plug 'majutsushi/tagbar'
 Plug 'tacahiroy/ctrlp-funky'
@@ -34,8 +34,9 @@ Plug 'iamcco/markdown-preview.vim'
 Plug 'fidian/hexmode'
 Plug 'name5566/vim-bookmark'
 Plug 'PProvost/vim-ps1'
-"Plugin 'rhysd/vim-clang-format'
-"Plugin 'Shougo/vimproc.vim'
+Plug 'mgedmin/chelper.vim'
+Plug 'rhysd/vim-clang-format'
+Plug 'Shougo/vimproc.vim'
 
 call plug#end()
 
@@ -202,7 +203,8 @@ let g:startify_bookmarks = [
             \ { 'e': 'C:\Users\hhuang\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1' },
             \ { 'f': 'C:\Users\hhuang\hvim\bash' },
             \ { 'f': 'C:\Users\hhuang\hvim\cmdlet' },
-            \ { 'f': 'C:\work\doc\technote\cirrus-note\' },
+            \ { 'f': 'C:\work\docs\technote' },
+            \ { 'f': 'C:\work\docs\technote\mynote.md' },
             \ ]
 let g:startify_custom_footer =
             \ ['', "Henry Huang", '']

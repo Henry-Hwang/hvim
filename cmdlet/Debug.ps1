@@ -69,6 +69,7 @@ Function Dlogcat {
 	gvim $FileName
 }
 
+
 Function Ddmesg {
     param([String]$Name)
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
@@ -192,13 +193,14 @@ Function Daudio-kill {
 }
 
 Function Dlogs {
-	param([String]$Name)
+    param([String]$Name, $Device1, $Device2, $SoundCard)
 
 	if ($Name -ne '') {
 		$Name=$Name+"-"
 	}
 
-	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+    Ainit
+	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss
 	$LogDir = $Name + "Log-" + $TimeStr
 	$DmesgName = $Name + "Dmesg-" + $TimeStr+".txt"
 	$LogcatName = $Name + "Logcat-" + $TimeStr+".txt"
@@ -211,6 +213,14 @@ Function Dlogs {
 	adb shell logcat -d > $LogcatName
 	adb shell tinymix > $TmixName
 
+    if (($Device1 -ne '') -AND ($Device2 -ne '') -AND ($SoundCard -ne '')) {
+        $DapmName1 = $Device1+"-dapm.txt"
+        $DapmName2 = $Device2+"-dapm.txt"
+        $Dapm1="/d/asoc/" + $SoundCard + "/" + $Device1 + "/" + "dapm/*"
+        $Dapm2="/d/asoc/" + $SoundCard + "/" + $Device2 + "/" + "dapm/*"
+        adb shell "cat $Dapm1" > $DapmName1
+        adb shell "cat $Dapm2" > $DapmName2
+    }
 	gvim $DmesgName $LogcatName $TmixName
 
 	Set-Location -Path ..
@@ -247,6 +257,65 @@ Function Ddump-regs {
 }
 
 Function DTestAudio {
+    Ainit
     adb push C:\Users\hhuang\OneDrive\TestAudio /sdcard/Music/
     adb push C:\Users\hhuang\OneDrive\TestAudio\lrp_loop.wav /sdcard/Music/
+    adb push C:\Users\hhuang\OneDrive\TestAudio\silent-3sec.wav /vendor/etc/
+    adb push C:\Users\hhuang\OneDrive\TestAudio\silent-4sec.wav /vendor/etc/
 }
+
+Function DDownload {
+    $url="https://raw.githubusercontent.com/Henry-Hwang/TestAudios/master/lrp_loop.wav"
+    $output = "lrp_loop.wav"
+    $start_time = Get-Date
+
+    Invoke-WebRequest -Uri $url -OutFile $output
+    Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
+}
+function Apush {
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$Src, $Dest
+    )
+    adb push $Src $Dest
+}
+
+$pushBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    (adb shell "find /vendor/firmware/ -name '*cs35*';
+                find /vendor/lib/rfsa/adsp -name '*cirrus*';
+                find /vendor/etc -name 'mixer_paths_*.xml';
+                find /vendor/lib64/hw/ -name 'audio.*primary*.so';
+                find /vendor/lib/hw/ -name 'audio.*primary*.so';") + "/sdcard/Music/" + "/sdcard/Download/" + "/vendor/etc/" + "/sdcard/Music/" | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+Register-ArgumentCompleter -CommandName Apush -ParameterName Dest -ScriptBlock $pushBlock
+
+function Aecho {
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$Reg, $Val, $Node
+    )
+    $Cache = ($(Split-Path -Path "$Node") + "/cache_bypass").Replace('\','/')
+    #$Cache = $Cache.Replace('\','/')
+    adb shell "echo N > $Cache"
+    adb shell "echo $Src $Dest > $Node"
+    adb shell "echo Y > $Cache"
+}
+
+$nodeBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    (adb shell "find /d/regmap/ -name '*registers*' | grep -iE 'spi|0031|0030|0032|0041|0040|0042'") | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+Register-ArgumentCompleter -CommandName Aecho -ParameterName Node -ScriptBlock $nodeBlock
