@@ -49,19 +49,71 @@ Function FirstSilent {
 		Ainit
 	}
 }
-
+Function CatRegs {
+    echo "background cap ..."
+    sleep 1
+    adb shell "cat /d/regmap/spi1.0/registers" > C:\work\customer\meizu\M2191\txecho\spi1.0-regs.txt
+    adb shell "cat /d/regmap/spi1.1/registers" > C:\work\customer\meizu\M2191\txecho\spi1.1-regs.txt
+}
 Function TxRecord-M2181 {
-    param([Int32]$Second = 10)
+    param([Int32]$Second = 60)
     Ainit
-    $Wav = "/sdcard/Download/rec.wav"
+    $Wav = "/sdcard/Download/rec1.wav"
     adb shell "tinymix 'RCV ASP_TX1 Source' 'DSP_TX1'"
     adb shell "tinymix 'SPK ASP_TX2 Source' 'DSP_TX1'"
     adb shell "tinymix 'MultiMedia1 Mixer PRI_MI2S_TX' 1"
     adb shell "tinymix 'PRIM_MI2S_TX SampleRate' KHZ_48"
     adb shell "tinymix 'PRIM_MI2S_TX Format' S16_LE"
     adb shell "tinymix 'PRIM_MI2S_TX Channels' 'Two'"
+    echo "start record ......"
     adb shell "tinycap $Wav -D 0 -d 0 -r 48000 -c 2 -T $Second"
+    #Start-Job -ScriptBlock { Get-Process -Name Tinycap }
+    echo "dump registers ......"
+    adb shell "cat /d/regmap/spi1.0/registers" > spi1.0-regs.txt
+    adb shell "cat /d/regmap/spi1.1/registers" > spi1.0-regs.txt
     adb pull $Wav .
+    start .
+}
+
+Function TxRec-BGround {
+    $Path = Get-Location
+    $Sbuilder = New-Object -TypeName System.Text.StringBuilder
+    $Spi1_0 = $Sbuilder.Append($Path).Append("\spi1.0-regs.txt").ToString()
+    $Spi1_1 = $Sbuilder.Clear().Append($Path).Append("\spi1.1-regs.txt").ToString()
+    Write-Host $Spi1_0
+    Write-Host $Spi1_1
+
+    $Wav = "/sdcard/Download/rec.wav"
+    $Time = 360
+    #Start-Process -NoNewWindow Tinycap
+    $BgRegs = {
+        param($Node1, $Node2)
+        echo "background cap ..."
+        sleep 1
+        adb shell "cat /d/regmap/spi1.0/registers" > $Node1
+        adb shell "cat /d/regmap/spi1.1/registers" > $Node2
+    }
+
+    $BgRec = {
+        param($Path, $Time)
+
+        adb shell "rm /sdcard/Download/rec.wav"
+        if($Time) {
+            adb shell "tinycap $Path -D 0 -d 0 -r 48000 -c 2 -T $Time"
+        } else {
+            adb shell "tinycap $Path -D 0 -d 0 -r 48000 -c 2"
+        }
+    }
+
+    #Start-Job -Name "Bg-Regs" $BgRec -ArgumentList $Wav, $Time
+    $RegJob = Start-Job -Name "Bg-Rec" $BgRegs -ArgumentList $Spi1_0, $Spi1_1
+    echo "background cap ..."
+    $CapJob = Start-Job -Name "Bg-Regs" $BgRec -ArgumentList $Wav, $Time
+    echo "background regs ..."
+
+    Wait-Job $RegJob
+    Stop-Job $CapJob
+    adb pull $Wav $Path
     start .
 }
 
@@ -99,7 +151,7 @@ Function VolumeTest {
 Function DeltaTest {
 
     Ainit
-	$Count = 0
+    $Count = 0
     while($Count++ -lt 100) {
         sleep 0.5
         $Index = 0, 1 | Get-Random
@@ -112,3 +164,152 @@ Function DeltaTest {
         adb shell "tinymix 'SPK Fast Use Case Switch Enable' 1"
     }
 }
+
+Function Reload-M2181 {
+    param([String]$RCV, $SPK)
+
+    adb wait-for-device root
+    adb wait-for-device remount
+    adb shell "input keyevent 85"
+    sleep 4
+
+    if ($SPK) {
+        echo "reload SPK tuning"
+        adb push $SPK /vendor/firmware/SPK-cs35l45-dsp1-spk-prot.bin
+        adb shell "tinymix 'SPK DSP1 Preload Switch' '0'"
+        adb shell "tinymix 'SPK DSP1 Boot Switch' '0'"
+        sleep 0.5
+        adb shell "tinymix 'SPK DSP1 Preload Switch' '1'"
+        adb shell "tinymix 'SPK DSP1 Boot Switch' '1'"
+    }
+
+
+    if ($RCV) {
+        echo "reload RCV tuning"
+        adb push $RCV /vendor/firmware/RCV-cs35l45-dsp1-spk-prot.bin
+        adb shell "tinymix 'RCV DSP1 Preload Switch' '0'"
+        adb shell "tinymix 'RCV DSP1 Boot Switch' '0'"
+        sleep 0.5
+        adb shell "tinymix 'RCV DSP1 Preload Switch' '1'"
+        adb shell "tinymix 'RCV DSP1 Boot Switch' '1'"
+    }
+
+    sleep 2
+    adb shell "input keyevent 85"
+}
+
+Function MixersWrite2Cmd {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$True)]
+        [Object[]]$InputObject,
+        [String]$Control, $Value, $Prefix
+    )
+    $Sb = New-Object -TypeName System.Text.StringBuilder
+    [void]$Sb.Append("tinymix `'@PREFIX @CONTROL`' `'@VALUE`'").Replace("@CONTROL", $Control).Replace("@VALUE", $Value).Replace("@PREFIX", $Prefix)
+    #Invoke-Expression $Sb.ToString()
+    return $Sb.ToString()
+}
+Function MixersRead2Cmd {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$True)]
+        [Object[]]$InputObject,
+        [String]$Control, $Prefix
+    )
+    $Sb = New-Object -TypeName System.Text.StringBuilder
+    [void]$Sb.Append("tinymix `'@PREFIX @CONTROL`'").Replace("@CONTROL", $Control).Replace("@PREFIX", $Prefix)
+    #Invoke-Expression $Sb.ToString()
+    return $Sb.ToString()
+}
+
+Function Cmd2AShell {
+    Param(
+        [Parameter(Mandatory=$True)]
+        [String]$Cmds
+    )
+    $Sb = New-Object -TypeName System.Text.StringBuilder
+    [void]$Sb.Append("adb shell `"@COMMANDS`"").Replace("@COMMANDS", $Cmds)
+    return $Sb.ToString()
+}
+
+Function DCmd2Set{
+    $Cmds = @()
+    $Json = DGetJson
+    #Write-Host $Json.AmpName $Json.AmpSet
+    foreach ($element in $Json.Mixers) {
+        $Cmds+=MixersRead2Cmd -InputObject $Json -Control $element -Prefix "RCV"
+        #$element
+    }
+    $Cmd = $Cmds -join ";"
+    return $Cmd
+}
+
+Function DMainDebug {
+    <#
+    $CSet = DCmd2Set
+    $Cmd = Cmd2AShell -Cmds $Cset
+    Invoke-Expression $Cmd
+    #>
+    $Json = DGetJson
+    $Json
+    foreach ($element in $Json.AmpPrefix) {
+        if ($element) {
+            $element
+        }
+    }
+}
+
+Function DGetJson{
+    $Json = Get-Content ~\hvim\cmdlet\M2181.json | ConvertFrom-Json
+
+    return $Json
+}
+$global:TmixCtls = ""
+$global:TmixOpt = ""
+function ATmix {
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$Control, $Value
+    )
+    $Sb = New-Object -TypeName System.Text.StringBuilder
+    if($Value) {
+        [void]$Sb.Append("tinymix `'@CONTROL`' `'@VALUE`'").Replace("@CONTROL", $Control).Replace("@VALUE", $Value)
+    } else {
+        [void]$Sb.Append("tinymix `'@CONTROL`'").Replace("@CONTROL", $Control)
+    }
+
+    $Cmd = Cmd2AShell -Cmds $Sb.ToString()
+    $global:TmixCtls = $Cmd
+    $global:TmixCtls
+    #Invoke-Expression $Cmd
+}
+
+$ctlsBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $Json = DGetJson
+    $Json.Mixers | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+        foreach ($element in $Json.AmpPrefix) {
+            if ($element) {
+                "`'$element $_`'"
+            } else {
+                "`'$_`'"
+            }
+        }
+    }
+}
+
+$valueBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    $(DgetJson).Mixers | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "`'RCV $_`'"
+    }
+}
+Register-ArgumentCompleter -CommandName ATmix -ParameterName Control -ScriptBlock $ctlsBlock
+

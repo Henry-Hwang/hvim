@@ -22,8 +22,8 @@ Function Dunmask-MboxIrq-J10 {
 Function DPortBlock-j10 {
 	Ainit
     # Unlock IRQ
-    adb shell "echo 10114 FFDFFFFF > /d/regmap/7-0040/registers"
-    adb shell "echo 10114 FFDFFFFF > /d/regmap/7-0041/registers"
+    #adb shell "echo 10114 FFDFFFFF > /d/regmap/7-0040/registers"
+    #adb shell "echo 10114 FFDFFFFF > /d/regmap/7-0041/registers"
 
     while($Count -lt 1000) {
         $Count++

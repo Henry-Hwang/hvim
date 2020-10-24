@@ -258,10 +258,9 @@ Function Ddump-regs {
 
 Function DTestAudio {
     Ainit
-    adb push C:\Users\hhuang\OneDrive\TestAudio /sdcard/Music/
-    adb push C:\Users\hhuang\OneDrive\TestAudio\lrp_loop.wav /sdcard/Music/
-    adb push C:\Users\hhuang\OneDrive\TestAudio\silent-3sec.wav /vendor/etc/
-    adb push C:\Users\hhuang\OneDrive\TestAudio\silent-4sec.wav /vendor/etc/
+    adb push C:\Users\hhuang\OneDrive\TestAudio\test /sdcard/Music/
+    adb push C:\Users\hhuang\OneDrive\TestAudio\test\lrp_loop.wav /sdcard/Music/
+    adb push C:\Users\hhuang\OneDrive\TestAudio\test\silent-3sec.wav /vendor/etc/
 }
 
 Function DDownload {
@@ -319,3 +318,4 @@ $nodeBlock = {
     }
 }
 Register-ArgumentCompleter -CommandName Aecho -ParameterName Node -ScriptBlock $nodeBlock
+
