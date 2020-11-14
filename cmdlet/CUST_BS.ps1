@@ -42,22 +42,6 @@ Function Dtplay-BlackShark {
     adb shell "tinymix 'RCV ASP TX2 Source' 'DSPTX1'"
     adb shell "tinyplay $Wav"
 }
-Function Ddump-BlackShark {
-    param([String]$Tag)
-
-    Ainit
-
-	if ($Tag -ne '') {
-		$Tag = $Tag + "-BlackShark"
-	}
-
-    Ddump -Device1 0-0040 -Device2 0-0041 -Prefix $Tag
-}
-
-Function Ddump-regs-BlackShark {
-    Ainit
-    Ddump-regs -Device1 0-0040 -Device2 0-0041
-}
 
 Function Dunload-BlackShark {
     Ainit
@@ -105,4 +89,58 @@ Function Dreload-BlackShark {
 	adb shell "tinymix 'DSP1 Firmware' 'Protection'"
     adb shell "tinymix 'DSP1 Preload Switch' '1'"
     adb shell "tinymix 'PCM Source' 'DSP'"
+}
+
+Function MassTest {
+    Ainit
+    $Count = 100
+	adb shell input keyevent 27  #POWER
+	sleep 2
+	adb shell input swipe 200 1700 200 300 # SWIPE UP
+    sleep 1
+    while($Count-- -gt 0) {
+        #Call 112
+        adb shell service call phone 1 s16 112
+        sleep 1
+	    adb shell input tap 533 2156 # tap CALL
+        Write-Host $Count "Calls"
+	    $ModeCount = 15
+        while($ModeCount-- -gt 0) {
+            sleep 1
+	        adb shell input tap 215 2060 # tap Handsfree/Handset
+            Write-Host $ModeCount "Switch"
+        }
+	    adb shell input tap 541 2073 # tap Hang up
+        sleep 6
+    }
+}
+Function TxRecord-HS {
+
+    adb wait-for-device root
+    adb wait-for-device remount
+
+    #adb shell "echo 4808 20200200 > /d/regmap/3-0030/registers"
+    #adb shell "echo 4808 20200200 > /d/regmap/3-0031/registers"
+
+    adb shell "tinymix 'RCV ASP_TX1 Source' 'DSP_TX1'"
+    adb shell "tinymix 'ASP_TX2 Source' 'DSP_TX1'"
+
+    adb shell "tinymix 'MultiMedia1 Mixer TERT_MI2S_TX' 1"
+    adb shell "tinymix 'TERT_MI2S_TX SampleRate' KHZ_48"
+    adb shell "tinymix 'TERT_MI2S_TX Format' S24_LE"
+    adb shell "tinymix 'TERT_MI2S_TX Channels' 'Two'"
+
+    adb shell "echo 4c20 18 > /d/regmap/3-0030/registers"
+    adb shell "echo 4c24 18 > /d/regmap/3-0031/registers"
+    #adb shell "echo 4800 30000 > /d/regmap/3-0030/registers"
+
+    adb shell "tinycap /data/rec.wav -D 0 -d 0 -r 48000 -c 2 -T 30"
+
+    #adb shell "cat /d/regmap/3-0030/registers" > regs-3-0030.txt
+    #adb shell "cat /d/regmap/3-0031/registers" > regs-3-0031.txt
+    #cat regs-3-0030.txt | findstr 4800:
+    #cat regs-3-0031.txt | findstr 4800:
+
+    adb pull /data/rec.wav .
+    start .
 }

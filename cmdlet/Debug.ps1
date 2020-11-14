@@ -1,31 +1,270 @@
-Function Dprdbg {
-    Ainit
-    adb shell "echo 'file soc-utils.c +p' > /sys/kernel/debug/dynamic_debug/control"
-    adb shell "echo 'file soc-dapm.c +p' > /sys/kernel/debug/dynamic_debug/control"
-    adb shell "echo 'file soc-pcm.c +p' > /sys/kernel/debug/dynamic_debug/control"
-    adb shell "echo 'file soc-core.c +p' > /sys/kernel/debug/dynamic_debug/control"
-    adb shell "echo 'file kona.c +p' > /sys/kernel/debug/dynamic_debug/control"
+Function EventTest {
+$job = Start-Job -ScriptBlock {
+  while($true) {
+    Register-EngineEvent -SourceIdentifier MyNewMessage -Forward
+    Start-Sleep -Seconds 3
+    $null = New-Event -SourceIdentifier MyNewMessage -MessageData "Pingback from job."
+  }
 }
 
-#Dbg-KernLoop -Patten "cs35|cirrus"
-Function DLdmesg {
-    param([String]$Patten)
-    Ainit
-    echo $Patten
-    while(1) {
-       # adb shell dmesg -c | rg -ie "cs35|cspl|cirrus|-0040|-0041|kona"
-       adb shell dmesg -c | rg -ie $Patten
+$event = Register-EngineEvent -SourceIdentifier MyNewMessage -Action {
+  Write-Host $event.MessageData;
+}
+
+for($i=0; $i -lt 10; $i++) {
+  Start-Sleep -Seconds 1
+  Write-Host "Pingback from main."
+}
+
+$job,$event| Stop-Job -PassThru| Remove-Job #stop the job and event listener
+
+}
+
+Function SuperTester {
+    param(
+        [Parameter()]
+        [String]$Target, [String]$Patten, [Switch]$Dapm, [Switch]$Logs,
+        [Switch]$View, [Switch]$Max, [Switch]$Min
+    )
+    $Callbacks = $TestCallbacks
+    $CallBacks["OnStart"].Invoke();
+
+    $job = Start-Job -ScriptBlock {
+        #$CallBacks["OnTest"].Invoke();
+        Out-Host "fuck..."
+    }
+    Start-Sleep -Seconds 3
+<#
+ $timer = New-Object System.Timers.Timer -Property @{
+        Interval = 1000;
+        Enabled = $true;
+        AutoReset = $false
+    }
+    Register-ObjectEvent $timer Elapsed -Action {
+        $Event | Out-Host
+    }
+    $timer.Start()
+#>
+    $timer = New-Object System.Timers.Timer -Property @{
+        Interval = 500;
+        AutoReset = $true
+    }
+
+    Register-ObjectEvent -InputObject $timer `
+        -MessageData 5 `
+        -SourceIdentifier Stateful -EventName Elapsed -Action {
+
+        $script:counter += 1
+        Write-Host "Event counter is $counter"
+        if ($counter -ge $Event.MessageData) {
+            Write-Host "Stopping timer"
+            $timer.Stop()
+        }
+    } > $null
+
+
+    $timer.Start()
+
+<#
+    return
+    $file = Get-Content $Target
+    $isWord = $file | %{$_ -match $Patten}
+    if ($isWord -contains $true) {
+        Write-Host "There is!"
+        $CallBacks["OnLogs"].Invoke();
+    } else {
+        Write-Host "There ins't - $Patten"
+    }
+#>
+}
+$TestCallbacks = @{
+    "OnStart"  = {
+        write-host "Now started Test, Time: " $(get-date -format yyyy-MM-ddTHH-mm-ss-ff)
+        return "OnStart..."
+    }
+
+    "OnTest"  = { write-host "Now started Test, Time:" $(get-date -format yyyy-MM-ddTHH-mm-ss-ff) }
+    "OnCheck"  = { write-host "Now started Test, Time: $(get-date -format yyyy-MM-ddTHH-mm-ss-ff)" }
+    "OnFinish" = { write-host "Finished, Time: $(get-date -format yyyy-MM-ddTHH-mm-ss-ff)"}
+    "OnError"    = { write-host "error , Time: $(get-date -format yyyy-MM-ddTHH-mm-ss-ff)"}
+    "OnLogs"    = {
+            write-host "DDumpLogs"
+            DLogs -Tag Failed -All -View
+            sleep 100000
     }
 }
 
+Function Prdebug {
+    $Sb = New-Object -TypeName System.Text.StringBuilder
+    $AdbCmd = "adb shell `"@COMMANDS`""
+    $DbgEna = "echo 'file @FILES +p' > /sys/kernel/debug/dynamic_debug/control;"
+    $DbgFiles = "soc-utils.c",
+                "soc-dapm.c",
+                "soc-pcm.c",
+                "soc-core.c",
+                "kona.c",
+                "laihana.c",
+                "q6afe.c",
+                "q6adm.c",
+                "msm-pcm-routing-v2.c",
+                "wm_adsp.c",
+                "cs35l41.c",
+                "cs35l45.c"
+    #$[void]$Sb.Append("tinymix `'@PREFIX @CONTROL`' `'@VALUE`'").Replace("@CONTROL", $Control).Replace("@VALUE", $Value).Replace("@PREFIX", $Prefix)
+
+    foreach ($element in $DbgFiles) {
+        [void]$Sb.Append($DbgEna).Replace("@FILES", $element)
+    }
+    $DbgEna = $Sb.ToString()
+    [void]$Sb.Clear().Append($AdbCmd).Replace("@COMMANDS", $DbgEna)
+    #Write-Host $Sb.ToString()
+    Invoke-Expression $Sb.ToString()
+}
+
+Function DLogs {
+    param(
+        [Parameter()]
+        [String]$Tag, [Switch]$Regs, [Switch]$Dapm, [Switch]$Logs, [Switch]$All,
+        [Switch]$View, [Switch]$Max, [Switch]$Min
+    )
+
+    Ainit
+
+    $Product = DGetProduct
+    $SoundCard = $Product.SoundCard
+    $Amp = $Product.Amp
+    #$Nodes = "spi1.0", "spi1.1"
+    $Nodes = $Product.Nodes
+
+    $Time=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+    $Dir = $Time
+
+    if($Tag) {
+        $Dir = "$Product-$Tag-$Time"
+        Write-Host $Time
+    }
+
+    new-item -path . -name $Dir -type directory
+    Set-Location -Path $Dir
+    if($Regs) {
+        foreach ($element in $Nodes) {
+            Write-Host $element
+            adb shell "echo Y > /d/regmap/$element/cache_bypass"
+            adb shell "cat /d/regmap/$element/registers" > $element-registers.txt
+            adb shell "echo N > /d/regmap/$element/cache_bypass"
+        }
+    }
+    if($Dapm) {
+        foreach ($element in $Nodes) {
+            if ($Product.CIF -eq "SPI") {
+                $Target = "/d/asoc/@SOUNDCARD/@NODE/dapm/*".Replace("@SOUNDCARD",$SoundCard).Replace("@NODE", $element)
+            } else {
+                $Target = "/d/asoc/@SOUNDCARD/@AMP.@NODE/dapm/*".Replace("@SOUNDCARD",$SoundCard).Replace("@AMP", $Amp).Replace("@NODE", $element)
+            }
+            adb shell "cat $Target" > $element-dapm.txt
+        }
+    }
+
+    if($Logs) {
+        if($Max) {
+            Prdebug
+        }
+        adb shell dmesg > dmesg.txt
+        adb shell "logcat -d" > logcat.txt
+        adb shell "tinymix" > tinymix.txt
+        foreach ($element in $Nodes) {
+            Write-Host $element
+            $Target = "/d/asoc/sm*/$element/dapm/*"
+            adb shell "cat $Target" > $element-dapm.txt
+        }
+    }
+
+    if($All) {
+        adb shell dmesg > dmesg.txt
+        adb shell "logcat -d" > logcat.txt
+        adb shell "tinymix" > tinymix.txt
+        foreach ($element in $Nodes) {
+            Write-Host $element
+            $Target = "/d/asoc/sm*/$element/dapm/*"
+            adb shell "cat $Target" > $element-dapm.txt
+        }
+        foreach ($element1 in $Nodes) {
+            Write-Host $element1
+            adb shell "echo Y > /d/regmap/$element1/cache_bypass"
+            adb shell "cat /d/regmap/$element1/registers" > $element1-registers.txt
+            adb shell "echo N > /d/regmap/$element1/cache_bypass"
+        }
+    }
+
+    if($View) {
+        gvim *.txt
+    }
+
+    Set-Location -Path ..
+    Get-ChildItem -Path $Dir
+}
+
 #Dbg-KernLoop -Patten "cs35|cirrus"
-Function DLlogcat {
-    param([String]$Patten)
+Function Dmesg {
+    param(
+        [Parameter()]
+        [String]$Patten, [Switch]$Loop, [Switch]$Max
+    )
+
     Ainit
     echo $Patten
-    while(1) {
-       adb shell logcat -d | rg -ie $Patten
-       adb shell logcat -c
+    if($Max) {
+        Prdebug
+    }
+
+    if ($Loop) {
+        while(1) {
+            if($Patten) {
+                adb shell "dmesg -c" | rg -ie $Patten
+            } else {
+                adb shell "dmesg -c"
+            }
+            sleep 0.2
+        }
+    } else {
+        if($Patten) {
+            adb shell "dmesg -c" | rg -ie $Patten
+        } else {
+            adb shell "dmesg -c"
+        }
+    }
+}
+
+Function Logcat {
+    param(
+        [Parameter()]
+        [String]$Patten, [Switch]$Loop, [Switch]$Max
+    )
+
+    Ainit
+    echo $Patten
+    if($Max) {
+        Prdebug
+    }
+
+    if($Loop) {
+        while(1) {
+            # adb shell dmesg -c | rg -ie "cs35|cspl|cirrus|-0040|-0041|kona"
+            if($Patten) {
+                adb shell logcat -d | rg -ie $Patten
+                adb shell logcat -c
+            } else {
+                adb shell logcat -d
+                adb shell logcat -c
+            }
+            sleep 0.2
+        }
+    } else {
+        if($Patten) {
+            adb shell logcat -d | rg -ie $Patten
+        } else {
+            adb shell logcat -d
+        }
     }
 }
 
@@ -37,9 +276,8 @@ Function Dminidm {
     mode
 }
 
-Function Dshowfw {
+Function DFwMd5 {
     Ainit
-    adb shell "find /vendor/firmware/ -name '*cs35*' | xargs ls -l"
     adb shell "find /vendor/firmware/ -name '*cs35*' | xargs md5sum"
 }
 
@@ -56,90 +294,7 @@ Function DTmix {
 	gvim $FileName
 }
 
-Function Dlogcat {
-    param([String]$Name)
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-	if ($Name -eq '') {
-		$FileName="logcat-" + "$TimeStr" + ".txt"
-	} else {
-		$FileName="$Name" + "-" + "logcat-" + "$TimeStr" + ".txt"
-	}
-    adb shell logcat -d > $FileName
-    echo $FileName
-	gvim $FileName
-}
-
-
-Function Ddmesg {
-    param([String]$Name)
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-	if ($Name -eq '') {
-		$FileName="dmesg-" + "$TimeStr" + ".txt"
-	} else {
-		$FileName="$Name" + "-" + "dmesg-" + "$TimeStr" + ".txt"
-	}
-    adb shell dmesg > $FileName
-    echo $FileName
-	gvim $FileName
-}
-
-Function Ddump {
-    param([String]$Device1, $Device2, $Prefix, $SoundCard)
-
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    if ($Prefix -ne '') {
-        $Prefix=$Prefix + "-"
-    }
-    $Dapm1="/d/asoc/" + $SoundCard + "/" + $Device1 + "/" + "dapm/*"
-    $Dapm2="/d/asoc/" + $SoundCard + "/" + $Device2 + "/" + "dapm/*"
-
-    $Regmap="/d/regmap"
-    $NodeBypass1=$Regmap + "/" + $Device1 + "/" + "cache_bypass"
-    $NodeBypass2=$Regmap + "/" + $Device2 + "/" + "cache_bypass"
-    $NodeRegisters1=$Regmap + "/" + $Device1 + "/" + "registers"
-    $NodeRegisters2=$Regmap + "/" + $Device2 + "/" + "registers"
-    $DumpDir = $Prefix + "Dump-" + $TimeStr
-
-    new-item -path . -name $DumpDir -type directory
-    Set-Location -Path $DumpDir
-
-    $DapmName1 = $Prefix + $Device1 + "-dapm-" + $TimeStr + ".txt"
-    $DapmName2 = $Prefix + $Device2 + "-dapm-" + $TimeStr + ".txt"
-    $RegName1 = $Prefix + $Device1 + "-registers-" + $TimeStr + ".txt"
-    $RegName2 = $Prefix + $Device2 + "-registers-" + $TimeStr + ".txt"
-    $TinymixName = $Prefix + "Tinymix-" + $TimeStr + ".txt"
-    $DmesgName = $Prefix + "Dmesg-" + $TimeStr + ".txt"
-    $LogcatName = $Prefix + "Logcat-" + $TimeStr + ".txt"
-
-   # echo $NodeBypass1
-   # echo $NodeBypass2
-   # echo $NodeRegisters1
-   # echo $NodeRegisters2
-   # echo $RegName1
-   # echo $RegName2
-   # echo $TinymixName
-   # echo $DmesgName
-   # echo $LogcatName
-    # Android
-    adb shell dmesg > $DmesgName
-    adb logcat -d > $LogcatName
-    adb shell tinymix > $TinymixName
-    adb shell "echo Y > $NodeBypass1"
-    adb shell "echo Y > $NodeBypass2"
-    #<
-    adb shell "cat $NodeRegisters1" > $RegName1
-    adb shell "cat $NodeRegisters2" > $RegName2
-    adb shell "echo N > $NodeBypass1"
-    adb shell "echo N > $NodeBypass2"
-    adb shell "cat $Dapm1" > $DapmName1
-    adb shell "cat $Dapm2" > $DapmName2
-    #
-    Set-Location -Path ..
-    Get-ChildItem -Path $DumpDir
-}
-
-
-Function Dbackup {
+Function DBackup {
     param([String]$Name)
     Ainit
 
@@ -192,71 +347,7 @@ Function Daudio-kill {
     adb shell "pgrep -f audioserver | xargs kill"
 }
 
-Function Dlogs {
-    param([String]$Name, $Device1, $Device2, $SoundCard)
-
-	if ($Name -ne '') {
-		$Name=$Name+"-"
-	}
-
-    Ainit
-	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss
-	$LogDir = $Name + "Log-" + $TimeStr
-	$DmesgName = $Name + "Dmesg-" + $TimeStr+".txt"
-	$LogcatName = $Name + "Logcat-" + $TimeStr+".txt"
-	$TmixName = $Name + "Tinymix-" + $TimeStr+".txt"
-
-	new-item -path . -name $LogDir -type directory
-	Set-Location -Path $LogDir
-
-	adb shell dmesg > $DmesgName
-	adb shell logcat -d > $LogcatName
-	adb shell tinymix > $TmixName
-
-    if (($Device1 -ne '') -AND ($Device2 -ne '') -AND ($SoundCard -ne '')) {
-        $DapmName1 = $Device1+"-dapm.txt"
-        $DapmName2 = $Device2+"-dapm.txt"
-        $Dapm1="/d/asoc/" + $SoundCard + "/" + $Device1 + "/" + "dapm/*"
-        $Dapm2="/d/asoc/" + $SoundCard + "/" + $Device2 + "/" + "dapm/*"
-        adb shell "cat $Dapm1" > $DapmName1
-        adb shell "cat $Dapm2" > $DapmName2
-    }
-	gvim $DmesgName $LogcatName $TmixName
-
-	Set-Location -Path ..
-	Get-ChildItem -Path $LogDir
-}
-
-Function Ddump-regs {
-    param([String]$Device1, $Device2)
-
-    $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    $Regmap="/d/regmap"
-    $NodeBypass1=$Regmap + "/" + $Device1 + "/" + "cache_bypass"
-    $NodeBypass2=$Regmap + "/" + $Device2 + "/" + "cache_bypass"
-    $NodeRegisters1=$Regmap + "/" + $Device1 + "/" + "registers"
-    $NodeRegisters2=$Regmap + "/" + $Device2 + "/" + "registers"
-    $RegsDir = "RegsDir-" + $TimeStr
-    new-item -path . -name $RegsDir -type directory
-    Set-Location -Path $RegsDir
-    $RegName1 = $Device1 + "-" + "registers" + $TimeStr + ".txt"
-    $RegName2 = $Device2 + "-" + "registers" + $TimeStr + ".txt"
-
-    # Android
-    adb shell "echo Y > $NodeBypass1"
-    adb shell "echo Y > $NodeBypass2"
-    #<
-    adb shell "cat $NodeRegisters1" > $RegName1
-    adb shell "cat $NodeRegisters2" > $RegName2
-    adb shell "echo N > $NodeBypass1"
-    adb shell "echo N > $NodeBypass2"
-    #
-    gvim $RegName1 $RegName2
-    Set-Location -Path ..
-    Get-ChildItem -Path $RegsDir
-}
-
-Function DTestAudio {
+Function DMusic {
     Ainit
     adb push C:\Users\hhuang\OneDrive\TestAudio\test /sdcard/Music/
     adb push C:\Users\hhuang\OneDrive\TestAudio\test\lrp_loop.wav /sdcard/Music/
@@ -294,6 +385,16 @@ $pushBlock = {
     }
 }
 Register-ArgumentCompleter -CommandName Apush -ParameterName Dest -ScriptBlock $pushBlock
+
+function Apull {
+    [CmdletBinding()]
+    param(
+        [Parameter()]
+        [string]$Src, $Dest
+    )
+    adb pull $Src $Dest
+}
+Register-ArgumentCompleter -CommandName Apull -ParameterName Src -ScriptBlock $pushBlock
 
 function Aecho {
     [CmdletBinding()]

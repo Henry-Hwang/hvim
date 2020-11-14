@@ -19,9 +19,8 @@ Plug 'junegunn/vim-journal'
 Plug 'jremmen/vim-ripgrep'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ludovicchabant/vim-gutentags'
-"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'universal-ctags/ctags'
-Plug 'majutsushi/tagbar'
 Plug 'tacahiroy/ctrlp-funky'
 Plug 'eshion/vim-sync'
 Plug 'vim-scripts/a.vim'
@@ -37,6 +36,7 @@ Plug 'PProvost/vim-ps1'
 Plug 'mgedmin/chelper.vim'
 Plug 'rhysd/vim-clang-format'
 Plug 'Shougo/vimproc.vim'
+"Plug 'liuchengxu/vista.vim'
 
 call plug#end()
 
@@ -104,8 +104,14 @@ set shell=powershell
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-set t_Co=256
+
+if has("gui_running")
 set guifont=Courier_New:h11
+else
+set guifont=Courier_New:h8
+endif
+set t_Co=256
+
 hi CursorLine term=underline ctermbg=236 guibg=#293739
 set cursorline       "hilight the line of the cursor
 "[[syntax]]
@@ -133,6 +139,7 @@ nnoremap <leader>bt :set buftype=<CR>
 nnoremap <C-h> :Hexmode<CR>
 
 nnoremap <silent> <leader>l :call Setwrap()<CR>
+nnoremap <silent> <leader>v :call MyVista()<CR>
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
 "tnoremap <Esc> <C-\><C-n>
 nnoremap <leader>. :e $GVIMRC<CR>
@@ -146,7 +153,6 @@ au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
 let g:vbookmark_bookmarkSaveFile = $HOME . '/.vimbookmark'
 " Airline
-let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
 " Markdown_preview (a plugin in nyaovim)
 let g:markdown_preview_eager = 1
@@ -160,6 +166,17 @@ let g:multi_cursor_skip_key='x'
 let g:multi_cursor_quit_key='q'
 let g:hexmode_patterns = '*.bin,*.exe,*.dat,*.o,*.wmfw,*.wav,*.mp3'
 
+let g:vista_status=0
+function! MyVista()
+    if g:vista_status ># 0
+		let g:vista_status=0
+        exec "Vista"
+    else
+        exec "Vista!!"
+		let g:vista_status=1
+    endif
+endfunction
+
 let g:wrap_line_count=0
 function! Setwrap()
     "exec "normal \<c-w>c"
@@ -171,6 +188,7 @@ function! Setwrap()
 		let g:wrap_line_count=1
     endif
 endfunction
+
 " Startify
 command! -nargs=1 CD cd <args> | Startify
 autocmd User Startified setlocal cursorline
@@ -246,20 +264,32 @@ endif
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+if has("gui_running")
 " calculator
 command! -nargs=+ Calc :py print <args>
 py from math import *
 "}
+endif
+set t_Co=256
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
 
+set statusline+=%{NearestMethodOrFunction()}
+
+" By default vista.vim never run if you don't call it explicitly.
+"
+" If you want to show the nearest function in your statusline automatically,
+" you can add the following line to your vimrc
+"autocmd VimEnter * call vista#RunForNearestMethodOrFunction()
 " SSH tmux
 if exists('$TMUX')
 	let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
 	let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
 else
-	let &t_SI = "\e[5 q"
-	let &t_EI = "\e[2 q"
+	let &t_SI .= "\e[5 q"
+	let &t_EI .= "\e[2 q"
 endif
-
 "[[Session management]]
 if &diff
     hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
@@ -280,7 +310,6 @@ autocmd BufWritePost *.scala :EnTypeCheck
 cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
-
 set undodir=~/.vim/tmp/undo/     " undo files
 set backupdir=~/.vim/tmp/backup/ " backups
 set directory=~/.vim/tmp/swap/   " swap files

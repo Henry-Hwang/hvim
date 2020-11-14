@@ -6,17 +6,17 @@ Function WMd5sum {
 function BuildCrussp {
     param(
         [Parameter()]
-        [string]$Push, $Reboot
+        [Switch]$Push, [Switch]$Reboot
     )
 
     C:\work\tools\android-ndk-r21\ndk-build.cmd
-    if ("$Push" -eq 'Push') {
+    if ($Push) {
         Ainit
         adb push C:\Users\hhuang\work\src\audio-hal\libs\arm64-v8a\cstool           /vendor/bin/
         adb push C:\Users\hhuang\work\src\audio-hal\libs\arm64-v8a\libcrussp.so     /vendor/lib64/
         adb push C:\Users\hhuang\work\src\audio-hal\shared\libstdc++.so             /vendor/lib64/
     }
-    if ("$Reboot" -eq 'Reboot') {
+    if ($Reboot) {
         adb reboot
     }
 }
@@ -37,44 +37,52 @@ function JsonConverter {
     python $Tool $Json -t $Target
 }
 
-function BuildCapiv2 {
-    param(
-        [Parameter()]
-        [string]$Json, $Out, $Push
-    )
-
+Function CapiV2Make {
     $Capiv2Dir = "C:\work\src\aus\amps\playback\CSPL\firmware\workspace_eclipse_for_QCOM_generic"
-    $SourceDir = $Capiv2Dir+"\capi_v2_cirrus_cspl"
-    $TuningDir = $Capiv2Dir+"\capi_v2_cirrus_cspl\include\tuningheaders"
-    $Target = ($Json).Replace(".json", ".h")
-
-    if($Json) {
-        JsonConverter -Json $Json -Out $Target
-    }
-
-    #Build
-    cp $Target $TuningDir
-    $Target.Replace(".\", "") | CLIP
     $CsplLib = $Capiv2Dir + "\capi_v2_cirrus_cspl\LLVM_Debug\capi_v2_cirrus_cspl.so"
-    $Stamp = $SourceDir + "\include\build_stamp.h"
-    $Compat = $SourceDir + "\source\compat.c"
-    vim $Compat $Stamp
-    echo "build..."
-
     Push-Location
     Set-Location -Path $Capiv2Dir
-    .\Windows_Set.cmd
+    . C:\Users\hhuang\hvim\cmdlet\Windows_Set.cmd
     Pop-Location
 
     Copy-Item $CsplLib capi_v2_cirrus_sp.so
-    Copy-Item ~\hvim\cmdlet\PushCapiv2.ps1 .
+    Copy-Item ~\hvim\cmdlet\PushCapiv2.ps1 .\Push.txt
+}
 
-    if($Push) {
-        . ~\hvim\cmdlet\PushCapiv2.ps1
-        if ("$Push" -eq 'Reboot') {
-            adb reboot
-        }
+Function CapiV2 {
+    param(
+        [Parameter()]
+        [String]$Json, [Switch]$Make, [Switch]$Push, [Switch]$Reboot
+    )
+    $Capiv2Dir = "C:\work\src\aus\amps\playback\CSPL\firmware\workspace_eclipse_for_QCOM_generic"
+    $TuningDir = $Capiv2Dir+"\capi_v2_cirrus_cspl\include\tuningheaders"
+    $SourceDir = $Capiv2Dir+"\capi_v2_cirrus_cspl"
+    $CsplLib = $Capiv2Dir + "\capi_v2_cirrus_cspl\LLVM_Debug\capi_v2_cirrus_cspl.so"
+    $Stamp = $SourceDir + "\include\build_stamp.h"
+    $Compat = $SourceDir + "\source\compat.c"
+
+
+    if ($Json) {
+        $Target = ($Json).Replace(".json", ".h")
+        JsonConverter -Json $Json -Out $Target
+        $Target | CLIP
+        cp $Target $TuningDir
+        vim $Compat $Stamp
+        CapiV2Make
+        start .
     }
 
-    start .
+    if ($Make) {
+        CapiV2Make
+    }
+
+    if ($Push) {
+        adb wait-for-device root
+        adb wait-for-device remount
+        adb push $CsplLib /system/vendor/lib/rfsa/adsp/capi_v2_cirrus_sp.so
+    }
+
+    if($Reboot) {
+        adb reboot
+    }
 }

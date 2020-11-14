@@ -34,3 +34,24 @@ Function OAmps {start C:\work\src\aus\amps}
 Function OHal {Start C:\work\src\audio-hal}
 Function OScs {start C:\work\src\aus\scs}
 Function OHaloSDK {Start C:\Users\hhuang\Documents\CirrusLogic\SDKs\HaloCore\SDK}
+
+Function GDir {
+    param(
+        [Parameter()]
+        [String]$Common, [Switch]$Open
+    )
+    if ($Open) {
+        start $Common
+    } else {
+        Set-Location $Common
+    }
+}
+$dirsBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    DGetDirs | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+Register-ArgumentCompleter -CommandName GDir -ParameterName Common -ScriptBlock $dirsBlock
