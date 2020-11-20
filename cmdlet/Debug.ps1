@@ -125,8 +125,12 @@ Function DLogs {
     param(
         [Parameter()]
         [String]$Tag, [Switch]$Regs, [Switch]$Dapm, [Switch]$Logs, [Switch]$All,
-        [Switch]$View, [Switch]$Max, [Switch]$Min
+        [Switch]$View, [Switch]$Max, [Switch]$Min, [String]$Workon
     )
+
+    if ($Workon) {
+        DDevices -Workon $Workon
+    }
 
     Ainit
 
@@ -137,11 +141,12 @@ Function DLogs {
     $Nodes = $Product.Nodes
 
     $Time=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    $Dir = $Time
+    $Dir = $Product.Name
 
     if($Tag) {
-        $Dir = "$Product-$Tag-$Time"
-        Write-Host $Time
+        $Dir = "$Dir-$Tag-$Time"
+    } else {
+        $Dir = "$Dir-$Time"
     }
 
     new-item -path . -name $Dir -type directory
@@ -281,7 +286,7 @@ Function DFwMd5 {
     adb shell "find /vendor/firmware/ -name '*cs35*' | xargs md5sum"
 }
 
-Function DTmix {
+Function Tinymix {
     param([String]$Name)
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
 	if ($Name -eq '') {
@@ -293,51 +298,7 @@ Function DTmix {
     echo $FileName
 	gvim $FileName
 }
-
-Function DBackup {
-    param([String]$Name)
-    Ainit
-
-	if ($Name -ne '') {
-		$NameFix=$Name+"-"
-	}
-
-	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
-    $BackupDir = $NameFix + "Backup-" + $TimeStr
-
-	new-item -path . -name $BackupDir -type directory
-    new-item -path $BackupDir -name lib -type directory
-    Set-Location -Path $BackupDir
-	new-item -path . -name vendor -type directory
-    if ($Name -ne 'Full') {
-        new-item -path vendor -name lib -type directory
-        new-item -path vendor -name lib64 -type directory
-        new-item -path vendor -name bin -type directory
-        new-item -path vendor -name etc -type directory
-        new-item -path vendor -name firmware -type directory
-
-        adb pull vendor/lib/hw vendor/lib/
-        adb pull vendor/lib64/hw vendor/lib64/
-        adb pull vendor/lib/libcrussp.so vendor/lib/
-        adb pull vendor/lib64/libcrussp.so vendor/lib64/
-
-        adb pull vendor/bin/cstool vendor/bin/
-        adb pull vendor/etc  vendor/
-        adb pull vendor/firmware vendor/
-    } else {
-        adb pull vendor/lib/ vendor/
-        adb pull vendor/lib64/ vendor/
-
-        adb pull vendor/bin/ vendor/
-        adb pull vendor/etc  vendor/
-        adb pull vendor/firmware vendor/
-
-    }
-	Set-Location -Path ..
-    Get-ChildItem -Path $BackupDir
-}
-
-Function Dwisce {
+Function Wisce {
     Ainit
     adb forward tcp:22349 tcp:22349
     adb shell
@@ -362,61 +323,4 @@ Function DDownload {
     Invoke-WebRequest -Uri $url -OutFile $output
     Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 }
-function Apush {
-    [CmdletBinding()]
-    param(
-        [Parameter()]
-        [string]$Src, $Dest
-    )
-    adb push $Src $Dest
-}
-
-$pushBlock = {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-
-    (adb shell "find /vendor/firmware/ -name '*cs35*';
-                find /vendor/lib/rfsa/adsp -name '*cirrus*';
-                find /vendor/etc -name 'mixer_paths_*.xml';
-                find /vendor/lib64/hw/ -name 'audio.*primary*.so';
-                find /vendor/lib/hw/ -name 'audio.*primary*.so';") + "/sdcard/Music/" + "/sdcard/Download/" + "/vendor/etc/" + "/sdcard/Music/" | where-Object {
-        $_ -like "*$wordToComplete*"
-    } | ForEach-Object {
-          "$_"
-    }
-}
-Register-ArgumentCompleter -CommandName Apush -ParameterName Dest -ScriptBlock $pushBlock
-
-function Apull {
-    [CmdletBinding()]
-    param(
-        [Parameter()]
-        [string]$Src, $Dest
-    )
-    adb pull $Src $Dest
-}
-Register-ArgumentCompleter -CommandName Apull -ParameterName Src -ScriptBlock $pushBlock
-
-function Aecho {
-    [CmdletBinding()]
-    param(
-        [Parameter()]
-        [string]$Reg, $Val, $Node
-    )
-    $Cache = ($(Split-Path -Path "$Node") + "/cache_bypass").Replace('\','/')
-    #$Cache = $Cache.Replace('\','/')
-    adb shell "echo N > $Cache"
-    adb shell "echo $Src $Dest > $Node"
-    adb shell "echo Y > $Cache"
-}
-
-$nodeBlock = {
-    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-
-    (adb shell "find /d/regmap/ -name '*registers*' | grep -iE 'spi|0031|0030|0032|0041|0040|0042'") | where-Object {
-        $_ -like "*$wordToComplete*"
-    } | ForEach-Object {
-          "$_"
-    }
-}
-Register-ArgumentCompleter -CommandName Aecho -ParameterName Node -ScriptBlock $nodeBlock
 

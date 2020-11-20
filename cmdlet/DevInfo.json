@@ -1,172 +1,209 @@
 {
-    "WORKON":  "M2181",
-    "VENDORS":  [
-                    {
-                        "Vendor":  "MEIZU",
-                        "Products":  [
-                                         {
-                                             "Name":  "M2181",
-                                             "Dir":  "C:\\work\\customer\\meizu\\M2191",
-                                             "SoundCard":  "sm8350-meizu-snd-card",
-                                             "ASP":  "I2S",
-                                             "CIF":  "SPI",
-                                             "Amp":  "cs35l45",
-                                             "AmpNum":  2,
-                                             "Nodes":  [
-                                                           "spi1.0",
-                                                           "spi1.1"
-                                                       ],
-                                             "Prefixs":  [
-                                                             "RCV",
-                                                             "SPK"
-                                                         ]
-                                         },
-                                         {
-                                             "Name":  "M2091",
-                                             "Dir":  "C:\\work\\customer\\meizu\\M2091",
-                                             "SoundCard":  "sm8350-meizu-snd-card",
-                                             "ASP":  "I2S",
-                                             "CIF":  "SPI",
-                                             "Amp":  "cs35l45",
-                                             "AmpNum":  2,
-                                             "Nodes":  [
-                                                           "spi1.0",
-                                                           "spi1.1"
-                                                       ],
-                                             "Prefixs":  [
-                                                             "RCV",
-                                                             "SPK"
-                                                         ]
-                                         }
-                                     ]
-                    },
-                    {
-                        "Vendor":  "BLACKSHARK",
-                        "Products":  [
-                                         {
-                                             "Name":  "BS",
-                                             "Dir":  "C:\\work\\customer\\Blackshark\\BS",
-                                             "SoundCard":  "lahaina-mtp-snd-card",
-                                             "ASP":  "I2S",
-                                             "CIF":  "I2C",
-                                             "Amp":  "cs35l45",
-                                             "AmpNum":  2,
-                                             "Nodes":  [
-                                                           "3-0040",
-                                                           "3-0041"
-                                                       ],
-                                             "Prefixs":  [
-                                                             "RCV",
-                                                             ""
-                                                         ]
-                                         }
-                                     ]
-                    },
-                    {
-                        "Vendor":  "XIAOMI",
-                        "Products":  [
-                                         {
-                                             "Name":  "K2",
-                                             "Dir":  "C:\\work\\customer\\xiaomi\\K2",
-                                             "SoundCard":  "lahaina-mtp-snd-card",
-                                             "ASP":  "TDM",
-                                             "CIF":  "I2C",
-                                             "Amp":  "cs35l41",
-                                             "AmpNum":  2,
-                                             "Nodes":  [
-                                                           "1-0040",
-                                                           "1-0042"
-                                                       ],
-                                             "Prefixs":  [
-                                                             "RCV",
-                                                             ""
-                                                         ]
-                                         },
-                                         {
-                                             "Name":  "K11",
-                                             "Dir":  "C:\\work\\customer\\xiaomi\\K11",
-                                             "SoundCard":  "lahaina-mtp-snd-card",
-                                             "ASP":  "TDM",
-                                             "CIF":  "I2C",
-                                             "Amp":  "cs35l41",
-                                             "AmpNum":  2,
-                                             "Nodes":  [
-                                                           "1-0040",
-                                                           "1-0042"
-                                                       ],
-                                             "Prefixs":  [
-                                                             "RCV",
-                                                             ""
-                                                         ]
-                                         }
-                                     ]
-                    }
-                ],
-    "DIRS":  [
-        "C:\\work\\customer\\xiaomi",
-        "C:\\work\\customer\\meizu",
-        "C:\\work\\src\\aus\\amps\\cspl",
-        "C:\\Users\\hhuang\\hvim",
-        "C:\\work\\music\\Music",
-        "C:\\work\\src\\audio-hal",
-        "C:\\work\\docs\\technote",
-        "C:\\work\\docs\\expense",
-        "C:\\work\\docs\\datasheet",
-        "C:\\work\\src\\aus\\amps\\ormis",
-        "C:\\work\\src\\aus\\amps",
-        "C:\\work\\src\\aus\\scs",
-        "C:\\work\\src\\aus\\cirrus-linux",
-        "C:\\work\\src\\aus\\scs\\scs_playback",
-        "C:\\work\\src\\aus\\amps\\playback\\CSPL\\firmware\\workspace_eclipse_for_QCOM_generic",
-        "C:\\Users\\hhuang\\Documents\\CirrusLogic\\SDKs\\HaloCore\\SDK",
-        "C:\\work"
-    ],
-    "Mixers":  [
-                   "Fast Use Case Delta File",
-                   "DSP1 Firmware",
-                   "Fast Use Case Switch Enable",
-                   "DSP1 Preload Switch",
-                   "DSP1 Boot Switch",
-                   "Amplifier Mode",
-                   "AMP PCM Gain",
-                   "AMP Mute",
-                   "Hibernate Mode",
-                   "ASPTX1 Slot Position",
-                   "ASPTX2 Slot Position",
-                   "ASPTX3 Slot Position",
-                   "ASPTX4 Slot Position",
-                   "ASPRX1 Slot Position",
-                   "ASPRX2 Slot Position",
-                   "Digital PCM Volume",
-                   "Calibration Resistance",
-                   "Ambient Temperature",
-                   "ASP_TX1 Source",
-                   "ASP_TX2 Source",
-                   "ASP_TX3 Source",
-                   "DACPCM Source",
-                   "NGATE1 Source",
-                   "NGATE2 Source",
-                   "AMP Enable Switch",
-                   "BBPE Enable Switch",
-                   "NFR Enable Switch",
-                   "NGATE Enable Switch",
-                   "SYNC PWR Enable Switch",
-                   "DSP1 Protection 4fa00 HALO_STATE",
-                   "DSP1 Protection 4fa00 HALO_HEARTBEAT",
-                   "DSP1 Protection 4fa00 FIRMWARE_STATE",
-                   "DSP1 Protection 4fa00 ROM_BOOT_COMPLETE",
-                   "DSP1 Protection cd CSPL_ENABLE",
-                   "DSP1 Protection cd CSPL_COMMAND",
-                   "DSP1 Protection cd CSPL_STATE",
-                   "DSP1 Protection cd CSPL_ERRORNO",
-                   "DSP1 Protection cd CSPL_TEMPERATURE",
-                   "DSP1 Protection cd CAL_R",
-                   "DSP1 Protection cd CAL_AMBIENT",
-                   "DSP1 Protection cd CAL_STATUS",
-                   "DSP1 Protection cd CAL_CHECKSUM",
-                   "DSP1 Protection cd DIAG_F0",
-                   "DSP1 Protection cd DIAG_Z_LOW_DIFF",
-                   "DSP1 Protection cd DIAG_F0_STATUS",
-                   "DSP1 Protection cd CH_BAL"
-               ]
+  "WORKON": "K2",
+  "WORKON_DIR": "C:\\work\\customer\\meizu\\M2191",
+  "VENDORS": [
+    {
+      "Vendor": "MEIZU",
+      "Products": [
+        {
+          "Name": "M2181",
+          "Dir": "C:\\work\\customer\\meizu\\M2191",
+          "SoundCard": "sm8350-meizu-snd-card",
+          "ASP": "I2S",
+          "CIF": "SPI",
+          "Amp": "cs35l45",
+          "AmpNum": 2,
+          "Nodes": [
+            "spi1.0",
+            "spi1.1"
+          ],
+          "Prefixs": [
+            "RCV",
+            "SPK"
+          ]
+        },
+        {
+          "Name": "M2091",
+          "Dir": "C:\\work\\customer\\meizu\\M2091",
+          "SoundCard": "sm8350-meizu-snd-card",
+          "ASP": "I2S",
+          "CIF": "SPI",
+          "Amp": "cs35l45",
+          "AmpNum": 2,
+          "Nodes": [
+            "spi1.0",
+            "spi1.1"
+          ],
+          "Prefixs": [
+            "RCV",
+            "SPK"
+          ]
+        }
+      ]
+    },
+    {
+      "Vendor": "BLACKSHARK",
+      "Products": [
+        {
+          "Name": "BS1",
+          "Dir": "C:\\work\\customer\\Blackshark\\BS1",
+          "SoundCard": "lahaina-mtp-snd-card",
+          "ASP": "I2S",
+          "CIF": "I2C",
+          "Amp": "cs35l45",
+          "AmpNum": 2,
+          "Nodes": [
+            "3-0040",
+            "3-0041"
+          ],
+          "Prefixs": [
+            "RCV",
+            ""
+          ]
+        },
+        {
+          "Name": "BS2",
+          "Dir": "C:\\work\\customer\\Blackshark\\BS2",
+          "SoundCard": "lahaina-mtp-snd-card",
+          "ASP": "TDM",
+          "CIF": "I2C",
+          "Amp": "cs35l41",
+          "AmpNum": 2,
+          "Nodes": [
+            "3-0040",
+            "3-0041"
+          ],
+          "Prefixs": [
+            "RCV",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "Vendor": "XIAOMI",
+      "Products": [
+        {
+          "Name": "K2",
+          "Dir": "C:\\work\\customer\\xiaomi\\K2",
+          "SoundCard": "lahaina-mtp-snd-card",
+          "ASP": "TDM",
+          "CIF": "I2C",
+          "Amp": "cs35l41",
+          "AmpNum": 2,
+          "Nodes": [
+            "1-0040",
+            "1-0042"
+          ],
+          "Prefixs": [
+            "RCV",
+            ""
+          ]
+        },
+        {
+          "Name": "J1",
+          "Dir": "C:\\work\\customer\\xiaomi\\J1",
+          "SoundCard": "kona-mtp-snd-card",
+          "ASP": "TDM",
+          "CIF": "I2C",
+          "Amp": "cs35l41",
+          "AmpNum": 2,
+          "Nodes": [
+            "1-0040",
+            "1-0042"
+          ],
+          "Prefixs": [
+            "RCV",
+            ""
+          ]
+        },
+
+        {
+          "Name": "K11",
+          "Dir": "C:\\work\\customer\\xiaomi\\K11",
+          "SoundCard": "lahaina-mtp-snd-card",
+          "ASP": "TDM",
+          "CIF": "I2C",
+          "Amp": "cs35l41",
+          "AmpNum": 2,
+          "Nodes": [
+            "1-0040",
+            "1-0042"
+          ],
+          "Prefixs": [
+            "RCV",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "DIRS": [
+    "C:\\work\\customer\\xiaomi",
+    "C:\\work\\customer\\meizu",
+    "C:\\work\\src\\aus\\amps\\cspl",
+    "C:\\Users\\hhuang\\hvim",
+    "C:\\Users\\hhuang\\hvim\\Cmdlet",
+    "C:\\work\\music\\Music",
+    "C:\\work\\src\\audio-hal",
+    "C:\\work\\docs\\technote",
+    "C:\\work\\docs\\expense",
+    "C:\\work\\docs\\datasheet",
+    "C:\\work\\src\\aus\\amps\\ormis",
+    "C:\\work\\src\\aus\\amps",
+    "C:\\work\\src\\aus\\scs",
+    "C:\\work\\src\\aus\\cirrus-linux",
+    "C:\\work\\src\\aus\\scs\\scs_playback",
+    "C:\\work\\src\\aus\\amps\\playback\\CSPL\\firmware\\workspace_eclipse_for_QCOM_generic",
+    "C:\\Users\\hhuang\\Documents\\CirrusLogic\\SDKs\\HaloCore\\SDK",
+    "C:\\work"
+  ],
+  "Mixers": [
+    "Fast Use Case Delta File",
+    "DSP1 Firmware",
+    "Fast Use Case Switch Enable",
+    "DSP1 Preload Switch",
+    "DSP1 Boot Switch",
+    "Amplifier Mode",
+    "AMP PCM Gain",
+    "AMP Mute",
+    "Hibernate Mode",
+    "ASPTX1 Slot Position",
+    "ASPTX2 Slot Position",
+    "ASPTX3 Slot Position",
+    "ASPTX4 Slot Position",
+    "ASPRX1 Slot Position",
+    "ASPRX2 Slot Position",
+    "Digital PCM Volume",
+    "Calibration Resistance",
+    "Ambient Temperature",
+    "ASP_TX1 Source",
+    "ASP_TX2 Source",
+    "ASP_TX3 Source",
+    "DACPCM Source",
+    "NGATE1 Source",
+    "NGATE2 Source",
+    "AMP Enable Switch",
+    "BBPE Enable Switch",
+    "NFR Enable Switch",
+    "NGATE Enable Switch",
+    "SYNC PWR Enable Switch",
+    "DSP1 Protection 4fa00 HALO_STATE",
+    "DSP1 Protection 4fa00 HALO_HEARTBEAT",
+    "DSP1 Protection 4fa00 FIRMWARE_STATE",
+    "DSP1 Protection 4fa00 ROM_BOOT_COMPLETE",
+    "DSP1 Protection cd CSPL_ENABLE",
+    "DSP1 Protection cd CSPL_COMMAND",
+    "DSP1 Protection cd CSPL_STATE",
+    "DSP1 Protection cd CSPL_ERRORNO",
+    "DSP1 Protection cd CSPL_TEMPERATURE",
+    "DSP1 Protection cd CAL_R",
+    "DSP1 Protection cd CAL_AMBIENT",
+    "DSP1 Protection cd CAL_STATUS",
+    "DSP1 Protection cd CAL_CHECKSUM",
+    "DSP1 Protection cd DIAG_F0",
+    "DSP1 Protection cd DIAG_Z_LOW_DIFF",
+    "DSP1 Protection cd DIAG_F0_STATUS",
+    "DSP1 Protection cd CH_BAL"
+  ]
 }

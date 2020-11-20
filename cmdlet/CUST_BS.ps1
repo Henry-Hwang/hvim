@@ -5,7 +5,7 @@ Function DRelease_Crussp {
     cp C:\work\src\audio-hal\script\push.ps1                   C:\work\customer\xiaomi\Heisha\calibration\lib
 }
 
-Function DPort-Block-BlackShark {
+Function DPort-Block-BS {
 	Ainit
     while($Count -lt 100) {
         $Count++
@@ -15,7 +15,7 @@ Function DPort-Block-BlackShark {
     }
 }
 
-Function Dtplay-BlackShark {
+Function Dtplay-BS {
     $Wav="/sdcard/Music/lrp_loop.wav"
     adb shell "tinymix 'TERT_TDM_RX_0 Audio Mixer MultiMedia1' 1"
     #adb shell "tinymix 'TERT_TDM_RX_0 SampleRate' 'KHZ_96'"
@@ -43,7 +43,7 @@ Function Dtplay-BlackShark {
     adb shell "tinyplay $Wav"
 }
 
-Function Dunload-BlackShark {
+Function Dunload-BS {
     Ainit
     adb shell "tinymix 'PCM Source' 'None'"
     adb shell "tinymix 'DSP Booted' '0'"
@@ -78,13 +78,13 @@ Function FirstSilent {
 		adb shell input tap 540 1086 # tap SPK-RCV
 		sleep 2
 		adb shell input tap 552 2057 # tap Hangup
-		Ddump-BlackShark $Count
+		Ddump-BS $Count
 		adb reboot
 		Ainit
 	}
 }
 
-Function Dreload-BlackShark {
+Function Dreload-BS {
     Ainit
 	adb shell "tinymix 'DSP1 Firmware' 'Protection'"
     adb shell "tinymix 'DSP1 Preload Switch' '1'"
@@ -114,13 +114,10 @@ Function MassTest {
         sleep 6
     }
 }
-Function TxRecord-HS {
 
+Function TxRecord-BS {
     adb wait-for-device root
     adb wait-for-device remount
-
-    #adb shell "echo 4808 20200200 > /d/regmap/3-0030/registers"
-    #adb shell "echo 4808 20200200 > /d/regmap/3-0031/registers"
 
     adb shell "tinymix 'RCV ASP_TX1 Source' 'DSP_TX1'"
     adb shell "tinymix 'ASP_TX2 Source' 'DSP_TX1'"
@@ -132,15 +129,13 @@ Function TxRecord-HS {
 
     adb shell "echo 4c20 18 > /d/regmap/3-0030/registers"
     adb shell "echo 4c24 18 > /d/regmap/3-0031/registers"
-    #adb shell "echo 4800 30000 > /d/regmap/3-0030/registers"
 
     adb shell "tinycap /data/rec.wav -D 0 -d 0 -r 48000 -c 2 -T 30"
-
-    #adb shell "cat /d/regmap/3-0030/registers" > regs-3-0030.txt
-    #adb shell "cat /d/regmap/3-0031/registers" > regs-3-0031.txt
-    #cat regs-3-0030.txt | findstr 4800:
-    #cat regs-3-0031.txt | findstr 4800:
 
     adb pull /data/rec.wav .
     start .
 }
+    #adb shell "cat /d/regmap/3-0030/registers" > regs-3-0030.txt
+    #adb shell "cat /d/regmap/3-0031/registers" > regs-3-0031.txt
+    #cat regs-3-0030.txt | findstr 4800:
+    #cat regs-3-0031.txt | findstr 4800:

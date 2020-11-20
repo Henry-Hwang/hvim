@@ -36,6 +36,7 @@ Plug 'PProvost/vim-ps1'
 Plug 'mgedmin/chelper.vim'
 Plug 'rhysd/vim-clang-format'
 Plug 'Shougo/vimproc.vim'
+"Plug 'majutsushi/tagbar'
 "Plug 'liuchengxu/vista.vim'
 
 call plug#end()
@@ -99,7 +100,7 @@ set list
 set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
 
 set shortmess=atl
-set shell=powershell
+set shell=pwsh.exe
 "set shell=wt
 colorscheme molokai  "use the theme gruvbox
 set background=dark "use the light version of gruvbox

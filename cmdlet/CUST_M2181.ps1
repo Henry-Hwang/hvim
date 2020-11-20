@@ -1,4 +1,140 @@
 
+Function M2181-SwapCH {
+    param([Switch]$LR, [Switch]$RL)
+    adb wait-for-device root
+    adb wait-for-device remount
+
+    adb shell "tinymix 'SPK DSP_RX1 Source' 'ASP_RX2'"
+    adb shell "tinymix 'SPK DSP_RX1 Source' 'ASP_RX1'"
+    adb shell "tinymix 'RCV DSP_RX1 Source' 'ASP_RX1'"
+    adb shell "tinymix 'RCV DSP_RX2 Source' 'ASP_RX2'"
+    if($LR) {
+        adb shell "tinymix 'SPK DSP1 Protection cd CH_BAL' 00 40 00 00"
+        adb shell "tinymix 'RCV DSP1 Protection cd CH_BAL' 00 00 00 00"
+    } else {
+        adb shell "tinymix 'SPK DSP1 Protection cd CH_BAL' 00 00 00 00"
+        adb shell "tinymix 'RCV DSP1 Protection cd CH_BAL' 00 40 00 00"
+    }
+}
+Function M2181-Tinyplay {
+    param([String]$Wav)
+    adb wait-for-device root
+    adb wait-for-device remount
+
+    if($Wav) {
+        adb push $Wav /sdcard/Music/cs_test.wav
+    }
+
+    adb shell "tinymix 'SPK Amplifier Mode' 'SPK'"
+    adb shell "tinymix 'RCV Amplifier Mode' 'SPK'"
+
+    adb shell "tinymix 'SPK DSP_RX1 Source' 'ASP_RX2'"
+    adb shell "tinymix 'SPK DSP_RX2 Source' 'ASP_RX2'"
+    adb shell "tinymix 'SPK AMP Enable Switch' '1'"
+    adb shell "tinymix 'SPK DACPCM Source' 'DSP_TX1'"
+    adb shell "tinymix 'SPK Digital PCM Volume' '817'"
+    adb shell "tinymix 'SPK ASP_TX2 Source' 'DSP_TX1'"
+    adb shell "tinymix 'SPK Fast Use Case Delta File' 'cs35l45-delta-spk-music.txt'"
+    adb shell "tinymix 'SPK Fast Use Case Switch Enable' '0'"
+    adb shell "tinymix 'RCV DSP_RX1 Source' 'ASP_RX1'"
+    adb shell "tinymix 'RCV DSP_RX2 Source' 'ASP_RX1'"
+    adb shell "tinymix 'RCV AMP Enable Switch' '1'"
+    adb shell "tinymix 'RCV DACPCM Source' 'DSP_TX1'"
+    adb shell "tinymix 'RCV Digital PCM Volume' '817'"
+    adb shell "tinymix 'SPK ASP_TX2 Source' 'DSP_TX1'"
+    adb shell "tinymix 'RCV Fast Use Case Delta File' 'cs35l45-delta-rcv-music.txt'"
+    adb shell "tinymix 'RCV Fast Use Case Switch Enable' '0'"
+    adb shell "tinymix 'PRI_MI2S_RX Audio Mixer MultiMedia1' 1"
+    adb shell "tinyplay '/sdcard/Music/cs_test.wav'"
+}
+
+#Accepts a Job as a parameter and writes the latest progress of it
+function WriteJobProgress
+{
+    param($Job)
+
+    #Make sure the first child job exists
+    if($Job.ChildJobs[0].Progress -ne $null)
+    {
+        #Extracts the latest progress of the job and writes the progress
+        $jobProgressHistory = $Job.ChildJobs[0].Progress;
+        $latestProgress = $jobProgressHistory[$jobProgressHistory.Count - 1];
+        $latestPercentComplete = $latestProgress | Select -expand PercentComplete;
+        $latestActivity = $latestProgress | Select -expand Activity;
+        $latestStatus = $latestProgress | Select -expand StatusDescription;
+
+        #When adding multiple progress bars, a unique ID must be provided. Here I am providing the JobID as this
+        Write-Progress -Id $Job.Id -Activity $latestActivity -Status $latestStatus -PercentComplete $latestPercentComplete;
+    }
+}
+
+Function DeltaTest-Jobs {
+    Ainit
+
+    # Create synced hashtable
+    $job = Start-Job -WorkingDirectory $PWD -Name Delta {
+        $Status = "Processing"
+
+        # Process. update activity
+        $Activity = "Id processing"
+
+        adb shell input keyevent 27  #POWER
+        sleep 2
+        adb shell input swipe 200 1700 200 300 # SWIPE UP
+        sleep 1
+        foreach ($percent in 1..100) {
+            # Update process on status
+            $Status = "Handling $percent/100"
+
+            $PercentComplete = (($percent / 100) * 100)
+
+            adb shell service call phone 1 s16 112
+            sleep 1
+	        adb shell input tap 533 2156 # tap CALL
+                    $Activity = "Id processing"
+            foreach ($Tabs in 1..15) {
+                sleep 1
+                $Activity = "Id processing"
+	            adb shell input tap 538 1100 # tap Handsfree/Handset
+                adb shell dmesg > dmesg.txt
+                $file = Get-Content dmesg.txt
+                $isWord = $file | %{$_ -match "CSPL_STATE"}
+                if ($isWord -contains $true) {
+                    $Activity = "Id processing"
+                    $Status = "Handling: $percent Calls, $Tabs Switching, Failed!"
+                    $Completed = $true
+                    return
+                } else {
+                    $Status = "Handling-0: $percent Calls, $Tabs Switching"
+                }
+
+                Write-Progress -Activity $Activity -Status $status -PercentComplete $percentComplete;
+                Start-Sleep -Seconds 0.1
+            }
+
+	        adb shell input tap 531 2073 # tap Hang up
+            sleep 2
+            # Fake workload that takes x amount of time to complete
+        }
+
+        # Mark process as completed
+        $Completed = $true
+    }
+
+    while($job.State -eq 'Running') {
+        # Create parameter hashtable to splat
+        #$param = $origin
+        # Execute Write-Progress
+        #Write-Progress @param
+        WriteJobProgress($job)
+        # Wait to refresh to not overload gui
+        Start-Sleep -Seconds 0.1
+    }
+
+    Dlogs -Tag Failed -All -View
+    $param
+}
+
 Function DPowerDown {
     adb shell "tinymix 'RCV DSP1 Firmware' 'Protection'"
     adb shell "tinymix 'SPK DSP1 Firmware' 'Protection'"
@@ -28,50 +164,6 @@ Function DPowerDown {
     adb shell "tinymix 'SPK DSP1 Preload Switch' '1'"
     adb shell "tinymix 'RCV DSP1 Boot Switch' '1'"
     adb shell "tinymix 'SPK DSP1 Boot Switch' '1'"
-}
-Function DeltaTest {
-    $job = Start-Job -ScriptBlock {
-        adb shell input keyevent 27  #POWER
-        sleep 2
-        adb shell input swipe 200 1700 200 300 # SWIPE UP
-        sleep 1
-        $Count = 0;
-        while($true) {
-            #Call 112
-            adb shell service call phone 1 s16 112
-            sleep 1
-            adb shell input tap 533 2156 # tap CALL
-            Write-Host $Count++ "Calls"
-            $ModeCount = 20
-            while($ModeCount-- -gt 0) {
-                adb shell input tap 538 1100 # tap Handsfree/Handset
-                sleep 1
-
-                adb shell dmesg > dmesg.txt
-                $file = Get-Content dmesg.txt
-                $isWord = $file | %{$_ -match "CSPL_STATE"}
-                if ($isWord -contains $true) {
-                    Register-EngineEvent -SourceIdentifier MyNewMessage -Forward
-                    $null = New-Event -SourceIdentifier MyNewMessage -MessageData "Delta Failed on $Count call , $ModeCount switching!"
-                    return
-                }
-
-            }
-
-            adb shell input tap 531 2073 # tap Hang up
-            sleep 2
-        }
-    }
-
-    $event = Register-EngineEvent -SourceIdentifier MyNewMessage -Action {
-        Write-Host $event.MessageData;
-        $job,$event| Stop-Job -PassThru| Remove-Job #stop the job and event listener
-        DLogs -Tag Faild -All
-    }
-
-
-    Wait-Job $job
-    Write-Host "Finished"
 }
 
 Function CallTest {
@@ -147,7 +239,7 @@ Function TxRecord-M2181 {
     adb shell "tinymix 'PRIM_MI2S_TX SampleRate' KHZ_48"
     adb shell "tinymix 'PRIM_MI2S_TX Format' S16_LE"
     adb shell "tinymix 'PRIM_MI2S_TX Channels' 'Two'"
-    
+
     adb shell "echo 4808 20200200 > /d/regmap/spi1.0/registers"
     adb shell "echo 4808 20200200 > /d/regmap/spi1.1/registers"
 
