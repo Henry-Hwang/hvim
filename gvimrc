@@ -138,7 +138,7 @@ nnoremap <leader>m :Startify<CR>
 nnoremap <leader>ws :w %:p:h
 nnoremap <leader>bt :set buftype=<CR>
 nnoremap <C-h> :Hexmode<CR>
-
+nnoremap <leader>' :!start explorer /select,%:p<CR>
 nnoremap <silent> <leader>l :call Setwrap()<CR>
 nnoremap <silent> <leader>v :call MyVista()<CR>
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
@@ -154,6 +154,7 @@ au! BufWinLeave *.md,*.markdown,*.mdown let g:markdown_preview_on = !g:markdown_
 nmap tm @=(g:markdown_preview_on ? ':Stop' : ':Start')<CR>MarkdownPreview<CR>:let g:markdown_preview_on = 1 - g:markdown_preview_on<CR>
 let g:vbookmark_bookmarkSaveFile = $HOME . '/.vimbookmark'
 " Airline
+let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
 let g:indentLine_color_gui = "#504945"
 " Markdown_preview (a plugin in nyaovim)
 let g:markdown_preview_eager = 1

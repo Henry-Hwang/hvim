@@ -1,3 +1,7 @@
+Function M2181-HSSH-GET-KO {
+    $cs35l45_dlkm="~/src/opensource/android-kernel/out/msm-5.4/private/msm-5.4/techpack/audio/asoc/codecs/cs35l45/cs35l45_dlkm.ko"
+    hscp -from -src $cs35l45_dlkm -dest .
+}
 
 Function M2181-SwapCH {
     param([Switch]$LR, [Switch]$RL)
@@ -179,12 +183,17 @@ Function CallTest {
         sleep 1
 	    adb shell input tap 533 2156 # tap CALL
         Write-Host $Count "Calls"
-	    $ModeCount = 20
+	    $ModeCount = 30
         while($ModeCount-- -gt 0) {
-            sleep 1
+            sleep 0.5
 	        adb shell input tap 538 1100 # tap Handsfree/Handset
             adb shell dmesg > dmesg.txt
-            CheckInLogs -Target dmesg.txt -Patten "CSPL_STATE"
+
+            $ELINE = Get-Content dmesg.txt | Where-Object { $_.Contains("HALO_STATE") }
+            if($ELINE) {
+                Write-Host $ELINE
+            }
+            #@( Get-Content mylogfile.txt | Where-Object { $_.Contains("ERROR") } ).Count
             Write-Host $ModeCount "Switch"
         }
 	    adb shell input tap 531 2073 # tap Hang up

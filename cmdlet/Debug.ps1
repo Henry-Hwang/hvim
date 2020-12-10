@@ -1,3 +1,84 @@
+Function DBackup {
+    param([String]$Tag, [Switch]$More, [String]$Recovery, [String]$Source)
+    Ainit
+
+	$TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
+    if ($More) {
+        if ($Tag) {
+            $BackupDir= $Tag + "-Backup-" + $TimeStr
+        } else {
+            $BackupDir= "Backup-" + $TimeStr
+        }
+        new-item -path . -name $BackupDir -type directory
+        Set-Location -Path $BackupDir
+        new-item -path . -name vendor -type directory
+
+        adb pull vendor/lib/ vendor/
+        adb pull vendor/lib64/ vendor/
+
+        adb pull vendor/bin/ vendor/
+        adb pull vendor/etc  vendor/
+        adb pull vendor/firmware vendor/
+
+        Set-Location -Path .. | Out-Null
+        Get-ChildItem -Path $BackupDir
+
+    } else {
+        if ($Tag) {
+            $BackupDir= $Tag + "-Less-Backup-" + $TimeStr
+        } else {
+            $BackupDir= "Less-Backup-" + $TimeStr
+        }
+
+        new-item -path . -name $BackupDir -type directory
+        Set-Location -Path $BackupDir
+
+        $Stuff = DGetStuff
+        foreach ($element in $Stuff) {
+            $newdir = "." + $(Split-Path -Path $element)
+            New-Item $newdir -ItemType Directory -ea 0 | Out-Null
+            adb pull $element $newdir
+        }
+
+        Set-Location -Path .. | Out-Null
+        Get-ChildItem -Path $BackupDir
+    }
+}
+
+Function DRecover {
+    Param(
+            [Parameter(Position=0,mandatory=$true)]
+            [string] $Src,
+            [Parameter(Position=1,mandatory=$true)]
+            [string] $Dest)
+
+    Ainit
+    $Src += "\" + $Dest
+    adb push $Src $("/" + $($Dest | Split-Path).Replace("\", "/"))
+
+}
+
+$sourceBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    (Get-ChildItem -Name *Less-Backup*) | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+$destBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    (Get-ChildItem -Name *Less-Backup* -Depth 1) | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+Register-ArgumentCompleter -CommandName DRecover -ParameterName Src -ScriptBlock $SourceBlock
+Register-ArgumentCompleter -CommandName DRecover -ParameterName Dest -ScriptBlock $destBlock
+
 Function EventTest {
 $job = Start-Job -ScriptBlock {
   while($true) {
@@ -124,7 +205,7 @@ Function Prdebug {
 Function DLogs {
     param(
         [Parameter()]
-        [String]$Tag, [Switch]$Regs, [Switch]$Dapm, [Switch]$Logs, [Switch]$All,
+        [String]$Tag, [Switch]$Regs, [Switch]$Dapm, [Switch]$All,
         [Switch]$View, [Switch]$Max, [Switch]$Min, [String]$Workon
     )
 
@@ -137,16 +218,15 @@ Function DLogs {
     $Product = DGetProduct
     $SoundCard = $Product.SoundCard
     $Amp = $Product.Amp
-    #$Nodes = "spi1.0", "spi1.1"
     $Nodes = $Product.Nodes
 
     $Time=get-date -format yyyy-MM-ddTHH-mm-ss-ff
     $Dir = $Product.Name
 
     if($Tag) {
-        $Dir = "$Dir-$Tag-$Time"
+        $Dir = "Logs" + "$Dir-$Tag-$Time"
     } else {
-        $Dir = "$Dir-$Time"
+        $Dir = "Logs" + "$Dir-$Time"
     }
 
     new-item -path . -name $Dir -type directory
@@ -170,27 +250,13 @@ Function DLogs {
         }
     }
 
-    if($Logs) {
-        if($Max) {
-            Prdebug
-        }
-        adb shell dmesg > dmesg.txt
-        adb shell "logcat -d" > logcat.txt
-        adb shell "tinymix" > tinymix.txt
-        foreach ($element in $Nodes) {
-            Write-Host $element
-            $Target = "/d/asoc/sm*/$element/dapm/*"
-            adb shell "cat $Target" > $element-dapm.txt
-        }
-    }
-
     if($All) {
         adb shell dmesg > dmesg.txt
         adb shell "logcat -d" > logcat.txt
         adb shell "tinymix" > tinymix.txt
         foreach ($element in $Nodes) {
             Write-Host $element
-            $Target = "/d/asoc/sm*/$element/dapm/*"
+            $Target = "/d/asoc/$SoundCard/$element/dapm/*"
             adb shell "cat $Target" > $element-dapm.txt
         }
         foreach ($element1 in $Nodes) {
@@ -213,7 +279,7 @@ Function DLogs {
 Function Dmesg {
     param(
         [Parameter()]
-        [String]$Patten, [Switch]$Loop, [Switch]$Max
+        [String]$Patten="cs35l|cirrus|crus|cspl", [Switch]$Loop=$true, [Switch]$Max
     )
 
     Ainit
@@ -286,7 +352,7 @@ Function DFwMd5 {
     adb shell "find /vendor/firmware/ -name '*cs35*' | xargs md5sum"
 }
 
-Function Tinymix {
+Function DTinymix {
     param([String]$Name)
     $TimeStr=get-date -format yyyy-MM-ddTHH-mm-ss-ff
 	if ($Name -eq '') {
@@ -298,6 +364,55 @@ Function Tinymix {
     echo $FileName
 	gvim $FileName
 }
+
+Function PromotArgs {
+    $Title = "Welcome"
+    $Info = "Just to Demo Promt for Choice"
+
+    $options = [System.Management.Automation.Host.ChoiceDescription[]] @("&Power", "&Shell", "&Quit")
+    [int]$defaultchoice = 2
+    $opt =  $host.UI.PromptForChoice($Title , $Info , $Options,$defaultchoice)
+        switch($opt)
+        {
+            0 { Write-Host "Power" -ForegroundColor Green}
+            1 { Write-Host "Shell" -ForegroundColor Green}
+            2 {Write-Host "Good Bye!!!" -ForegroundColor Green}
+        }
+}
+
+Function Tinymix {
+    param([String]$Ctls, [String]$Value)
+
+    adb shell "tinymix '$Ctls'"
+
+    if ($value) {
+        adb shell "tinymix '$Ctls' $Value"
+    } else {
+        $opt = Read-Host -Prompt "Please enter option"
+        adb shell "tinymix '$Ctls' $opt"
+    }
+
+    adb shell "tinymix '$Ctls'"
+}
+
+$ctlsBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    $Prefix = DGetPrefix
+    (DGetControls) | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+        foreach ($element in $Prefix) {
+                if($element) {
+                    "'$element $_'"
+                } else {
+                    "'$_'"
+                }
+        }
+    }
+}
+
+Register-ArgumentCompleter -CommandName Tinymix -ParameterName Ctls -ScriptBlock $ctlsBlock
+
 Function Wisce {
     Ainit
     adb forward tcp:22349 tcp:22349

@@ -59,12 +59,50 @@ Function DGetDirs {
     #$Dirs = $Dirs | Sort-Object
     $Dirs
 }
+
+Function DGetPrefix {
+    $Json = DGetJson
+    foreach ($element in $Json.VENDORS) {
+            foreach ($product in $element.Products) {
+                if ($product.Name -eq $Json.WORKON) {
+                    return $product.Prefixs
+                }
+            }
+    }
+}
 Function DGetProduct {
     $Json = DGetJson
     foreach ($element in $Json.VENDORS) {
             foreach ($product in $element.Products) {
                 if ($product.Name -eq $Json.WORKON) {
                     return $product
+                }
+            }
+    }
+}
+
+Function DGetControls {
+    $Json = DGetJson
+    foreach ($element in $Json.VENDORS) {
+            foreach ($product in $element.Products) {
+                if ($product.Name -eq $Json.WORKON) {
+
+                    foreach ($element1 in $Json.Mixers) {
+                        if ($element1.name -eq $product.Amp) {
+                            return $element1.controls
+                        }
+                    }
+                }
+            }
+    }
+}
+
+Function DGetStuff {
+    $Json = DGetJson
+    foreach ($element in $Json.VENDORS) {
+            foreach ($product in $element.Products) {
+                if ($product.Name -eq $Json.WORKON) {
+                    return $product.Stuff
                 }
             }
     }
@@ -80,6 +118,7 @@ Function DGetNodes {
             }
     }
 }
+
 Function DGetSoundCard {
     $Json = DGetJson
     foreach ($element in $Json.VENDORS) {
