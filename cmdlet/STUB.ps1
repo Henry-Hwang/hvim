@@ -7,3 +7,4 @@
 . ~\hvim\cmdlet\CUST.ps1
 . ~\hvim\cmdlet\CsSsh.ps1
 . ~\hvim\cmdlet\WinBin.ps1
+. ~\hvim\cmdlet\Common.ps1

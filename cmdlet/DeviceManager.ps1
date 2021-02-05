@@ -1,8 +1,3 @@
-Function ReadRegs {
-    $reg1 = $(adb shell "cat /d/regmap/spi1.0/registers | grep 0004800:")
-    $reg2 = $(adb shell "cat /d/regmap/spi1.1/registers | grep 0004800:")
-    Write-Host $reg1 $reg2
-}
 
 Function Cmd2AShell {
     Param(
@@ -81,6 +76,17 @@ Function DGetProduct {
     }
 }
 
+Function DGetProductNames {
+    $Json = DGetJson
+    $Products = @()
+    foreach ($element in $Json.VENDORS) {
+            foreach ($product in $element.Products) {
+                $Products +=$product.Name
+            }
+    }
+
+    return $Products
+}
 Function DGetControls {
     $Json = DGetJson
     foreach ($element in $Json.VENDORS) {
@@ -98,10 +104,21 @@ Function DGetControls {
 }
 
 Function DGetStuff {
+    param(
+        [Parameter()]
+        [String]$ProjectName
+    )
+
     $Json = DGetJson
+    if($ProjectName) {
+        $Name = $ProjectName
+    } else {
+        $Name = $Json.WORKON
+    }
+
     foreach ($element in $Json.VENDORS) {
             foreach ($product in $element.Products) {
-                if ($product.Name -eq $Json.WORKON) {
+                if ($product.Name -eq $Name) {
                     return $product.Stuff
                 }
             }

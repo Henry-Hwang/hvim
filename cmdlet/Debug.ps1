@@ -107,6 +107,7 @@ Function SuperTester {
         [String]$Target, [String]$Patten, [Switch]$Dapm, [Switch]$Logs,
         [Switch]$View, [Switch]$Max, [Switch]$Min
     )
+
     $Callbacks = $TestCallbacks
     $CallBacks["OnStart"].Invoke();
 
@@ -206,12 +207,8 @@ Function DLogs {
     param(
         [Parameter()]
         [String]$Tag, [Switch]$Regs, [Switch]$Dapm, [Switch]$All,
-        [Switch]$View, [Switch]$Max, [Switch]$Min, [String]$Workon
+        [Switch]$View
     )
-
-    if ($Workon) {
-        DDevices -Workon $Workon
-    }
 
     Ainit
 
@@ -224,40 +221,38 @@ Function DLogs {
     $Dir = $Product.Name
 
     if($Tag) {
-        $Dir = "Logs" + "$Dir-$Tag-$Time"
+        $Dir = "Logs-" + "$Dir-$Tag-$Time"
     } else {
-        $Dir = "Logs" + "$Dir-$Time"
+        $Dir = "Logs-" + "$Dir-$Time"
+    }
+
+    $dapmpath = "/d/asoc/@SOUNDCARD/@NODE/dapm/*"
+    if ($Product.CIF -eq "SPI") {
+         $dapmpath = $dapmpath.Replace("@SOUNDCARD",$SoundCard)
+    } else {
+         $dapmpath = $dapmpath.Replace("@SOUNDCARD",$SoundCard).Replace("@AMP", $Amp)
     }
 
     new-item -path . -name $Dir -type directory
     Set-Location -Path $Dir
     if($Regs) {
         foreach ($element in $Nodes) {
-            Write-Host $element
             adb shell "echo Y > /d/regmap/$element/cache_bypass"
             adb shell "cat /d/regmap/$element/registers" > $element-registers.txt
             adb shell "echo N > /d/regmap/$element/cache_bypass"
         }
-    }
-    if($Dapm) {
+    } elseif($Dapm) {
         foreach ($element in $Nodes) {
-            if ($Product.CIF -eq "SPI") {
-                $Target = "/d/asoc/@SOUNDCARD/@NODE/dapm/*".Replace("@SOUNDCARD",$SoundCard).Replace("@NODE", $element)
-            } else {
-                $Target = "/d/asoc/@SOUNDCARD/@AMP.@NODE/dapm/*".Replace("@SOUNDCARD",$SoundCard).Replace("@AMP", $Amp).Replace("@NODE", $element)
-            }
-            adb shell "cat $Target" > $element-dapm.txt
+            $dapmpath = $dapmpath.Replace("@NODE", $element)
+            adb shell "cat $dapmpath" > $element-dapm.txt
         }
-    }
-
-    if($All) {
+    } elseif($All) {
         adb shell dmesg > dmesg.txt
         adb shell "logcat -d" > logcat.txt
         adb shell "tinymix" > tinymix.txt
         foreach ($element in $Nodes) {
-            Write-Host $element
-            $Target = "/d/asoc/$SoundCard/$element/dapm/*"
-            adb shell "cat $Target" > $element-dapm.txt
+            $dapmpath = $dapmpath.Replace("@NODE", $element)
+            adb shell "cat $dapmpath" > $element-dapm.txt
         }
         foreach ($element1 in $Nodes) {
             Write-Host $element1
@@ -265,10 +260,33 @@ Function DLogs {
             adb shell "cat /d/regmap/$element1/registers" > $element1-registers.txt
             adb shell "echo N > /d/regmap/$element1/cache_bypass"
         }
+    } else {
+        adb shell dmesg > dmesg.txt
+        adb shell "logcat -d" > logcat.txt
+        adb shell "tinymix" > tinymix.txt
     }
 
-    if($View) {
-        gvim *.txt
+    $Title = ""
+    $Info = "Promt for Actions"
+
+    $options = [System.Management.Automation.Host.ChoiceDescription[]] @("&Send", "&View", "&Locate", "&Quit")
+    [int]$defaultchoice = 3
+    $opt =  $host.UI.PromptForChoice($Title , $Info , $Options, $defaultchoice)
+    switch($opt) {
+        0 {
+            Write-Host "Copied to clib" -ForegroundColor Green
+        }
+        1 {
+            Write-Host "Vim Open" -ForegroundColor Green
+            gvim *.txt
+        }
+        2 {
+            Write-Host "Open location" -ForegroundColor Green
+            start .
+        }
+        3 {
+            Write-Host "Quit" -ForegroundColor Green
+        }
     }
 
     Set-Location -Path ..
@@ -341,7 +359,8 @@ Function Logcat {
 
 Function Dminidm {
     Ainit
-    adb shell setprop sys.usb.config diag,adb
+    adb wait-for-device
+    adb shell setprop sys.usb.config diag,diag_mdm,qdss,qdss_mdm,serial_cdev,dpl,rmnet,adb
     adb wait-for-device
     sleep 2
     mode
@@ -388,8 +407,12 @@ Function Tinymix {
     if ($value) {
         adb shell "tinymix '$Ctls' $Value"
     } else {
-        $opt = Read-Host -Prompt "Please enter option"
-        adb shell "tinymix '$Ctls' $opt"
+        $opt = Read-Host -Prompt "Please enter control option"
+        if ($opt) {
+            adb shell "tinymix '$Ctls' '$opt'"
+        } else {
+            return
+        }
     }
 
     adb shell "tinymix '$Ctls'"
@@ -413,12 +436,6 @@ $ctlsBlock = {
 
 Register-ArgumentCompleter -CommandName Tinymix -ParameterName Ctls -ScriptBlock $ctlsBlock
 
-Function Wisce {
-    Ainit
-    adb forward tcp:22349 tcp:22349
-    adb shell
-}
-
 Function Daudio-kill {
     adb shell "pgrep -f audioserver | xargs kill"
 }
@@ -439,3 +456,52 @@ Function DDownload {
     Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 }
 
+Function DReadRegs {
+    param([String]$Register, [String]$Value)
+    $Product = DGetProduct
+    $SoundCard = $Product.SoundCard
+    $Amp = $Product.Amp
+    $Nodes = $Product.Nodes
+
+    foreach ($element in $Nodes) {
+        $reg = $(adb shell "cat /d/regmap/$element/registers | grep $Register`:")
+        Write-Host $element `- $reg
+    }
+}
+
+
+Function Fuzzy-Tuning-Rename {
+    param([Parameter(Mandatory=$true)][String]$Product, [String]$Dir, [Switch]$Manual)
+
+    if(-not($Dir)) {
+        $Dir = "."
+    }
+
+    $Firmware_Path = "/vendor/firmware"
+    $Stuff = @(DGetStuff -ProjectName $Product)
+    $Tunings = @()
+    foreach ($e in $Stuff) {
+        if($Firmware_Path -eq $(Split-path -path $e).replace('\','/')) {
+            $e = Split-path -path $e -Leaf
+            $Tunings += $e
+        }
+    }
+
+    if($Manual) {
+        python C:\Users\hhuang\hvim\cmdlet\python\fuzzy_rename.py -s $Dir -d "$Tunings" -m
+    } else {
+        python C:\Users\hhuang\hvim\cmdlet\python\fuzzy_rename.py -s $Dir -d "$Tunings"
+    }
+
+}
+
+$productBlock = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    (DGetProductNames) | where-Object {
+        $_ -like "*$wordToComplete*"
+    } | ForEach-Object {
+          "$_"
+    }
+}
+Register-ArgumentCompleter -CommandName DTuning-Rename -ParameterName Product -ScriptBlock $productBlock

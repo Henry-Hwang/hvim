@@ -84,11 +84,37 @@ Function FirstSilent {
 	}
 }
 
-Function Dreload-BS {
-    Ainit
-	adb shell "tinymix 'DSP1 Firmware' 'Protection'"
-    adb shell "tinymix 'DSP1 Preload Switch' '1'"
-    adb shell "tinymix 'PCM Source' 'DSP'"
+Function Reload-Kaiser {
+    param([String]$RCV, $SPK)
+
+    adb wait-for-device root
+    adb wait-for-device remount
+    adb shell "input keyevent 85"
+    sleep 4
+
+    if ($SPK) {
+        echo "reload SPK tuning"
+        adb push $SPK /vendor/firmware/cs35l45-dsp1-spk-prot.bin
+        adb shell "tinymix 'DSP1 Preload Switch' '0'"
+        adb shell "tinymix 'DSP1 Boot Switch' '0'"
+        sleep 0.5
+        adb shell "tinymix 'DSP1 Preload Switch' '1'"
+        adb shell "tinymix 'DSP1 Boot Switch' '1'"
+    }
+
+
+    if ($RCV) {
+        echo "reload RCV tuning"
+        adb push $RCV /vendor/firmware/RCV-cs35l45-dsp1-spk-prot.bin
+        adb shell "tinymix 'RCV DSP1 Preload Switch' '0'"
+        adb shell "tinymix 'RCV DSP1 Boot Switch' '0'"
+        sleep 0.5
+        adb shell "tinymix 'RCV DSP1 Preload Switch' '1'"
+        adb shell "tinymix 'RCV DSP1 Boot Switch' '1'"
+    }
+
+    sleep 2
+    adb shell "input keyevent 85"
 }
 
 Function MassTest {
@@ -115,7 +141,7 @@ Function MassTest {
     }
 }
 
-Function TxRecord-BS {
+Function TxRecord-Vmon-BS {
     adb wait-for-device root
     adb wait-for-device remount
 
@@ -135,7 +161,72 @@ Function TxRecord-BS {
     adb pull /data/rec.wav .
     start .
 }
+Function TxRecord-BS {
+    adb wait-for-device root
+    adb wait-for-device remount
+
+    adb shell "tinymix 'RCV ASP_TX1 Source' 'DSP_TX1'"
+    adb shell "tinymix 'ASP_TX2 Source' 'DSP_TX1'"
+
+    adb shell "tinymix 'MultiMedia1 Mixer TERT_MI2S_TX' 1"
+    adb shell "tinymix 'TERT_MI2S_TX SampleRate' KHZ_48"
+    adb shell "tinymix 'TERT_MI2S_TX Format' S24_LE"
+    adb shell "tinymix 'TERT_MI2S_TX Channels' 'Two'"
+
+    adb shell "tinycap /data/rec.wav -D 0 -d 0 -r 48000 -c 2 -T 30"
+
+    adb pull /data/rec.wav .
+    start .
+}
     #adb shell "cat /d/regmap/3-0030/registers" > regs-3-0030.txt
     #adb shell "cat /d/regmap/3-0031/registers" > regs-3-0031.txt
     #cat regs-3-0030.txt | findstr 4800:
     #cat regs-3-0031.txt | findstr 4800:
+Function Diagnostic_BS{
+    adb shell "tinymix 'DSP Booted' '0'"
+    adb shell "tinymix 'DSP1 Preload Switch' '0'"
+    adb shell "tinymix 'RCV DSP Booted' '0'"
+    adb shell "tinymix 'RCV DSP1 Preload Switch' '0'"
+    adb shell "tinymix 'TERT_TDM_RX_0 Audio Mixer MultiMedia1' '0'"
+
+    adb shell "tinymix 'DSP Set AMBIENT' '28'"
+    adb shell "tinymix 'RCV DSP Set AMBIENT' '28'"
+    adb shell "tinymix 'DSP1 Firmware' 'Diagnostic'"
+    adb shell "tinymix 'DSP1 Preload Switch' '1'"
+    adb shell "tinymix 'RCV DSP1 Firmware' 'Diagnostic'"
+    adb shell "tinymix 'RCV DSP1 Preload Switch' '1'"
+    adb shell "tinymix 'PCM Source' 'DSP'"
+    adb shell "tinymix 'RCV PCM Source' 'DSP'"
+    adb shell "tinymix 'Digital PCM Volume' '817'"
+    adb shell "tinymix 'RCV Digital PCM Volume' '817'"
+    adb shell "tinymix 'AMP PCM Gain' '18'"
+    adb shell "tinymix 'RCV AMP PCM Gain' '18'"
+    adb shell "tinymix 'DSP RX1 Source' 'ASPRX1'"
+    adb shell "tinymix 'DSP RX2 Source' 'ASPRX1'"
+    adb shell "tinymix 'RCV DSP RX1 Source' 'ASPRX1'"
+    adb shell "tinymix 'RCV DSP RX2 Source' 'ASPRX2'"
+
+    adb shell "tinymix 'TERT_TDM_RX_0 Audio Mixer MultiMedia1' '1'"
+    adb shell "tinymix 'TERT_TDM_RX_0 SampleRate' 'KHZ_48'"
+    adb shell "tinymix 'TERT_TDM_RX_0 Channels' 'Two'"
+    adb shell "tinymix 'TERT_TDM_RX_0 Format' 'S24_LE'"
+
+    adb shell "tinymix 'RCV DSP1 Diagnostic cd DIAG_F0'"
+    adb shell "tinymix 'RCV DSP1 Diagnostic cd DIAG_Z_LOW_DIFF'"
+    adb shell "tinymix 'RCV DSP1 Diagnostic cd CAL_STATUS'"
+    adb shell "tinymix 'RCV DSP1 Diagnostic cd CAL_R'"
+    adb shell "tinymix 'RCV DSP1 Diagnostic cd CAL_CHECKSUM'"
+    adb shell "tinymix 'DSP1 Diagnostic cd DIAG_F0_STATUS'"
+    adb shell "tinymix 'DSP1 Diagnostic cd DIAG_F0'"
+    adb shell "tinymix 'DSP1 Diagnostic cd DIAG_Z_LOW_DIFF'"
+    adb shell "tinymix 'DSP1 Diagnostic cd CAL_STATUS'"
+    adb shell "tinymix 'DSP1 Diagnostic cd CAL_R'"
+    adb shell "tinymix 'DSP1 Diagnostic cd CAL_CHECKSUM'"
+
+    adb shell "tinymix 'DSP1 Firmware' 'Protection'"
+    adb shell "tinymix 'DSP1 Preload Switch' '1'"
+    adb shell "tinymix 'RCV DSP1 Firmware' 'Protection'"
+    adb shell "tinymix 'RCV DSP1 Preload Switch' '1'"
+    adb shell "tinymix 'TERT_TDM_RX_0 Audio Mixer MultiMedia1' '0'"
+}
+#>

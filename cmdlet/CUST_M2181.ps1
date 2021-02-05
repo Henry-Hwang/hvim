@@ -238,6 +238,20 @@ Function Call {
     adb shell service call phone 1 s16 "112"
 }
 
+Function TxRecord-Loopback-M2181 {
+    $Wav = "/sdcard/Download/rec1.wav"
+    adb shell "tinymix 'RCV ASP_TX1 Source' 'ASP_RX1'"
+    adb shell "tinymix 'SPK ASP_TX2 Source' 'ASP_RX1'"
+    adb shell "tinymix 'MultiMedia1 Mixer PRI_MI2S_TX' 1"
+    adb shell "tinymix 'PRIM_MI2S_TX SampleRate' KHZ_48"
+    adb shell "tinymix 'PRIM_MI2S_TX Format' S16_LE"
+    adb shell "tinymix 'PRIM_MI2S_TX Channels' 'Two'"
+    adb shell "tinycap $Wav -D 0 -d 0 -r 48000 -c 2 -T 15"
+    adb pull $Wav .
+    start .
+}
+
+
 Function TxRecord-M2181 {
     param([Int32]$Second = 10)
     Ainit
@@ -262,6 +276,7 @@ Function TxRecord-M2181 {
     adb pull $Wav .
     start .
 }
+
 Function TxRec-BGround {
     $Path = Get-Location
     $Sbuilder = New-Object -TypeName System.Text.StringBuilder
@@ -390,4 +405,25 @@ Function Reload-M2181 {
 
     sleep 2
     adb shell "input keyevent 85"
+}
+
+Function Usecase-Pops-M2181 {
+    param([String]$RCV, $SPK)
+
+    For ($k=0; $k -lt 100; $k++) {
+        For ($i=0; $i -lt 3; $i++) {
+            adb shell "tinymix 'RCV PCM Soft Ramp'  32ms"
+            adb shell "tinymix 'SPK PCM Soft Ramp'  32ms"
+            adb shell "tinymix 'RCV Digital PCM Volume'  0"
+            adb shell "tinymix 'SPK Digital PCM Volume'  0"
+
+            adb shell "tinymix 'Cirrus SP Usecase'  $i"
+
+            adb shell "tinymix 'RCV Digital PCM Volume'  817"
+            adb shell "tinymix 'SPK Digital PCM Volume'  817"
+            adb shell "tinymix 'SPK PCM Soft Ramp'  4ms"
+            adb shell "tinymix 'RCV PCM Soft Ramp'  4ms"
+            sleep 2
+        }
+    }
 }

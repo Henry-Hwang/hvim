@@ -1,3 +1,14 @@
+Function BS_P_SwapChannel {
+    adb shell "tinymix 'DSP1X Protection cd CH_BAL' 00 40 00 00"
+    adb shell "tinymix 'RCV DSP1X Protection cd CH_BAL' 00 40 00 00"
+    adb shell "cat /d/regmap/2-0040/registers | grep 2800374"
+    adb shell "cat /d/regmap/2-0040/registers | grep 2800374"
+    
+    adb shell "tinymix 'DSP1X Protection cd CH_BAL' 00 00 00 00"
+    adb shell "tinymix 'RCV DSP1X Protection cd CH_BAL' 00 00 00 00"
+    adb shell "cat /d/regmap/2-0040/registers | grep 2800374"
+    adb shell "cat /d/regmap/2-0040/registers | grep 2800374"
+}
 Function DRelease_Crussp {
     cp C:\work\src\audio-hal\libs\arm64-v8a\cstool          C:\work\customer\xiaomi\Heisha\calibration\lib
     cp C:\work\src\audio-hal\libs\arm64-v8a\libcrussp.so    C:\work\customer\xiaomi\Heisha\calibration\lib
