@@ -1,58 +1,76 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+"wget https://github.com/Henry-Hwang/hvim/blob/master/vimrc
 
 set rtp+=$HOME/.vim/bundle/Vundle.vim/
 call vundle#begin('$HOME/.vim/bundle/')
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'ctrlpvim/ctrlp.vim'
-Bundle 'tacahiroy/ctrlp-funky'
-Plugin 'eshion/vim-sync'
-Plugin 'vim-scripts/molokai.git'
-Plugin 'vim-scripts/taglist.vim'
-Plugin 'vim-scripts/a.vim'
-Plugin 'vim-scripts/c.vim'
-Plugin 'vim-scripts/ctags.vim'
-Plugin 'xolox/vim-misc'
-Plugin 'will133/vim-dirdiff'
-Plugin 'tpope/vim-fugitive'
+Plugin 'mhinz/vim-startify'
+Plugin 'myusuf3/numbers.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'godlygeek/tabular'
-Plugin 'scrooloose/nerdtree.git'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'scrooloose/nerdcommenter'
+Plugin 'vim-scripts/molokai'
+Plugin 'honza/vim-snippets'
+Plugin 'wellle/targets.vim'
+Plugin 'will133/vim-dirdiff'
+Plugin 'asins/vimcdoc'
+Plugin 'xolox/vim-notes'
+Plugin 'xolox/vim-misc'
+Plugin 'itchyny/calendar.vim'
+Plugin 'junegunn/vim-journal'
+Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plugin 'jremmen/vim-ripgrep'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'universal-ctags/ctags'
+Plugin 'majutsushi/tagbar'
+Plugin 'tacahiroy/ctrlp-funky'
+Plugin 'eshion/vim-sync'
+Plugin 'vim-scripts/a.vim'
+Plugin 'vim-scripts/xml.vim'
+Plugin 'vim-scripts/python.vim'
+Plugin 'vim-scripts/c.vim'
 call vundle#end()
-
 set encoding=utf-8
-
-set cst
-set fileformats=unix,dos
-syntax on
+set fileencoding=utf-8
+set fileencodings=ucs-bom,utf-8,gbk,cp936,latin-1
+set fileformat=unix
+set fileformats=unix,dos,mac
 filetype on
 filetype plugin on
+filetype plugin indent on
+syntax on
+
+" Some useful settings
+set mat=2            "keep modified buffer
+set scrolloff=4
+set hidden           "keep modified buffer
+set smartindent
+set expandtab         "tab to spaces
+set tabstop=4         "the width of a tab
+set shiftwidth=4      "the width for indent
+set foldenable
+set foldmethod=indent "folding by indent
+set foldlevel=99
+set ignorecase        "ignore the case when search texts
+set smartcase         "if searching text contains uppercase case will not be ignored
+set autochdir
+set number           "line number
+set nowrap           "no line wrapping
+set cst "ctags 多个选择
+
 hi Comment ctermfg=cyan
 set backspace=indent,eol,start
 set whichwrap+=<,>,h,l
-set number
-set scrolloff=4
-set expandtab
-set tabstop=4
 set softtabstop=4
-set shiftwidth=4
 set smarttab
 set history=1024
 set nobackup
-set autochdir
-set ignorecase
-set smartcase
+set noswapfile
 set incsearch
 set hlsearch
 set noerrorbells
 set novisualbell
-set nowrap
-set mat=2
-set hidden
-set smartindent
 set laststatus=2
 set showmatch
 set wrapscan
@@ -60,38 +78,96 @@ set display=lastline
 set paste
 set list
 set listchars=tab:\|\ ,trail:~,extends:>,precedes:<
-set shortmess=atl
-set background=dark
-set t_Co=256
-colorscheme molokai
-set cursorline
-set guifont=Courier_New:h11
-hi CursorLine term=underline ctermbg=236 guibg=#293739
-hi Comment term=bold ctermfg=60 guifg=#465457
 
-"command ": hi" to show all color
-"{ [[map keys]]
+set shortmess=atl
+
+colorscheme molokai  "use the theme gruvbox
+set background=dark "use the light version of gruvbox
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+set t_Co=256
+set guifont=Courier_New:h11
+	hi CursorLine term=underline ctermbg=236 guibg=#293739
+set cursorline       "hilight the line of the cursor
+"[[syntax]]
+hi Comment term=bold ctermfg=60 guifg=#465457
 let mapleader = ","       "Set mapleader
-nnoremap <C-e> :CtrlPBuffer<CR>
-nnoremap <leader>t :Tlist<CR>
+"command ": hi" to show all color
+imap <leader><leader> <esc>:
+"nnoremap <leader><leader>t :vs|:te<CR>
 nnoremap <C-e> :Ex<CR>
-nnoremap <leader>3 :b#<CR>
-nnoremap <leader>bw :bw<CR>
-nnoremap <leader>bd :bd<CR>
-"replace word
-nnoremap <leader>,r :%s/<C-r><C-w>/<C-r><C-w>/gc
-nnoremap <leader>br :bufdo %s/<C-r><C-w>/<C-r><C-w>/gc
-nnoremap <leader>,t :vertical terminal<CR>
-nnoremap <leader>b :ls<CR>
+nnoremap <C-f> :FZF %:p:h
+nnoremap <leader>bw :bw!<CR>
 map <leader>p "+p
-map <leader>y "+y
-"}
-"[[Ctrlp]]
-let g:ctrlp_map = '<leader>p'
-let g:ctrlp_cmd = 'CtrlP'
-nnoremap <leader>cp :CtrlPMRU<CR>
-nnoremap <leader>cm :CtrlPMixed<CR>
+map <leader>y "+yy
+nnoremap <leader>r :%s/<C-r><C-w>/<C-r><C-w>/gc
+nnoremap <C-s> :g/<C-r><C-w>/<CR>
+nnoremap <S-s> :let @a='' <bar> g/<C-r><C-w>/yank A
+nnoremap ff /<C-r><C-w>
+nnoremap <C-g> :Rg <C-r><C-w> %:p:h
 nnoremap <C-a> :CtrlPBuffer<CR>
+nnoremap <leader>f [[%v%h0
+nnoremap <leader>m :Startify<CR>
+nnoremap <leader>ws :w %:p:h
+nnoremap <C-h> :Hexmode<CR>
+
+nnoremap <leader>t :vertical terminal<CR>
+nnoremap <leader>,m /&clean-search&<CR>
+" Airline
+let g:airline#extensions#tagbar#flags = 'f' " show full tag hierarchy
+let g:indentLine_color_gui = "#504945"
+" Markdown_preview (a plugin in nyaovim)
+let g:markdown_preview_eager = 1
+let g:markdown_preview_auto = 1
+" Multi_cursor
+let g:multi_cursor_use_default_mapping=0
+let g:multi_cursor_start_key='<c-n>'
+let g:multi_cursor_next_key='<tab>'
+let g:multi_cursor_prev_key='b'
+let g:multi_cursor_skip_key='x'
+let g:multi_cursor_quit_key='q'
+let g:hexmode_patterns = '*.bin,*.exe,*.dat,*.o,*.wmfw,*.wav,*.mp3'
+
+let g:wrap_line_count=0
+" Startify
+command! -nargs=1 CD cd <args> | Startify
+autocmd User Startified setlocal cursorline
+let g:startify_enable_special         = 0
+let g:startify_files_number           = 8
+let g:startify_relative_path          = 1
+let g:startify_change_to_dir          = 1
+let g:startify_update_oldfiles        = 1
+let g:startify_session_autoload       = 1
+let g:startify_session_persistence    = 1
+let g:startify_session_delete_buffers = 1
+let g:startify_list_order = [
+            \ ['   LRU within this dir:'],
+            \ 'dir',
+            \ ['   LRU:'],
+            \ 'files',
+            \ ['   Sessions:'],
+            \ 'sessions',
+            \ ['   Bookmarks:'],
+            \ 'bookmarks',
+            \ ]
+let g:startify_skiplist = [
+            \ 'COMMIT_EDITMSG',
+            \ 'plugged/.*/doc',
+            \ '/data/repo/neovim/runtime/doc',
+            \ '.vimrc',
+            \ 'nyaovimrc.html',
+            \ ]
+let g:startify_bookmarks = [
+            \ { 'n': '~/note.txt' },
+            \ { 'c': '~/hvim/vim-note.txt' },
+            \ { 't': '~/hvim/tmux-note.txt' },
+            \ { 'y': '~/hvim/nvim/init.vim' },
+            \ ]
+let g:startify_custom_footer =
+            \ ['', "Henry Huang", '']
+highlight StartifyFooter  ctermfg=240
+
+"[[Ctrlp]]
+let g:ctrlp_cmd = 'CtrlP'
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
     \ 'file': '\v\.(exe|so|bin|dll|zip|tar|tar.gz|pyc)$',
@@ -105,21 +181,68 @@ let g:ctrlp_follow_symlinks=1
 
 let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
 
-nnoremap <Leader>cf :CtrlPFunky<Cr>
-" narrow the list down with a word under cursor
-nnoremap <Leader>Cf :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
 
-
-"{ [[commands]]
 command! Difft windo diffthis
 command! Diffo windo diffoff
+" gutentags stop at the point list bellow"
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+
+" ctag name"
+let g:gutentags_ctags_tagfile = '.tags'
+
+" Put all tags in ~/.cache/tags"
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+
+" ctags settings "
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 "}
 
+" SSH tmux
+if exists('$TMUX')
+	let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+	let &t_EI = "\<Esc>Ptmux;\<Esc>\e[2 q\<Esc>\\"
+else
+	let &t_SI = "\e[5 q"
+	let &t_EI = "\e[2 q"
+endif
+
 "[[Session management]]
-nnoremap ] ]c
-nnoremap [ [c
-hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
-hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
-hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+if &diff
+    hi DiffAdd    ctermfg=233 ctermbg=LightGreen guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+    hi DiffChange ctermbg=white  guibg=#ececec gui=none   cterm=none
+	hi DiffText   ctermfg=233  ctermbg=yellow  guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+endif
+" Automatics
+function! ToStartify()
+    if winnr("$") == 1 && buffer_name(winbufnr(winnr())) != ""
+        vs
+        Startify
+        exec "normal \<c-w>w"
+    endif
+endfunction
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+autocmd BufWritePost *.scala :EnTypeCheck
+cd $DIR_TEMP
+au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
+autocmd FileType json set nocursorcolumn
+
+set undodir=~/.vim/tmp/undo/     " undo files
+set backupdir=~/.vim/tmp/backup/ " backups
+set directory=~/.vim/tmp/swap/   " swap files
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif
