@@ -1,6 +1,6 @@
 "插件管理
 "git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-"wget https://github.com/Henry-Hwang/hvim/blob/master/vimrc
+"wget https://raw.githubusercontent.com/Henry-Hwang/hvim/master/simple_vimrc
 
 set rtp+=$HOME/.vim/bundle/Vundle.vim/
 call vundle#begin('$HOME/.vim/bundle/')
@@ -18,7 +18,6 @@ Plugin 'xolox/vim-notes'
 Plugin 'xolox/vim-misc'
 Plugin 'itchyny/calendar.vim'
 Plugin 'junegunn/vim-journal'
-Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'jremmen/vim-ripgrep'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'ludovicchabant/vim-gutentags'
@@ -230,7 +229,6 @@ function! ToStartify()
 endfunction
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 autocmd BufWritePost *.scala :EnTypeCheck
-cd $DIR_TEMP
 au BufRead,BufNewFile,BufEnter \@!(term://)* cd %:p:h
 autocmd FileType json set nocursorcolumn
 
